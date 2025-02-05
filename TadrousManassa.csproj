@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>aspnet-TadrousManassa-5abc6540-6599-486e-bf0a-d8283e276dc5</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.12" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.12" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.12" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Areas\Assistant\Controllers\" />
+    <Folder Include="Areas\Assistant\Data\" />
+    <Folder Include="Areas\Assistant\Models\" />
+    <Folder Include="Areas\Assistant\Views\" />
+    <Folder Include="Areas\Student\Controllers\" />
+    <Folder Include="Areas\Student\Data\" />
+    <Folder Include="Areas\Student\Models\" />
+    <Folder Include="Areas\Student\Views\" />
+    <Folder Include="Areas\Teacher\Controllers\" />
+    <Folder Include="Areas\Teacher\Data\" />
+    <Folder Include="Areas\Teacher\Models\" />
+    <Folder Include="Areas\Teacher\Views\" />
+  </ItemGroup>
+
+</Project>
