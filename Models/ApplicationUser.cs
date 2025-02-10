@@ -6,7 +6,7 @@ namespace TadrousManassa.Models
     public class ApplicationUser : IdentityUser
     {
         //[Required]
-        //[MaxLength(70)]
+        //[MaxLength(100)]
         //public override string? UserName { get; set; }
 
         //[Required]
@@ -24,6 +24,11 @@ namespace TadrousManassa.Models
         //[DataType(DataType.PhoneNumber)]
         //[StringLength(11)]
         //public string PhoneNumber { get; set; }
+
+        public ApplicationUser()
+        {
+            Student = new Student();
+        }
 
         public virtual Student Student { get; set; }
     }

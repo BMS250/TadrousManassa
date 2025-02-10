@@ -13,6 +13,7 @@ namespace TadrousManassa.Data
         override protected void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<StudentLecture>()
                 .HasKey(sl => new { sl.StudentId, sl.LectureId });
             modelBuilder.Entity<StudentLecture>().HasOne(sl => sl.Student)

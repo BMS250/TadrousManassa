@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using TadrousManassa.Data;
 using TadrousManassa.Models;
+using TadrousManassa.Repositories;
 
 namespace TadrousManassa
 {
@@ -12,24 +13,41 @@ namespace TadrousManassa
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+            // Database Configuration
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+                ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-            builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+            // Identity Configuration
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            {
+                options.User.RequireUniqueEmail = true;
+                options.User.AllowedUserNameCharacters = null; // Allows all characters, including duplicates
+            })
                 .AddEntityFrameworkStores<ApplicationDbContext>();
-                //.AddDefaultTokenProviders();
-            builder.Services.AddControllersWithViews();
+            //.AddDefaultTokenProviders(); // This enables email confirmation & password reset
 
+            builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+            // Email Service
+            builder.Services.AddScoped<IEmailSender, EmailSender>();
+
+            // MVC & Razor Pages
+            builder.Services.AddControllersWithViews();
             builder.Services.AddRazorPages();
 
-            builder.Services.AddScoped<IEmailSender, EmailSender>();
+            // Configure Identity
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/Identity/Account/Login";
+                options.LogoutPath = "/Identity/Account/Logout";
+                options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+            });
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            // Middleware Configuration
             if (app.Environment.IsDevelopment())
             {
                 app.UseMigrationsEndPoint();
@@ -37,24 +55,26 @@ namespace TadrousManassa
             else
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
             app.UseRouting();
-
-            app.UseAuthorization();
             app.UseAuthentication();
-            app.MapRazorPages();
+            app.UseAuthorization();
+
+
+
             app.MapControllerRoute(
                 name: "areas",
                 pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+
+            // This should come AFTER the areas route
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
+
             app.MapRazorPages();
 
             app.Run();
