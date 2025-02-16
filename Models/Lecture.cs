@@ -22,6 +22,9 @@ namespace TadrousManassa.Models
         public int Semester { get; set; }
 
         [Required]
+        public int Price { get; set; }
+
+        [Required]
         [MaxLength(255)]
         public string VideoPath { get; set; }
 
