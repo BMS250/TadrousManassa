@@ -25,12 +25,14 @@ namespace TadrousManassa.Areas.Identity.Pages.Account
     {
         private readonly IStudentRepository _studentRepository;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<LoginModel> _logger;
 
-        public LoginModel(IStudentRepository studentRepository, SignInManager<ApplicationUser> signInManager, ILogger<LoginModel> logger)
+        public LoginModel(IStudentRepository studentRepository, SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, ILogger<LoginModel> logger)
         {
             _studentRepository = studentRepository;
             _signInManager = signInManager;
+            _userManager = userManager;
             _logger = logger;
         }
 
@@ -82,7 +84,7 @@ namespace TadrousManassa.Areas.Identity.Pages.Account
         {
             if (User.Identity.IsAuthenticated)
             {
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Index", "Home", new { area = "Student" });
             }
             returnUrl ??= Url.Content("~/");
 
@@ -103,6 +105,14 @@ namespace TadrousManassa.Areas.Identity.Pages.Account
                 
                 if (result.Succeeded)
                 {
+                    // If Admin, Sign in Directly
+                    var roles = await _userManager.GetRolesAsync(user);
+
+                    //if (roles.Contains("Student"))
+                    //    return RedirectToAction("Index", "Home", new { area = "Student" });
+
+                    if (roles.Contains("Teacher"))
+                        return RedirectToAction("Index", "Home", new { area = "Teacher" });
                     string deviceId = GetDeviceFingerprint();
                     if (user.Student.DeviceId != deviceId)
                     {
@@ -110,17 +120,9 @@ namespace TadrousManassa.Areas.Identity.Pages.Account
                         return Page();
                     }
                     _logger.LogInformation("User logged in.");
-                    return LocalRedirect(returnUrl);
+                    //return LocalRedirect(returnUrl);
+                    return RedirectToAction("Index", "Home", new { area = "Student" });
                 }
-                //if (result.RequiresTwoFactor)
-                //{
-                //    return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
-                //}
-                //if (result.IsLockedOut)
-                //{
-                //    _logger.LogWarning("User account locked out.");
-                //    return RedirectToPage("./Lockout");
-                //}
                 else
                 {
                     ModelState.AddModelError(string.Empty, "Invalid login attempt.");

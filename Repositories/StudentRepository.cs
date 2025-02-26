@@ -46,18 +46,17 @@ namespace TadrousManassa.Repositories
 
         public void InsertStudent(Student student)
         {
+            ArgumentNullException.ThrowIfNull(student);
             context.Students.Add(student);
             context.SaveChanges();
         }
 
-        public async Task<int> UpdateStudentAsync(string Id, Student student, string? newPassword = null)
+        public async Task<int> UpdateStudentAsync(string id, Student student, string? newPassword = null)
         {
-            Student oldStudent = GetStudent(Id);
-            if (oldStudent == null)
-            {
-                return 1; // Student not found
-            }
-
+            if (string.IsNullOrEmpty(id))
+                throw new ArgumentException("Student id cannot be null or empty", nameof(id));
+            ArgumentNullException.ThrowIfNull(student);
+            Student oldStudent = GetStudent(id) ?? throw new ArgumentException("Student not found", nameof(id));
             if (oldStudent.ApplicationUser != null && student.ApplicationUser != null)
             {
                 oldStudent.ApplicationUser.UserName = student.ApplicationUser.UserName;
@@ -90,14 +89,14 @@ namespace TadrousManassa.Repositories
             return 0;
         }
 
-        public void DeleteStudent(string Id)
+        public void DeleteStudent(string id)
         {
-            Student student = GetStudent(Id);
-            if (student != null)
-            {
-                context.Students.Remove(student);
-                context.SaveChanges();
-            }
+            if (string.IsNullOrEmpty(id))
+                throw new ArgumentException("Student id cannot be null or empty", nameof(id));
+            Student student = GetStudent(id);
+            ArgumentNullException.ThrowIfNull(student);
+            context.Students.Remove(student);
+            context.SaveChanges();
         }
     }
 }

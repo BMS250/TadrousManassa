@@ -1,9 +1,12 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using System.Configuration;
 using TadrousManassa.Data;
 using TadrousManassa.Models;
 using TadrousManassa.Repositories;
+using TadrousManassa.Services;
+using TadrousManassa.Utilities;
 
 namespace TadrousManassa
 {
@@ -30,6 +33,9 @@ namespace TadrousManassa
             //.AddDefaultTokenProviders(); // This enables email confirmation & password reset
 
             builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+            builder.Services.AddScoped<ILectureRepository, LectureRepository>();
+            builder.Services.AddScoped<IStudentService, StudentService>();
+            builder.Services.AddScoped<ILectureService, LectureService>();
             // Email Service
             builder.Services.AddScoped<IEmailSender, EmailSender>();
 
@@ -44,6 +50,9 @@ namespace TadrousManassa
                 options.LogoutPath = "/Identity/Account/Logout";
                 options.AccessDeniedPath = "/Identity/Account/AccessDenied";
             });
+
+            // Add to your services configuration
+            builder.Services.AddHttpContextAccessor();
 
             var app = builder.Build();
 
@@ -64,12 +73,10 @@ namespace TadrousManassa
             app.UseAuthentication();
             app.UseAuthorization();
 
-
-
             app.MapControllerRoute(
                 name: "areas",
-                pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
-
+                pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}",
+                defaults: new { area = "Student" });
             // This should come AFTER the areas route
             app.MapControllerRoute(
                 name: "default",

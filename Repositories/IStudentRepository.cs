@@ -16,8 +16,8 @@ namespace TadrousManassa.Repositories
 
         public void InsertStudent(Student student);
 
-        public Task<int> UpdateStudentAsync(string Id, Student student, string? newPassword = null);
+        public Task<int> UpdateStudentAsync(string id, Student student, string? newPassword = null);
 
-        public void DeleteStudent(string Id);
+        public void DeleteStudent(string id);
     }
 }
