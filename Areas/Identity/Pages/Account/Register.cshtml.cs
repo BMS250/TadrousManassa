@@ -20,13 +20,13 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using TadrousManassa.Models;
-using TadrousManassa.Repositories;
+using TadrousManassa.Services;
 
 namespace TadrousManassa.Areas.Identity.Pages.Account
 {
     public class RegisterModel : PageModel
     {
-        private readonly IStudentRepository _studentRepository;
+        private readonly IStudentService _studentService;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IUserStore<ApplicationUser> _userStore;
@@ -35,14 +35,14 @@ namespace TadrousManassa.Areas.Identity.Pages.Account
         private readonly IEmailSender _emailSender;
 
         public RegisterModel(
-            IStudentRepository studentRepository,
+            IStudentService studentService,
             UserManager<ApplicationUser> userManager,
             IUserStore<ApplicationUser> userStore,
             SignInManager<ApplicationUser> signInManager,
             ILogger<RegisterModel> logger,
             IEmailSender emailSender)
         {
-            _studentRepository = studentRepository;
+            _studentService = studentService;
             _userManager = userManager;
             _userStore = userStore;
             _emailStore = GetEmailStore();
@@ -69,6 +69,10 @@ namespace TadrousManassa.Areas.Identity.Pages.Account
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
+            if (User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Index", "Home", new { area = "Student" });
+            }
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
@@ -77,7 +81,7 @@ namespace TadrousManassa.Areas.Identity.Pages.Account
 
                 await _userStore.SetUserNameAsync(user, Input.Name, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-                user.Student = new Student
+                user.Student = new Models.Student
                 {
                     Address = Input.Address,
                     Grade = Input.Grade,
@@ -88,13 +92,23 @@ namespace TadrousManassa.Areas.Identity.Pages.Account
                 };
                 user.PhoneNumber = Input.PhoneNumber;
                 var result = await _userManager.CreateAsync(user, Input.Password);
-
+                await _userManager.AddToRoleAsync(user, "Student");
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
 
+                    // Call the StudentService to insert the student information
+                    var studentResult = await _studentService.InsertStudentAsync(user.Student);
+                    if (!studentResult.Success)
+                    {
+                        // If the student insertion failed, add the error message to ModelState
+                        ModelState.AddModelError(string.Empty, studentResult.Message);
+                        return Page();
+                    }
+
                     await _signInManager.SignInAsync(user, isPersistent: false);
-                    return LocalRedirect("~/");
+                    //return LocalRedirect("~/");
+                    return RedirectToAction("Index", "Home", new { area = "Student" });
                 }
                 foreach (var error in result.Errors)
                 {

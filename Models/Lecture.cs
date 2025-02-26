@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using TadrousManassa.Utilities;
 
 namespace TadrousManassa.Models
 {
@@ -20,6 +21,15 @@ namespace TadrousManassa.Models
         
         [Required]
         public int Semester { get; set; }
+
+        [Required]
+        public int Year { get; set; }
+
+        [Required]
+        public bool UsedThisYear { get; set; } = true;
+
+        [Required, MaxLength(255)]
+        public string Unit { get; set; }
 
         [Required]
         public int Price { get; set; }

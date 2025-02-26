@@ -1,0 +1,38 @@
+﻿/* Unit Card Style */
+.unit-card {
+    background: #f0f0f0;
+    padding: 20px;
+    margin: 10px;
+    cursor: pointer;
+    text-align: center;
+    border-radius: 5px;
+}
+/* Lecture Group Container */
+.lecture-group {
+    margin-top: 20px;
+}
+/* Lecture Row Style */
+.lecture-row {
+    background: #fff;
+    border: 2px solid orange;
+    padding: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+.lecture-info {
+    flex: 1;
+}
+
+.lecture-actions {
+    flex: 1;
+    text-align: right;
+}
+
+.code-input {
+    width: 150px;
+    margin-right: 10px;
+}

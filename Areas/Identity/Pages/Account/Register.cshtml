@@ -1,4 +1,5 @@
 ﻿@page
+@using TadrousManassa.Utilities
 @model RegisterModel
 @{
     ViewData["Title"] = "Register";
@@ -53,13 +54,11 @@
                 <span asp-validation-for="Input.School" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
-                @* <input asp-for="Input.Grade" class="form-control" aria-required="true" placeholder="ادخل عامك الدراسى" /> *@
-                <select asp-for="Input.Grade" class="form-control" aria-required="true" placeholder="ادخل عامك الدراسى">
-                    <option value="5">Fifth primary</option>
-                    <option value="6">Sixth primary</option>
-                    <option value="1">First secondary</option>
-                    <option value="2">Second secondary</option>
-                    <option value="3">Third secondary</option>
+                <select asp-for="Input.Grade"
+                        asp-items="Html.GetEnumSelectList<Grade>()"
+                        class="form-control"
+                        aria-required="true">
+                    <option value="">ادخل عامك الدراسى</option>
                 </select>
                 <label asp-for="Input.Grade">العام الدراسى</label>
                 <span asp-validation-for="Input.Grade" class="text-danger"></span>
