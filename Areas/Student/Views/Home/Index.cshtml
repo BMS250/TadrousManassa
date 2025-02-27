@@ -102,6 +102,7 @@
     </div>
     
     <!-- Lecture List Section -->
+    <!-- Lecture List Section -->
     <div id="lectureListSection">
         @foreach (var unit in Model.LecturesOfUnits.Keys)
         {
@@ -109,20 +110,28 @@
                 <h5>Lectures for unit: @unit</h5>
                 @foreach (var lecture in Model.LecturesOfUnits[unit])
                 {
-                    <div class="lecture-row" data-lecture-id="@lecture.Id">
+                    <!-- Add style="cursor:default" to the row -->
+                    <div class="lecture-row" data-lecture-id="@lecture.Id" style="cursor:default">
                         <div class="lecture-info">
                             @lecture.Name
                         </div>
                         <div class="lecture-actions">
                             @if (!lecture.IsPurchased)
                             {
-                                <label for="code-@lecture.Id">Enter the code:</label>
-                                <input type="text" id="code-@lecture.Id" name="code-@lecture.Id" class="code-input" />
-                                <button class="btn btn-success buy-btn" data-lecture-id="@lecture.Id">Buy the lecture</button>
+                                <form method="post" action="@Url.Action("LecturePurchasing", "Home")" style="display:inline;">
+                                    <input type="hidden" name="lectureId" value="@lecture.Id" />
+                                    <label for="code-@lecture.Id">Enter the code:</label>
+                                    <input type="text" id="code-@lecture.Id" name="code" class="code-input" />
+                                    <button type="submit" class="btn btn-success buy-btn" data-lecture-id="@lecture.Id">Buy the lecture</button>
+                                </form>
                             }
                             else
                             {
-                                <button class="btn btn-primary go-btn" data-lecture-id="@lecture.Id">Go to the lecture</button>
+                                <!-- Use form POST to avoid URL parameters -->
+                                <form method="post" action="@Url.Action("LectureDetails", "Home")" style="display:inline;">
+                                    <input type="hidden" name="lectureId" value="@lecture.Id" />
+                                    <button type="submit" class="btn btn-primary go-btn">Go to the lecture</button>
+                                </form>
                             }
                         </div>
                     </div>
@@ -130,42 +139,21 @@
             </div>
         }
     </div>
+    <br />
+    <br />
+    <br />
+    <br />
 </div>
 
 @section Scripts {
-    <!-- Include jQuery from a reputable CDN -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
         $(document).ready(function () {
-            // Show lecture rows for the clicked unit card.
+            // Show lecture groups when unit card is clicked
             $('.unit-card').click(function () {
                 var selectedUnit = $(this).data('unit');
                 $('.lecture-group').hide();
                 $('.lecture-group[data-unit="' + selectedUnit + '"]').show();
-            });
-            
-            // Handle Buy button click (for lectures not purchased)
-            $('.buy-btn').click(function (e) {
-                e.stopPropagation(); // Prevent row click event
-                var lectureId = $(this).data('lecture-id');
-                var code = $('#code-' + lectureId).val();
-                // Implement your AJAX call or redirect logic here.
-                alert("Buying lecture " + lectureId + " with code: " + code);
-            });
-            
-            // Handle Go button click (for purchased lectures)
-            $('.go-btn').click(function (e) {
-                e.stopPropagation();
-                var lectureId = $(this).data('lecture-id');
-                // Redirect to the lecture details page.
-                window.location.href = '@Url.Action("LectureDetails", "Lecture")' + '?lectureId=' + lectureId;
-            });
-            
-            // Optionally, handle click on the lecture row itself.
-            $('.lecture-row').click(function () {
-                var lectureId = $(this).data('lecture-id');
-                // This can navigate to a details page or perform another action.
-                window.location.href = '@Url.Action("LectureDetails", "Lecture")' + '?lectureId=' + lectureId;
             });
         });
     </script>

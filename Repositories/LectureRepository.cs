@@ -193,5 +193,27 @@ namespace TadrousManassa.Repositories
                 return OperationResult<bool>.Ok(true, "Lecture is purchased.");
             return OperationResult<bool>.Ok(false, "Lecture is not purchased.");
         }
+
+        public OperationResult<object> BuyCode(string studentId, string code, string lectureId)
+        {
+            if (string.IsNullOrWhiteSpace(code))
+                return OperationResult<object>.Fail("Code cannot be null or empty.");
+            if (string.IsNullOrWhiteSpace(lectureId))
+                return OperationResult<object>.Fail("Lecture ID cannot be null or empty.");
+
+                StudentLecture? row = context.StudentLectures.FirstOrDefault(sl => sl.Code == code && sl.LectureId == lectureId && (sl.StudentId == "" || sl.StudentId == null));
+                if (row == null)
+                    return OperationResult<object>.Fail("Code is not valid.");
+            try
+            {
+                row.StudentId = studentId;
+                context.SaveChanges();
+                return OperationResult<object>.Ok(true, "Code is valid.");
+            }
+            catch
+            {
+                return OperationResult<object>.Fail("An Error happened while buying the lecture, please try again.");
+            }
+        }
     }
 }
