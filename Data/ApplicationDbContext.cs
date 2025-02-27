@@ -15,13 +15,19 @@ namespace TadrousManassa.Data
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<StudentLecture>()
-                .HasKey(sl => new { sl.StudentId, sl.LectureId });
-            modelBuilder.Entity<StudentLecture>().HasOne(sl => sl.Student)
+                .HasIndex(sl => sl.Code)
+                .IsUnique();
+            modelBuilder.Entity<StudentLecture>()
+                .HasOne(sl => sl.Student)
                 .WithMany(s => s.StudentLectures)
-                .HasForeignKey(sl => sl.StudentId);
-            modelBuilder.Entity<StudentLecture>().HasOne(sl => sl.Lecture)
+                .HasForeignKey(sl => sl.StudentId)
+                .IsRequired(false);
+
+            modelBuilder.Entity<StudentLecture>()
+                .HasOne(sl => sl.Lecture)
                 .WithMany(l => l.StudentLectures)
-                .HasForeignKey(sl => sl.LectureId);
+                .HasForeignKey(sl => sl.LectureId)
+                .IsRequired();
 
             modelBuilder.Entity<Student>()
                 .HasOne(s => s.ApplicationUser)
@@ -30,7 +36,6 @@ namespace TadrousManassa.Data
                 .OnDelete(DeleteBehavior.Cascade);
         }
         public virtual DbSet<Student> Students { get; set; }
-        //public virtual DbSet<Admin> Admins { get; set; }
         public virtual DbSet<Lecture> Lectures { get; set; }
         public virtual DbSet<StudentLecture> StudentLectures { get; set; }
     }

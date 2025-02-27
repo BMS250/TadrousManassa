@@ -31,5 +31,7 @@ namespace TadrousManassa.Repositories
         public Task<OperationResult<object>> DeleteLectureAsync(string id);
 
         public OperationResult<bool> IsLecturePurchased(string studentId, string lectureId);
+
+        public OperationResult<object> BuyCode(string studentId, string code, string lectureId);
     }
 }

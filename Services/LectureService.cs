@@ -119,5 +119,10 @@ namespace TadrousManassa.Services
         {
             return lectureRepository.IsLecturePurchased(studentId, lectureId);
         }
+
+        public OperationResult<object> BuyCode(string studentId, string code, string lectureId)
+        {
+            return lectureRepository.BuyCode(studentId, code, lectureId);
+        }
     }
 }

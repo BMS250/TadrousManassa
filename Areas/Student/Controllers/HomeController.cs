@@ -20,6 +20,7 @@ namespace TadrousManassa.Areas.Student.Controllers
             _studentService = studentService;
             _lectureService = lectureService;
         }
+
         public IActionResult Index()
         {
             string userId = _userManager.GetUserId(User);
@@ -29,6 +30,22 @@ namespace TadrousManassa.Areas.Student.Controllers
                 return View(lecturesResult.Data);
             }
             return View();
+        }
+
+        public IActionResult LectureDetails(string lectureId)
+        {
+            return View();
+        }
+
+        public IActionResult LecturePurchasing(string lectureId, string code)
+        {
+            string userId = _userManager.GetUserId(User);
+            if (_lectureService.BuyCode(userId, code, lectureId).Success)
+            {
+                return RedirectToAction("LectureDetails", new { lectureId = lectureId });
+            }
+            // Replace it with an alert or anything like that
+            return RedirectToAction("Index");
         }
     }
 }
