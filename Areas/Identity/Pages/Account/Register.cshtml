@@ -15,7 +15,7 @@
             <div asp-validation-summary="All" class="text-danger" role="alert"></div>
             <div class="form-floating mb-3">
                 <input asp-for="Input.Name" class="form-control" autocomplete="username" aria-required="true" placeholder="ادخال اسمك بالكامل" />
-                <label asp-for="Input.Name">ادخال اسمك بالكامل</label>
+                <label asp-for="Input.Name">Full Name </label>
                 <span asp-validation-for="Input.Name" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
@@ -25,32 +25,32 @@
             </div>
             <div class="form-floating mb-3">
                 <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="ادخال كلمة المرور" />
-                <label asp-for="Input.Password">ادخال كلمة المرور</label>
+                <label asp-for="Input.Password">Password</label>
                 <span asp-validation-for="Input.Password" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
                 <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="تأكيد كلمة المرور" />
-                <label asp-for="Input.ConfirmPassword">تأكيد كلمة المرور</label>
+                <label asp-for="Input.ConfirmPassword">Confirm Password</label>
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
                 <input asp-for="Input.PhoneNumber" class="form-control" aria-required="true" placeholder="ادخال رقم التليفون الخاص بالطالب" />
-                <label asp-for="Input.PhoneNumber">ادخال رقم التليفون الخاص بالطالب</label>
+                <label asp-for="Input.PhoneNumber">Student's Phone Number</label>
                 <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
                 <input asp-for="Input.PhoneNumber_Parents" class="form-control" aria-required="true" placeholder="ادخال رقم التليفون الخاص بـ ولى الامر (الاب - الام)" />
-                <label asp-for="Input.PhoneNumber_Parents">ادخال رقم التليفون الخاص بـ ولى الامر (الاب - الام)</label>
+                <label asp-for="Input.PhoneNumber_Parents">Parents Phone Number</label>
                 <span asp-validation-for="Input.PhoneNumber_Parents" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
                 <input asp-for="Input.Address" class="form-control" aria-required="true" placeholder="المنطقة / الحى" />
-                <label asp-for="Input.Address">المنطقة / الحى</label>
+                <label asp-for="Input.Address">Address</label>
                 <span asp-validation-for="Input.Address" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
                 <input asp-for="Input.School" class="form-control" aria-required="true" placeholder="اسم المدرسة" />
-                <label asp-for="Input.School">اسم المدرسة</label>
+                <label asp-for="Input.School">School Name</label>
                 <span asp-validation-for="Input.School" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
@@ -58,17 +58,17 @@
                         asp-items="Html.GetEnumSelectList<Grade>()"
                         class="form-control"
                         aria-required="true">
-                    <option value="">ادخل عامك الدراسى</option>
+                    <option value="">Enter your Grade</option>
                 </select>
-                <label asp-for="Input.Grade">العام الدراسى</label>
+                <label asp-for="Input.Grade">Grade</label>
                 <span asp-validation-for="Input.Grade" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
                 <input asp-for="Input.ReferralSource" class="form-control" aria-required="true" placeholder="عرفتنا منين" />
-                <label asp-for="Input.ReferralSource">عرفتنا منين</label>
+                <label asp-for="Input.ReferralSource">How do you know us?</label>
                 <span asp-validation-for="Input.ReferralSource" class="text-danger"></span>
             </div>
-            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">التسجيل</button>
+            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
         </form>
     </div>
 </div>

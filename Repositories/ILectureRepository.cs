@@ -24,14 +24,14 @@ namespace TadrousManassa.Repositories
 
         public OperationResult<List<string>> GetCurrentUnits(int grade);
 
-        public OperationResult<object> InsertLecture(Lecture lecture);
+        public OperationResult<bool> InsertLecture(Lecture lecture);
 
         public Task<OperationResult<int>> UpdateLectureAsync(string id, Lecture lecture);
 
-        public Task<OperationResult<object>> DeleteLectureAsync(string id);
+        public Task<OperationResult<bool>> DeleteLectureAsync(string id);
 
         public OperationResult<bool> IsLecturePurchased(string studentId, string lectureId);
 
-        public OperationResult<object> BuyCode(string studentId, string code, string lectureId);
+        public OperationResult<bool> BuyCode(string studentId, string code, string lectureId);
     }
 }

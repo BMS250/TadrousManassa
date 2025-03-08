@@ -1,7 +1,12 @@
 ﻿@using TadrousManassa.Areas.Student.Models
 @model LectureListViewModel
-@{
-    Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger" role="alert">
+        @TempData["ErrorMessage"]
+    </div>
 }
 
 <div class="text-center">
@@ -33,7 +38,7 @@
                     <div class="col-md-4 ">
                         <div class="box ">
                             <div class="img-box">
-                                <img src="images/quiz.gif" alt="">
+                                <img src="~/images/quiz.gif" alt="">
                             </div>
                             <div class="detail-box">
                                 <h5>
@@ -48,7 +53,7 @@
                     <div class="col-md-4 ">
                         <div class="box ">
                             <div class="img-box">
-                                <img src="images/book.gif" alt="">
+                                <img src="~/images/book.gif" alt="">
                             </div>
                             <div class="detail-box">
                                 <h5>
@@ -63,7 +68,7 @@
                     <div class="col-md-4 ">
                         <div class="box ">
                             <div class="img-box">
-                                <img src="images/teacher.gif" alt="">
+                                <img src="~/images/teacher.gif" alt="">
                             </div>
                             <div class="detail-box">
                                 <h5>
@@ -82,38 +87,34 @@
 </div>
 
 <div class="text-center">
-    <h1 class="display-4">المنهج</h1>
+    <h1 class="display-4">Lectures</h1>
 </div>
 
-
 <div class="container">
-    <!-- Unit Cards Section -->
+    <!-- Semester Cards Section -->
     <div class="row">
-        @foreach (var unit in Model.LecturesOfUnits.Keys)
+        @foreach (var semester in Model.LecturesOfSemesters.Keys)
         {
-            var lectureCount = Model.LecturesOfUnits[unit].Count;
-            <div class="col-md-3">
-                <div class="unit-card" data-unit="@unit">
-                    <h4>@unit</h4>
-                    <p>@lectureCount lecture@(lectureCount > 1 ? "s" : "")</p>
-                </div>
+            var lectureCount = Model.LecturesOfSemesters[semester].Count;
+            <div class="col-md-12 semester-card" data-semester="@semester">
+                <h4>Term: @semester</h4>
+                <p>@lectureCount lecture@(lectureCount > 1 ? "s" : "")</p>
             </div>
         }
     </div>
     
     <!-- Lecture List Section -->
-    <!-- Lecture List Section -->
-    <div id="lectureListSection">
-        @foreach (var unit in Model.LecturesOfUnits.Keys)
+    <div>
+        @foreach (var semester in Model.LecturesOfSemesters.Keys)
         {
-            <div class="lecture-group" data-unit="@unit" style="display:none;">
-                <h5>Lectures for unit: @unit</h5>
-                @foreach (var lecture in Model.LecturesOfUnits[unit])
+            <div class="lecture-group" data-semester="@semester" style="display:none;">
+                @* <h5>Lectures for term @semester: @Model.LecturesOfSemesters[semester].Count()</h5> *@
+                @foreach (var lecture in Model.LecturesOfSemesters[semester])
                 {
                     <!-- Add style="cursor:default" to the row -->
                     <div class="lecture-row" data-lecture-id="@lecture.Id" style="cursor:default">
                         <div class="lecture-info">
-                            @lecture.Name
+                            Lecture: @lecture.Name
                         </div>
                         <div class="lecture-actions">
                             @if (!lecture.IsPurchased)
@@ -139,192 +140,33 @@
             </div>
         }
     </div>
-    <br />
-    <br />
-    <br />
-    <br />
 </div>
+
+<style>
+    .semester-card {
+        background: #f0f0f0;
+        padding: 20px;
+        margin: 10px;
+        cursor: pointer;
+        text-align: center;
+        border-radius: 5px;
+    }
+</style>
 
 @section Scripts {
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
         $(document).ready(function () {
-            // Show lecture groups when unit card is clicked
-            $('.unit-card').click(function () {
-                var selectedUnit = $(this).data('unit');
+            // Show lecture groups when semester card is clicked
+            $('.semester-card').click(function () {
+                var selectedSemester = $(this).data('semester');
                 $('.lecture-group').hide();
-                $('.lecture-group[data-unit="' + selectedUnit + '"]').show();
+                $('.lecture-group[data-semester="' + selectedSemester + '"]').show();
             });
         });
     </script>
 }
 
-
-@* <div class="container"> *@
-@*     <!-- Unit Cards Section --> *@
-@*     <div class="row mb-4"> *@
-@*         @foreach (var unit in Model.Units) *@
-@*         { *@
-@*             <div class="col-md-3"> *@
-@*                 <div class="card unit-card mb-3" data-unit="@unit" style="cursor:pointer;"> *@
-@*                     <div class="card-body text-center"> *@
-@*                         <h5 class="card-title">@unit</h5> *@
-@*                     </div> *@
-@*                 </div> *@
-@*             </div> *@
-@*         } *@
-@*     </div> *@
-
-@*     <!-- Lecture Cards Section --> *@
-@*     <div class="row lecture-cards"> *@
-@*         @foreach (var lecture in Model.Lectures) *@
-@*         { *@
-@*             <div class="col-md-4 lecture-card mb-4" data-unit="@lecture.Unit" style="display: none;"> *@
-@*                 <div class="card"> *@
-@*                     <img class="card-img-top" src="@lecture.ImageUrl" alt="@lecture.Name" /> *@
-@*                     <div class="card-body"> *@
-@*                         <h5 class="card-title">@lecture.Name</h5> *@
-@*                         <p class="card-text">@lecture.Description</p> *@
-@*                         @if (lecture.IsPurchased) *@
-@*                         { *@
-@*                             <a href="@Url.Action("LectureDetails", "Lecture", new { lectureId = lecture.Id })" class="btn btn-primary"> *@
-@*                                 Go to the lecture *@
-@*                             </a> *@
-@*                         } *@
-@*                         else *@
-@*                         { *@
-@*                             <a href="@Url.Action("BuyLecture", "Lecture", new { lectureId = lecture.Id })" class="btn btn-success"> *@
-@*                                 Buy the lecture *@
-@*                             </a> *@
-@*                         } *@
-@*                     </div> *@
-@*                 </div> *@
-@*             </div> *@
-@*         } *@
-@*     </div> *@
-@* </div> *@
-
-@* @section Scripts { *@
-@*     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> *@
-@*     <script> *@
-@*         $(document).ready(function(){ *@
-@*             // When a unit card is clicked *@
-@*             $('.unit-card').click(function(){ *@
-@*                 var selectedUnit = $(this).data('unit'); *@
-@*                 // Hide all lecture cards and then show only the ones for the selected unit *@
-@*                 $('.lecture-card').hide().filter(function(){ *@
-@*                     return $(this).data('unit') === selectedUnit; *@
-@*                 }).show(); *@
-@*             }); *@
-@*         }); *@
-@*     </script> *@
-@* } *@
-
-
-
-<!-- info section -->
-@* <section class="info_section layout_padding2"> *@
-@*     <div class="container"> *@
-@*         <div class="row"> *@
-@*             <div class="col-md-6 col-lg-3 info_col"> *@
-@*                 <div class="info_contact"> *@
-@*                     <h4> *@
-@*                         Address *@
-@*                     </h4> *@
-@*                     <div class="contact_link_box"> *@
-@*                         <a href=""> *@
-@*                             <i class="fa fa-map-marker" aria-hidden="true"></i> *@
-@*                             <span> *@
-@*                                 Location *@
-@*                             </span> *@
-@*                         </a> *@
-@*                         <a href=""> *@
-@*                             <i class="fa fa-phone" aria-hidden="true"></i> *@
-@*                             <span> *@
-@*                                 Call +01 1234567890 *@
-@*                             </span> *@
-@*                         </a> *@
-@*                         <a href=""> *@
-@*                             <i class="fa fa-envelope" aria-hidden="true"></i> *@
-@*                             <span> *@
-@*                                 demo@gmail.com *@
-@*                             </span> *@
-@*                         </a> *@
-@*                     </div> *@
-@*                 </div> *@
-@*                 <div class="info_social"> *@
-@*                     <a href=""> *@
-@*                         <i class="fa fa-facebook" aria-hidden="true"></i> *@
-@*                     </a> *@
-@*                     <a href=""> *@
-@*                         <i class="fa fa-twitter" aria-hidden="true"></i> *@
-@*                     </a> *@
-@*                     <a href=""> *@
-@*                         <i class="fa fa-linkedin" aria-hidden="true"></i> *@
-@*                     </a> *@
-@*                     <a href=""> *@
-@*                         <i class="fa fa-instagram" aria-hidden="true"></i> *@
-@*                     </a> *@
-@*                 </div> *@
-@*             </div> *@
-@*             <div class="col-md-6 col-lg-3 info_col"> *@
-@*                 <div class="info_detail"> *@
-@*                     <h4> *@
-@*                         Info *@
-@*                     </h4> *@
-@*                     <p> *@
-@*                         necessary, making this the first true generator on the Internet. It uses a dictionary of over 200 Latin words, combined with a handful *@
-@*                     </p> *@
-@*                 </div> *@
-@*             </div> *@
-@*             <div class="col-md-6 col-lg-2 mx-auto info_col"> *@
-@*                 <div class="info_link_box"> *@
-@*                     <h4> *@
-@*                         Links *@
-@*                     </h4> *@
-@*                     <div class="info_links"> *@
-@*                         <a class="active" href="index.html"> *@
-@*                             Home *@
-@*                         </a> *@
-@*                         <a class="" href="about.html"> *@
-@*                             About *@
-@*                         </a> *@
-@*                         <a class="" href="service.html"> *@
-@*                             Services *@
-@*                         </a> *@
-@*                         <a class="" href="why.html"> *@
-@*                             Why Us *@
-@*                         </a> *@
-@*                         <a class="" href="team.html"> *@
-@*                             Team *@
-@*                         </a> *@
-@*                     </div> *@
-@*                 </div> *@
-@*             </div> *@
-@*             <div class="col-md-6 col-lg-3 info_col "> *@
-@*                 <h4> *@
-@*                     Subscribe *@
-@*                 </h4> *@
-@*                 <form action="#"> *@
-@*                     <input type="text" placeholder="Enter email" /> *@
-@*                     <button type="submit"> *@
-@*                         Subscribe *@
-@*                     </button> *@
-@*                 </form> *@
-@*             </div> *@
-@*         </div> *@
-@*     </div> *@
-@* </section> *@
-
-<!-- end info section -->
-<!-- footer section -->
-<section class="footer_section">
-    <div class="container">
-        <p>
-        </p>
-    </div>
-</section>
-<!-- footer section -->
 <!-- jQery -->
 <script type="text/javascript" src="~/lib/jquery/dist/jquery.js"></script>
 <script type="text/javascript" src="~/lib/jquery/dist/jquery.min.js"></script>
@@ -343,4 +185,4 @@
 <link rel="stylesheet" href="~/css/bootstrap.css" />
 <link rel="stylesheet" href="~/css/responsive.css" />
 <link rel="stylesheet" href="~/css/style.css" />
-<link rel="stylesheet" href="~/css/units.css" />
+<link rel="stylesheet" href="~/css/units.css">

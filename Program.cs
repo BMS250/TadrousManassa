@@ -1,3 +1,4 @@
+using Amazon.S3;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -28,16 +29,25 @@ namespace TadrousManassa
             {
                 options.User.RequireUniqueEmail = true;
                 options.User.AllowedUserNameCharacters = null; // Allows all characters, including duplicates
+                options.Password.RequireDigit = false;       // No numbers required
+                options.Password.RequireNonAlphanumeric = false; // No symbols required
+                options.Password.RequireUppercase = false;  // No uppercase required
+                options.Password.RequireLowercase = false;  // No lowercase required
+                options.Password.RequiredUniqueChars = 0;   // No unique chars required
             })
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             //.AddDefaultTokenProviders(); // This enables email confirmation & password reset
 
             builder.Services.AddScoped<IStudentRepository, StudentRepository>();
             builder.Services.AddScoped<ILectureRepository, LectureRepository>();
+            builder.Services.AddScoped<ICodeRepository, CodeRepository>();
             builder.Services.AddScoped<IStudentService, StudentService>();
             builder.Services.AddScoped<ILectureService, LectureService>();
+            builder.Services.AddScoped<ICodeService, CodeService>();
             // Email Service
             builder.Services.AddScoped<IEmailSender, EmailSender>();
+
+            builder.Services.AddAWSService<IAmazonS3>();
 
             // MVC & Razor Pages
             builder.Services.AddControllersWithViews();
@@ -80,7 +90,8 @@ namespace TadrousManassa
             // This should come AFTER the areas route
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+                pattern: "{controller=Home}/{action=Index}/{id?}",
+                defaults: new { area = "Student" });
 
             app.MapRazorPages();
 

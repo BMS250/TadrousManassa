@@ -62,45 +62,81 @@ namespace TadrousManassa.Services
             return lectureRepository.GetCurrentUnits(grade);
         }
 
-        public OperationResult<LectureListViewModel> GetLecturesVMWithUnits(string studentId)
+        public OperationResult<LectureListViewModel> GetLecturesVM(string studentId)
         {
             if (string.IsNullOrWhiteSpace(studentId))
                 return OperationResult<LectureListViewModel>.Fail("Student ID cannot be null or empty.");
-
             Student student = studentRepository.GetStudent(studentId);
             if (student == null)
                 return OperationResult<LectureListViewModel>.Fail("Student not found.");
-
-            var unitsResult = lectureRepository.GetCurrentUnits(student.Grade);
-            if (!unitsResult.Success || unitsResult.Data == null || !unitsResult.Data.Any())
-                return OperationResult<LectureListViewModel>.Fail("No units found.");
-
-            var lecturesVM = new Dictionary<string, List<LectureViewModel>>();
-
-            foreach (var unit in unitsResult.Data)
+            var lecturesVM = new Dictionary<int, List<LectureViewModel>>();
+            //var lecturesResult = lectureRepository.GetLecturesByStudent(studentId);
+            var lecturesResult = lectureRepository.GetCurrentLecturesByGrade(student.Grade);
+            if (lecturesResult.Success)
             {
-                var lecturesResult = lectureRepository.GetLecturesByUnit(unit);
-                if (lecturesResult.Success)
+                int i = 1;
+                foreach (var lecture in lecturesResult.Data)
                 {
-                    var lectureVMList = lecturesResult.Data.Select((lecture, index) => new LectureViewModel
+                    var lectureVM = new LectureViewModel
                     {
                         Id = lecture.Id,
                         Name = lecture.Name,
-                        ImageURL = $"bg{index + 1}",
+                        ImageURL = $"bg{i++}",
                         IsPurchased = IsLecturePurchased(studentId, lecture.Id).Success && IsLecturePurchased(studentId, lecture.Id).Data
-                    }).ToList();
-
-                    lecturesVM[unit] = lectureVMList;
+                    };
+                    try
+                    {
+                        lecturesVM[lecture.Semester].Add(lectureVM);
+                    }
+                    catch
+                    {
+                        lecturesVM[lecture.Semester] = [lectureVM];
+                    }
                 }
-                
             }
-
-            var result = new LectureListViewModel { LecturesOfUnits = lecturesVM };
-
-            return OperationResult<LectureListViewModel>.Ok(result, "Lectures with units retrieved successfully.");
+            var result = new LectureListViewModel { LecturesOfSemesters = lecturesVM };
+            return OperationResult<LectureListViewModel>.Ok(result, "Lectures retrieved successfully.");
         }
 
-        public OperationResult<object> InsertLecture(Lecture lecture)
+        //public OperationResult<LectureListViewModel> GetLecturesVMWithUnits(string studentId)
+        //{
+        //    if (string.IsNullOrWhiteSpace(studentId))
+        //        return OperationResult<LectureListViewModel>.Fail("Student ID cannot be null or empty.");
+
+        //    Student student = studentRepository.GetStudent(studentId);
+        //    if (student == null)
+        //        return OperationResult<LectureListViewModel>.Fail("Student not found.");
+
+        //    var unitsResult = lectureRepository.GetCurrentUnits(student.Grade);
+        //    if (!unitsResult.Success || unitsResult.Data == null || !unitsResult.Data.Any())
+        //        return OperationResult<LectureListViewModel>.Fail("No units found.");
+
+        //    var lecturesVM = new Dictionary<int, List<LectureViewModel>>();
+
+        //    foreach (var unit in unitsResult.Data)
+        //    {
+        //        var lecturesResult = lectureRepository.GetLecturesByUnit(unit);
+        //        if (lecturesResult.Success)
+        //        {
+        //            var lectureVMList = lecturesResult.Data.Select((lecture, index) => new LectureViewModel
+        //            {
+        //                Id = lecture.Id,
+        //                Name = lecture.Name,
+        //                ImageURL = $"bg{index + 1}",
+        //                IsPurchased = IsLecturePurchased(studentId, lecture.Id).Success && IsLecturePurchased(studentId, lecture.Id).Data
+        //            }).ToList();
+
+        //            lecturesVM[unit] = lectureVMList;
+        //        }
+                
+        //    }
+
+        //    var result = new LectureListViewModel { LecturesOfUnits = lecturesVM };
+
+        //    return OperationResult<LectureListViewModel>.Ok(result, "Lectures with units retrieved successfully.");
+        //}
+
+        public OperationResult<bool> InsertLecture(Lecture lecture)
         {
             return lectureRepository.InsertLecture(lecture);
         }
@@ -110,7 +146,7 @@ namespace TadrousManassa.Services
             return await lectureRepository.UpdateLectureAsync(id, lecture);
         }
 
-        public Task<OperationResult<object>> DeleteLecture(string id)
+        public Task<OperationResult<bool>> DeleteLecture(string id)
         {
             return lectureRepository.DeleteLectureAsync(id);
         }
@@ -120,7 +156,7 @@ namespace TadrousManassa.Services
             return lectureRepository.IsLecturePurchased(studentId, lectureId);
         }
 
-        public OperationResult<object> BuyCode(string studentId, string code, string lectureId)
+        public OperationResult<bool> BuyCode(string studentId, string code, string lectureId)
         {
             return lectureRepository.BuyCode(studentId, code, lectureId);
         }

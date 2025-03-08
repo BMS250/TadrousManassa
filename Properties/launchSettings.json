@@ -33,6 +33,13 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
+    },
+    "El-Archmides": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "applicationUrl": "http://el-archmides.runasp.net/",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Production"
+      }
     }
   }
-}

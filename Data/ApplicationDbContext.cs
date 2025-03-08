@@ -10,6 +10,15 @@ namespace TadrousManassa.Data
             : base(options)
         {
         }
+
+        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        //{
+        //    if (!optionsBuilder.IsConfigured)
+        //    {
+        //        optionsBuilder.UseSqlServer("Server=db14797.public.databaseasp.net; Database=db14797; User Id=db14797; Password=L%r76jM#n?3C; Encrypt=True; TrustServerCertificate=True; MultipleActiveResultSets=True;");
+        //    }
+        //}
+
         override protected void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

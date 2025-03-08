@@ -4,6 +4,11 @@ body {
   overflow-x: hidden;
 }
 
+/*.subtitle {
+    font-size: 0.5rem;
+    color: gray; 
+}
+*/
 .layout_padding {
   padding: 90px 0;
 }
@@ -795,8 +800,13 @@ a:focus {
 
 /* footer section*/
 .footer_section {
-  position: relative;
-  text-align: center;
+    height: 60px; /* Fixed height */
+    background: #333;
+    color: white;
+    text-align: center;
+    line-height: 60px; /* Centers text vertically */
+    position: relative; /* Ensures it's not overlapping content */
+    width: 100%;
 }
 
 .footer_section p {

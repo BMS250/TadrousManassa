@@ -10,14 +10,14 @@ namespace TadrousManassa.Utilities
         [Display(Name = "Sixth primary")]
         SixthPrimary = 6,
 
-        [Display(Name = "First secondary")]
-        FirstSecondary = 1,
+        [Display(Name = "First Preparatory")]
+        FirstPreparatory = 1,
 
-        [Display(Name = "Second secondary")]
-        SecondSecondary = 2,
+        [Display(Name = "Second Preparatory")]
+        SecondPreparatory = 2,
 
-        [Display(Name = "Third secondary")]
-        ThirdSecondary = 3
+        [Display(Name = "Third Preparatory")]
+        ThirdPreparatory = 3
     }
 
     // Helper class to get display names

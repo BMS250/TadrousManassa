@@ -2,7 +2,7 @@
 {
     public class LectureListViewModel
     {
-        // The key is the unit name, and the value is a list of lectures for that unit.
-        public Dictionary<string, List<LectureViewModel>> LecturesOfUnits { get; set; }
+        // The key is the unit name, and the value is a list of lectures for that semester.
+        public Dictionary<int, List<LectureViewModel>> LecturesOfSemesters { get; set; }
     }
 }

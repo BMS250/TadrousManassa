@@ -65,6 +65,12 @@ namespace TadrousManassa.Areas.Identity.Pages.Account
 
         public async Task OnGetAsync(string returnUrl = null)
         {
+            if (User.Identity.IsAuthenticated)
+            {
+                // Logout
+                await _signInManager.SignOutAsync();
+                //return RedirectToAction("Index", "Home", new { area = "Student" });
+            }
             if (!string.IsNullOrEmpty(ErrorMessage))
             {
                 ModelState.AddModelError(string.Empty, ErrorMessage);
@@ -82,10 +88,10 @@ namespace TadrousManassa.Areas.Identity.Pages.Account
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
-            if (User.Identity.IsAuthenticated)
-            {
-                return RedirectToAction("Index", "Home", new { area = "Student" });
-            }
+            //if (User.Identity.IsAuthenticated)
+            //{
+            //    return RedirectToAction("Index", "Home", new { area = "Student" });
+            //}
             returnUrl ??= Url.Content("~/");
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
@@ -99,6 +105,13 @@ namespace TadrousManassa.Areas.Identity.Pages.Account
                     return Page();
                 }
                 user.Student = _studentRepository.GetStudent(user.Id);
+
+                string deviceId = GetDeviceFingerprint();
+                if (user.Student.DeviceId != deviceId)
+                {
+                    ModelState.AddModelError(string.Empty, "Please login by the same device you have used in registeration.");
+                    return Page();
+                }
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
                 var result = await _signInManager.PasswordSignInAsync(user.UserName, Input.Password, Input.RememberMe, lockoutOnFailure: false);
@@ -113,12 +126,7 @@ namespace TadrousManassa.Areas.Identity.Pages.Account
 
                     if (roles.Contains("Teacher"))
                         return RedirectToAction("Index", "Home", new { area = "Teacher" });
-                    string deviceId = GetDeviceFingerprint();
-                    if (user.Student.DeviceId != deviceId)
-                    {
-                        ModelState.AddModelError(string.Empty, "Please login by the same device and the same browser you have used in registeration.");
-                        return Page();
-                    }
+                    
                     _logger.LogInformation("User logged in.");
                     //return LocalRedirect(returnUrl);
                     return RedirectToAction("Index", "Home", new { area = "Student" });

@@ -95,19 +95,21 @@ namespace TadrousManassa.Areas.Identity.Pages.Account
                 await _userManager.AddToRoleAsync(user, "Student");
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("User created a new account with password.");
+                    //    _logger.LogInformation("User created a new account with password.");
 
-                    // Call the StudentService to insert the student information
-                    var studentResult = await _studentService.InsertStudentAsync(user.Student);
-                    if (!studentResult.Success)
-                    {
-                        // If the student insertion failed, add the error message to ModelState
-                        ModelState.AddModelError(string.Empty, studentResult.Message);
-                        return Page();
-                    }
+                    //    // Call the StudentService to insert the student information
+                    //    var studentResult = await _studentService.InsertStudentAsync(user.Student);
+                    //    if (!studentResult.Success)
+                    //    {
+                    //        // If the student insertion failed, add the error message to ModelState
+                    //        ModelState.AddModelError(string.Empty, studentResult.Message);
+                    //        return Page();
+                    //    }
 
+                    //    await _signInManager.SignInAsync(user, isPersistent: false);
+                    //    //return LocalRedirect("~/");
+                    //    return RedirectToAction("Index", "Home", new { area = "Student" });
                     await _signInManager.SignInAsync(user, isPersistent: false);
-                    //return LocalRedirect("~/");
                     return RedirectToAction("Index", "Home", new { area = "Student" });
                 }
                 foreach (var error in result.Errors)

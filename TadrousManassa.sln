@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35507.96 d17.13
+VisualStudioVersion = 17.13.35507.96
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TadrousManassa", "TadrousManassa.csproj", "{74FF919A-6A5B-4D7F-8EB5-DDD783DBA12E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeGenerator", "..\CodeGenerator\CodeGenerator.csproj", "{70D55476-9306-476E-924C-61D9C5C5F299}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{74FF919A-6A5B-4D7F-8EB5-DDD783DBA12E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{74FF919A-6A5B-4D7F-8EB5-DDD783DBA12E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{74FF919A-6A5B-4D7F-8EB5-DDD783DBA12E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{70D55476-9306-476E-924C-61D9C5C5F299}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{70D55476-9306-476E-924C-61D9C5C5F299}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{70D55476-9306-476E-924C-61D9C5C5F299}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{70D55476-9306-476E-924C-61D9C5C5F299}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -23,16 +23,18 @@ namespace TadrousManassa.Services
 
         public OperationResult<List<string>> GetCurrentUnits(int grade);
 
-        public OperationResult<LectureListViewModel> GetLecturesVMWithUnits(string studentId);
+        public OperationResult<LectureListViewModel> GetLecturesVM(string studentId);
+        
+        //public OperationResult<LectureListViewModel> GetLecturesVMWithUnits(string studentId);
 
-        public OperationResult<object> InsertLecture(Lecture lecture);
+        public OperationResult<bool> InsertLecture(Lecture lecture);
 
         public Task<OperationResult<int>> UpdateLectureAsync(string id, Lecture lecture);
 
-        public Task<OperationResult<object>> DeleteLecture(string id);
+        public Task<OperationResult<bool>> DeleteLecture(string id);
 
         public OperationResult<bool> IsLecturePurchased(string studentId, string lectureId);
 
-        public OperationResult<object> BuyCode(string studentId, string code, string lectureId);
+        public OperationResult<bool> BuyCode(string studentId, string code, string lectureId);
     }
 }

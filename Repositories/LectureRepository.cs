@@ -57,7 +57,7 @@ namespace TadrousManassa.Repositories
             if (!IsValidGrade(grade))
                 return OperationResult<List<Lecture>>.Fail("Grade must be between 1 and 6");
             var lectures = context.Lectures
-                .Where(l => l.Semester == ApplicationSettings.CurrentSemester && l.UsedThisYear && l.Grade == grade)
+                .Where(l => /*l.Semester == ApplicationSettings.CurrentSemester && */l.UsedThisYear && l.Grade == grade)
                 .ToList();
             if (lectures == null || lectures.Count == 0)
                 return OperationResult<List<Lecture>>.Fail($"No current lectures found for grade {grade}.");
@@ -125,15 +125,15 @@ namespace TadrousManassa.Repositories
             return OperationResult<List<Lecture>>.Ok(lectures, $"Lectures for unit '{unit}' retrieved successfully.");
         }
 
-        public OperationResult<object> InsertLecture(Lecture lecture)
+        public OperationResult<bool> InsertLecture(Lecture lecture)
         {
             if (lecture == null)
-                return OperationResult<object>.Fail("Lecture cannot be null.");
+                return OperationResult<bool>.Fail("Lecture cannot be null.");
 
             context.Lectures.Add(lecture);
             context.SaveChanges();
 
-            return OperationResult<object>.Ok(null, "Lecture inserted successfully.");
+            return OperationResult<bool>.Ok(true, "Lecture inserted successfully.");
         }
 
         public async Task<OperationResult<int>> UpdateLectureAsync(string id, Lecture lecture)
@@ -160,24 +160,24 @@ namespace TadrousManassa.Repositories
             }
         }
 
-        public async Task<OperationResult<object>> DeleteLectureAsync(string id)
+        public async Task<OperationResult<bool>> DeleteLectureAsync(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
-                return OperationResult<object>.Fail("Lecture ID cannot be null or empty.");
+                return OperationResult<bool>.Fail("Lecture ID cannot be null or empty.");
 
             var lecture = context.Lectures.FirstOrDefault(l => l.Id == id);
             if (lecture == null)
-                return OperationResult<object>.Fail("Lecture not found.");
+                return OperationResult<bool>.Fail("Lecture not found.");
 
             try
             {
                 context.Lectures.Remove(lecture);
                 await context.SaveChangesAsync();
-                return OperationResult<object>.Ok(null, "Lecture deleted successfully.");
+                return OperationResult<bool>.Ok(true, "Lecture deleted successfully.");
             }
             catch (Exception ex)
             {
-                return OperationResult<object>.Fail($"Error deleting lecture: {ex.Message}");
+                return OperationResult<bool>.Fail($"Error deleting lecture: {ex.Message}");
             }
         }
 
@@ -194,25 +194,25 @@ namespace TadrousManassa.Repositories
             return OperationResult<bool>.Ok(false, "Lecture is not purchased.");
         }
 
-        public OperationResult<object> BuyCode(string studentId, string code, string lectureId)
+        public OperationResult<bool> BuyCode(string studentId, string code, string lectureId)
         {
             if (string.IsNullOrWhiteSpace(code))
-                return OperationResult<object>.Fail("Code cannot be null or empty.");
+                return OperationResult<bool>.Fail("Code cannot be null or empty.");
             if (string.IsNullOrWhiteSpace(lectureId))
-                return OperationResult<object>.Fail("Lecture ID cannot be null or empty.");
+                return OperationResult<bool>.Fail("Lecture ID cannot be null or empty.");
 
                 StudentLecture? row = context.StudentLectures.FirstOrDefault(sl => sl.Code == code && sl.LectureId == lectureId && (sl.StudentId == "" || sl.StudentId == null));
                 if (row == null)
-                    return OperationResult<object>.Fail("Code is not valid.");
+                    return OperationResult<bool>.Fail("Code is not valid.");
             try
             {
                 row.StudentId = studentId;
                 context.SaveChanges();
-                return OperationResult<object>.Ok(true, "Code is valid.");
+                return OperationResult<bool>.Ok(true, "Code is valid.");
             }
             catch
             {
-                return OperationResult<object>.Fail("An Error happened while buying the lecture, please try again.");
+                return OperationResult<bool>.Fail("An Error happened while buying the lecture, please try again.");
             }
         }
     }
