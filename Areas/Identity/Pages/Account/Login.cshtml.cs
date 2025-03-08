@@ -153,7 +153,7 @@ namespace TadrousManassa.Areas.Identity.Pages.Account
                 deviceIdCookie = Guid.NewGuid().ToString();
                 var cookieOptions = new CookieOptions
                 {
-                    Expires = DateTime.Now.AddYears(5), // Long-lived cookie
+                    Expires = DateTime.Now.AddYears(6), // Long-lived cookie
                     HttpOnly = true,
                     Secure = true, // Enable if using HTTPS
                     SameSite = SameSiteMode.Lax // Adjust based on your cross-site needs

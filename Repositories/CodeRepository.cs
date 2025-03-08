@@ -38,14 +38,11 @@ namespace TadrousManassa.Repositories
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
             StringBuilder result = new StringBuilder(length);
-            using (var rng = new RNGCryptoServiceProvider())
+            byte[] buffer = new byte[length];
+            RandomNumberGenerator.Fill(buffer);
+            for (int i = 0; i < length; i++)
             {
-                byte[] buffer = new byte[length];
-                rng.GetBytes(buffer);
-                for (int i = 0; i < length; i++)
-                {
-                    result.Append(chars[buffer[i] % chars.Length]);
-                }
+                result.Append(chars[buffer[i] % chars.Length]);
             }
             return result.ToString();
         }
