@@ -104,6 +104,24 @@ namespace TadrousManassa.Areas.Identity.Pages.Account
                     ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                     return Page();
                 }
+
+                // If Admin, Sign in Directly
+                var roles = await _userManager.GetRolesAsync(user);
+                if (roles.Contains("Teacher"))
+                {
+                    var teacherResult = await _signInManager.PasswordSignInAsync(user.UserName, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+                    if (teacherResult.Succeeded)
+                    {
+                        _logger.LogInformation("User logged in.");
+                        return RedirectToAction("Index", "Home", new { area = "Teacher" });
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                        return Page();
+                    }
+                }
+
                 user.Student = _studentRepository.GetStudent(user.Id);
 
                 string deviceId = GetDeviceFingerprint();
@@ -114,18 +132,13 @@ namespace TadrousManassa.Areas.Identity.Pages.Account
                 }
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await _signInManager.PasswordSignInAsync(user.UserName, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+                var studentResult = await _signInManager.PasswordSignInAsync(user.UserName, Input.Password, Input.RememberMe, lockoutOnFailure: false);
                 
-                if (result.Succeeded)
+                if (studentResult.Succeeded)
                 {
-                    // If Admin, Sign in Directly
-                    var roles = await _userManager.GetRolesAsync(user);
-
+                    
                     //if (roles.Contains("Student"))
                     //    return RedirectToAction("Index", "Home", new { area = "Student" });
-
-                    if (roles.Contains("Teacher"))
-                        return RedirectToAction("Index", "Home", new { area = "Teacher" });
                     
                     _logger.LogInformation("User logged in.");
                     //return LocalRedirect(returnUrl);

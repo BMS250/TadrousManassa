@@ -3,47 +3,53 @@
 <head>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" 
-          integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumxWNU3hPU4tYLIprf3b0WxJf7BYJ5O4vRII5Ym" 
-          crossorigin="anonymous">
-    <style>
-        /* Container for responsive video with a 16:9 ratio */
-        .video-container {
-            position: relative;
-            padding-bottom: 56.25%;
-            height: 0;
-            overflow: hidden;
-            margin-bottom: 1.5rem;
-        }
-        .video-container video {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-        /* Disable text selection and right-click on video */
-        video {
-            -webkit-user-select: none;
-            -webkit-touch-callout: none;
-            user-select: none;
-        }
-    </style>
+    integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumxWNU3hPU4tYLIprf3b0WxJf7BYJ5O4vRII5Ym" 
+    crossorigin="anonymous">
+    @* <style> *@
+    @*     /* Container for responsive video with a 16:9 ratio */ *@
+    @*     .video-container { *@
+    @*         position: relative; *@
+    @*         padding-bottom: 56.25%; *@
+    @*         height: 0; *@
+    @*         overflow: hidden; *@
+    @*         margin-bottom: 1.5rem; *@
+    @*     } *@
+    @*     .video-container video { *@
+    @*         position: absolute; *@
+    @*         top: 0; *@
+    @*         left: 0; *@
+    @*         width: 100%; *@
+    @*         height: 100%; *@
+    @*     } *@
+    @*     /* Disable text selection and right-click on video */ *@
+    @*     video { *@
+    @*         -webkit-user-select: none; *@
+    @*         -webkit-touch-callout: none; *@
+    @*         user-select: none; *@
+    @*     } *@
+    @* </style> *@
 </head>
 <div class="container mt-4">
     <h1 class="mb-3">@Model.Name</h1>
     <p class="text-muted"><strong>Unit:</strong> @Model.Unit</p>
     <p>@Model.Description</p>
-        
+
     <div class="video-container">
         <video controls controlsList="nodownload" oncontextmenu="return false;">
             <source src="@Model.VideoPath" type="video/mp4" />
             Your browser does not support the video player.
         </video>
     </div>
-        
+
     <div class="d-flex justify-content-around">
-        <a href="@Model.SheetPath" class="btn btn-outline-primary" target="_blank">View Sheet</a>
-        <a href="@Model.QuizPath" class="btn btn-outline-success" target="_blank">Take Quiz</a>
+        @if (!string.IsNullOrEmpty(Model.SheetPath))
+        {
+            <a href="@Model.SheetPath" class="btn btn-outline-primary" target="_blank">View Sheet</a>
+        }
+        @if (!string.IsNullOrEmpty(Model.QuizPath))
+        {
+            <a href="@Model.QuizPath" class="btn btn-outline-success" target="_blank">Take Quiz</a>
+        }
     </div>
 </div>
     

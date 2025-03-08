@@ -1,1 +1,97 @@
-﻿This is Teacher/Home/Index
+﻿@using TadrousManassa.Areas.Teacher.Models
+@using TadrousManassa.Models
+@using TadrousManassa.Utilities
+@model AdminVM
+@{
+    ViewData["Title"] = "Admin Page";
+}
+
+<h1>Admin Page</h1>
+
+<!-- Bootstrap Nav Tabs -->
+<ul class="nav nav-tabs" id="adminTab" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab" aria-controls="settings" aria-selected="true">
+            Settings
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="video-tab" data-bs-toggle="tab" data-bs-target="#video" type="button" role="tab" aria-controls="video" aria-selected="false">
+            Video Upload
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="adminTabContent">
+    <!-- Tab 1: Update Settings -->
+    <div class="tab-pane fade show active p-3" id="settings" role="tabpanel" aria-labelledby="settings-tab">
+        <form asp-action="UpdateSettings" method="post">
+            <div class="mb-3">
+                <label asp-for="CurrentYear" class="form-label">Current Year</label>
+                <input asp-for="CurrentYear" class="form-control" />
+                <span asp-validation-for="CurrentYear" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="CurrentSemester" class="form-label">Current Semester</label>
+                <input asp-for="CurrentSemester" class="form-control" />
+                <span asp-validation-for="CurrentSemester" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-primary">Update Settings</button>
+        </form>
+    </div>
+
+    <!-- Tab 2: Video Upload and Details -->
+    <div class="tab-pane fade p-3" id="video" role="tabpanel" aria-labelledby="video-tab">
+        <form asp-action="UploadVideo" method="post" enctype="multipart/form-data">
+            <!-- File Input for Video -->
+            <div class="mb-3">
+                <label for="videoFile" class="form-label">Choose Video</label>
+                <input type="file" class="form-control" id="videoFile" name="videoFile" accept="video/*" />
+            </div>
+
+            <!-- Video Details Inputs -->
+            <div class="mb-3">
+                <label asp-for="Input.Name" class="form-label">Name</label>
+                <input asp-for="Input.Name" class="form-control" />
+                <span asp-validation-for="Input.Name" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Input.Description" class="form-label">Description</label>
+                <textarea asp-for="Input.Description" class="form-control"></textarea>
+                <span asp-validation-for="Input.Description" class="text-danger"></span>
+            </div>
+            <!-- Grade Selector using an Enum Select List -->
+            <div class="form-floating mb-3">
+                <select asp-for="Input.Grade"
+                        asp-items="Html.GetEnumSelectList<Grade>()"
+                        class="form-control"
+                        aria-required="true">
+                    <option value="">Enter your Grade</option>
+                </select>
+                <label asp-for="Input.Grade">Grade</label>
+                <span asp-validation-for="Input.Grade" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Input.Unit" class="form-label">Unit</label>
+                <input asp-for="Input.Unit" class="form-control" />
+                <span asp-validation-for="Input.Unit" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Input.Price" class="form-label">Price</label>
+                <input asp-for="Input.Price" class="form-control" type="number" />
+                <span asp-validation-for="Input.Price" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Input.SheetPath" class="form-label">Sheet Path</label>
+                <input asp-for="Input.SheetPath" class="form-control" />
+                <span asp-validation-for="Input.SheetPath" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Input.QuizPath" class="form-label">Quiz Path</label>
+                <input asp-for="Input.QuizPath" class="form-control" />
+                <span asp-validation-for="Input.QuizPath" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-primary">Upload Video</button>
+        </form>
+    </div>
+</div>
