@@ -75,4 +75,50 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+
+    <script>
+        // Check for existing device ID in cookies/localStorage
+        function getOrCreateDeviceId() {
+            return new Promise((resolve) => {
+                // Try to read from localStorage first
+                let deviceId = localStorage.getItem('deviceId');
+
+                // If not in localStorage, check cookies
+                if (!deviceId) {
+                    const cookieValue = document.cookie
+                        .split('; ')
+                        .find(row => row.startsWith('DeviceId='))
+                        ?.split('=')[1];
+
+                    if (cookieValue) {
+                        deviceId = cookieValue;
+                        localStorage.setItem('deviceId', deviceId); // Sync to localStorage
+                    }
+                }
+
+                // If still no ID, generate a new one
+                if (!deviceId) {
+                    deviceId = crypto.randomUUID(); // Modern browsers only
+                    localStorage.setItem('deviceId', deviceId);
+                }
+
+                // Send the ID to the server (if not already in cookies)
+                if (!document.cookie.includes('DeviceId=')) {
+                    fetch('/api/device/sync', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Device-Id': deviceId
+                        }
+                    });
+                }
+
+                resolve(deviceId);
+            });
+        }
+
+        // Initialize on page load
+        getOrCreateDeviceId();
+    </script>
 }

@@ -18,6 +18,7 @@ using TadrousManassa.Models;
 using System.Text;
 using System.Security.Cryptography;
 using TadrousManassa.Repositories;
+using TadrousManassa.Services;
 
 namespace TadrousManassa.Areas.Identity.Pages.Account
 {
@@ -27,13 +28,15 @@ namespace TadrousManassa.Areas.Identity.Pages.Account
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<LoginModel> _logger;
+        private readonly DeviceIdentifierService _deviceService;
 
-        public LoginModel(IStudentRepository studentRepository, SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, ILogger<LoginModel> logger)
+        public LoginModel(IStudentRepository studentRepository, SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, ILogger<LoginModel> logger, DeviceIdentifierService deviceService)
         {
             _studentRepository = studentRepository;
             _signInManager = signInManager;
             _userManager = userManager;
             _logger = logger;
+            _deviceService = deviceService;
         }
 
         /// <summary>
@@ -124,7 +127,8 @@ namespace TadrousManassa.Areas.Identity.Pages.Account
 
                 user.Student = _studentRepository.GetStudent(user.Id);
 
-                string deviceId = GetDeviceFingerprint();
+                //string deviceId = GetDeviceFingerprint();
+                string deviceId = _deviceService.GetDeviceId();
                 if (user.Student.DeviceId != deviceId)
                 {
                     ModelState.AddModelError(string.Empty, "Please login by the same device you have used in registeration.");
@@ -155,36 +159,36 @@ namespace TadrousManassa.Areas.Identity.Pages.Account
             return Page();
         }
 
-        private string GetDeviceFingerprint(bool isRegistration = false)
-        {
-            var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
-            var deviceIdCookie = HttpContext.Request.Cookies["DeviceId"];
+        //private string GetDeviceFingerprint(bool isRegistration = false)
+        //{
+        //    var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
+        //    var deviceIdCookie = HttpContext.Request.Cookies["DeviceId"];
 
-            // Generate and persist DeviceId cookie during registration if missing
-            if (isRegistration && string.IsNullOrEmpty(deviceIdCookie))
-            {
-                deviceIdCookie = Guid.NewGuid().ToString();
-                var cookieOptions = new CookieOptions
-                {
-                    Expires = DateTime.Now.AddYears(6), // Long-lived cookie
-                    HttpOnly = true,
-                    Secure = true, // Enable if using HTTPS
-                    SameSite = SameSiteMode.Lax // Adjust based on your cross-site needs
-                };
-                HttpContext.Response.Cookies.Append("DeviceId", deviceIdCookie, cookieOptions);
-            }
+        //    // Generate and persist DeviceId cookie during registration if missing
+        //    if (isRegistration && string.IsNullOrEmpty(deviceIdCookie))
+        //    {
+        //        deviceIdCookie = Guid.NewGuid().ToString();
+        //        var cookieOptions = new CookieOptions
+        //        {
+        //            Expires = DateTime.Now.AddYears(6), // Long-lived cookie
+        //            HttpOnly = true,
+        //            Secure = true, // Enable if using HTTPS
+        //            SameSite = SameSiteMode.Lax // Adjust based on your cross-site needs
+        //        };
+        //        HttpContext.Response.Cookies.Append("DeviceId", deviceIdCookie, cookieOptions);
+        //    }
 
-            string rawFingerprint = userAgent;
-            if (!string.IsNullOrEmpty(deviceIdCookie))
-            {
-                rawFingerprint += "-" + deviceIdCookie;
-            }
+        //    string rawFingerprint = userAgent;
+        //    if (!string.IsNullOrEmpty(deviceIdCookie))
+        //    {
+        //        rawFingerprint += "-" + deviceIdCookie;
+        //    }
 
-            using (var sha256 = SHA256.Create())
-            {
-                var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(rawFingerprint));
-                return Convert.ToBase64String(hash);
-            }
-        }
+        //    using (var sha256 = SHA256.Create())
+        //    {
+        //        var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(rawFingerprint));
+        //        return Convert.ToBase64String(hash);
+        //    }
+        //}
     }
 }

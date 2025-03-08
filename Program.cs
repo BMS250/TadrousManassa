@@ -47,6 +47,12 @@ namespace TadrousManassa
             // Email Service
             builder.Services.AddScoped<IEmailSender, EmailSender>();
 
+            // Add HttpContextAccessor (required for accessing the current HTTP context)
+            builder.Services.AddHttpContextAccessor();
+
+            // Register your custom DeviceIdentifierService
+            builder.Services.AddScoped<DeviceIdentifierService>();
+
             builder.Services.AddAWSService<IAmazonS3>();
 
             // MVC & Razor Pages
