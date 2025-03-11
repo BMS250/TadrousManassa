@@ -47,5 +47,6 @@ namespace TadrousManassa.Data
         public virtual DbSet<Student> Students { get; set; }
         public virtual DbSet<Lecture> Lectures { get; set; }
         public virtual DbSet<StudentLecture> StudentLectures { get; set; }
+        public virtual DbSet<ApplicationSettings> ApplicationSettings { get; set; }
     }
 }

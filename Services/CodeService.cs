@@ -4,8 +4,9 @@ using System.Security.Cryptography;
 using System.Text;
 using TadrousManassa.Data;
 using TadrousManassa.Models;
+using TadrousManassa.Repositories;
 
-namespace TadrousManassa.Repositories
+namespace TadrousManassa.Services
 {
     public class CodeService : ICodeService
     {

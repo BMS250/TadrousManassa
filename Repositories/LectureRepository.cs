@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using TadrousManassa.Data;
 using TadrousManassa.Models;
-using TadrousManassa.Utilities;
 
 namespace TadrousManassa.Repositories
 {
@@ -10,12 +9,17 @@ namespace TadrousManassa.Repositories
         private readonly ApplicationDbContext context;
         private readonly UserManager<ApplicationUser> userManager;
         private readonly IStudentRepository studentRepo;
+        private readonly int currentYear;
+        private readonly int currentSemester;
 
-        public LectureRepository(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IStudentRepository studentRepo)
+        public LectureRepository(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IStudentRepository studentRepo, IAppSettingsRepository appSettingsRepo)
         {
             this.context = context;
             this.userManager = userManager;
             this.studentRepo = studentRepo;
+            var currentData = appSettingsRepo.GetCurrentData();
+            currentYear = currentData.CurrentYear;
+            currentSemester = currentData.CurrentSemester;
         }
 
         public List<Lecture> GetLectures()
@@ -25,7 +29,7 @@ namespace TadrousManassa.Repositories
 
         public List<Lecture> GetCurrentLectures()
         {
-            return [.. context.Lectures.Where(l => l.Semester == ApplicationSettings.CurrentSemester && l.UsedThisYear)];
+            return [.. context.Lectures.Where(l => l.Semester == currentSemester && l.UsedThisYear)];
         }
 
         public OperationResult<Lecture> GetLecture(string id)
@@ -89,7 +93,7 @@ namespace TadrousManassa.Repositories
             var lectures = context.StudentLectures
                 .Where(sl => sl.StudentId == studentId)
                 .Select(sl => sl.Lecture)
-                .Where(l => l.Grade == student.Grade && l.Semester == ApplicationSettings.CurrentSemester && l.UsedThisYear)
+                .Where(l => l.Grade == student.Grade && l.Semester == currentSemester && l.UsedThisYear)
                 .ToList();
 
             return OperationResult<List<Lecture>>.Ok(lectures, "Current lectures retrieved for student.");
@@ -105,7 +109,7 @@ namespace TadrousManassa.Repositories
 
         public OperationResult<List<string>> GetCurrentUnits(int grade)
         {
-            var units = context.Lectures.Where(l => l.Grade == grade && l.Semester == ApplicationSettings.CurrentSemester && l.UsedThisYear).Select(l => l.Unit).Distinct().ToList();
+            var units = context.Lectures.Where(l => l.Grade == grade && l.Semester == currentSemester && l.UsedThisYear).Select(l => l.Unit).Distinct().ToList();
             if (units == null || units.Count == 0)
                 return OperationResult<List<string>>.Fail("No units found.");
             return OperationResult<List<string>>.Ok(units, "Units retrieved successfully.");

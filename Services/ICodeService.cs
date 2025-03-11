@@ -1,4 +1,4 @@
-﻿namespace TadrousManassa.Repositories
+﻿namespace TadrousManassa.Services
 {
     public interface ICodeService
     {

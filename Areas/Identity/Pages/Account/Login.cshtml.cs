@@ -129,7 +129,12 @@ namespace TadrousManassa.Areas.Identity.Pages.Account
 
                 //string deviceId = GetDeviceFingerprint();
                 string deviceId = _deviceService.GetDeviceId();
-                if (user.Student.DeviceId != deviceId)
+                if (user.Student.DeviceId == "000")
+                {
+                    user.Student.DeviceId = deviceId;
+                    await _studentRepository.UpdateStudentAsync(user.Student.Id, user.Student);
+                }
+                else if (user.Student.DeviceId != deviceId)
                 {
                     ModelState.AddModelError(string.Empty, "Please login by the same device you have used in registeration.");
                     return Page();

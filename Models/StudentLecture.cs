@@ -21,6 +21,6 @@ namespace TadrousManassa.Models
         public string? StudentId { get; set; }
 
         [ForeignKey("StudentId")]
-        public Student Student { get; set; }
+        public Student? Student { get; set; }
     }
 }

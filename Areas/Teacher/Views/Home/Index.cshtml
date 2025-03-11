@@ -2,9 +2,6 @@
 @using TadrousManassa.Models
 @using TadrousManassa.Utilities
 @model AdminVM
-@{
-    ViewData["Title"] = "Admin Page";
-}
 
 <h1>Admin Page</h1>
 
@@ -28,14 +25,19 @@
         <form asp-action="UpdateSettings" method="post">
             <div class="mb-3">
                 <label asp-for="CurrentYear" class="form-label">Current Year</label>
-                <input asp-for="CurrentYear" class="form-control" />
+                <input asp-for="CurrentYear" class="form-control" value="@Model.CurrentYear" />
                 <span asp-validation-for="CurrentYear" class="text-danger"></span>
             </div>
+
             <div class="mb-3">
                 <label asp-for="CurrentSemester" class="form-label">Current Semester</label>
-                <input asp-for="CurrentSemester" class="form-control" />
+                <select asp-for="CurrentSemester" class="form-control">
+                    <option value="1" selected="@(Model.CurrentSemester == 1)">1</option>
+                    <option value="2" selected="@(Model.CurrentSemester == 2)">2</option>
+                </select>
                 <span asp-validation-for="CurrentSemester" class="text-danger"></span>
             </div>
+
             <button type="submit" class="btn btn-primary">Update Settings</button>
         </form>
     </div>
@@ -45,51 +47,52 @@
         <form asp-action="UploadVideo" method="post" enctype="multipart/form-data">
             <!-- File Input for Video -->
             <div class="mb-3">
-                <label for="videoFile" class="form-label">Choose Video</label>
-                <input type="file" class="form-control" id="videoFile" name="videoFile" accept="video/*" />
+                <label asp-for="Video" class="form-label">Choose Video</label>
+                <input asp-for="Video" type="file" class="form-control" id="videoFile" name="Video" accept="video/*" />
+                <span asp-validation-for="Video" class="text-danger"></span>
             </div>
 
             <!-- Video Details Inputs -->
             <div class="mb-3">
-                <label asp-for="Input.Name" class="form-label">Name</label>
-                <input asp-for="Input.Name" class="form-control" />
-                <span asp-validation-for="Input.Name" class="text-danger"></span>
+                <label asp-for="Name" class="form-label">Name</label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
             </div>
             <div class="mb-3">
-                <label asp-for="Input.Description" class="form-label">Description</label>
-                <textarea asp-for="Input.Description" class="form-control"></textarea>
-                <span asp-validation-for="Input.Description" class="text-danger"></span>
+                <label asp-for="Description" class="form-label">Description</label>
+                <textarea asp-for="Description" class="form-control"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
             </div>
             <!-- Grade Selector using an Enum Select List -->
             <div class="form-floating mb-3">
-                <select asp-for="Input.Grade"
+                <select asp-for="Grade"
                         asp-items="Html.GetEnumSelectList<Grade>()"
                         class="form-control"
                         aria-required="true">
                     <option value="">Enter your Grade</option>
                 </select>
-                <label asp-for="Input.Grade">Grade</label>
-                <span asp-validation-for="Input.Grade" class="text-danger"></span>
+                <label asp-for="Grade">Grade</label>
+                <span asp-validation-for="Grade" class="text-danger"></span>
             </div>
             <div class="mb-3">
-                <label asp-for="Input.Unit" class="form-label">Unit</label>
-                <input asp-for="Input.Unit" class="form-control" />
-                <span asp-validation-for="Input.Unit" class="text-danger"></span>
+                <label asp-for="Unit" class="form-label">Unit</label>
+                <input asp-for="Unit" class="form-control" />
+                <span asp-validation-for="Unit" class="text-danger"></span>
             </div>
             <div class="mb-3">
-                <label asp-for="Input.Price" class="form-label">Price</label>
-                <input asp-for="Input.Price" class="form-control" type="number" />
-                <span asp-validation-for="Input.Price" class="text-danger"></span>
+                <label asp-for="Price" class="form-label">Price</label>
+                <input asp-for="Price" class="form-control" type="number" />
+                <span asp-validation-for="Price" class="text-danger"></span>
             </div>
             <div class="mb-3">
-                <label asp-for="Input.SheetPath" class="form-label">Sheet Path</label>
-                <input asp-for="Input.SheetPath" class="form-control" />
-                <span asp-validation-for="Input.SheetPath" class="text-danger"></span>
+                <label asp-for="SheetPath" class="form-label">Sheet Path</label>
+                <input asp-for="SheetPath" class="form-control" />
+                <span asp-validation-for="SheetPath" class="text-danger"></span>
             </div>
             <div class="mb-3">
-                <label asp-for="Input.QuizPath" class="form-label">Quiz Path</label>
-                <input asp-for="Input.QuizPath" class="form-control" />
-                <span asp-validation-for="Input.QuizPath" class="text-danger"></span>
+                <label asp-for="QuizPath" class="form-label">Quiz Path</label>
+                <input asp-for="QuizPath" class="form-control" />
+                <span asp-validation-for="QuizPath" class="text-danger"></span>
             </div>
             <button type="submit" class="btn btn-primary">Upload Video</button>
         </form>

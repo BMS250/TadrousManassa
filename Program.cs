@@ -1,4 +1,5 @@
 using Amazon.S3;
+using Amazon.Util.Internal.PlatformServices;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -41,6 +42,7 @@ namespace TadrousManassa
             builder.Services.AddScoped<IStudentRepository, StudentRepository>();
             builder.Services.AddScoped<ILectureRepository, LectureRepository>();
             builder.Services.AddScoped<ICodeRepository, CodeRepository>();
+            builder.Services.AddScoped<IAppSettingsRepository, AppSettingsRepository>();
             builder.Services.AddScoped<IStudentService, StudentService>();
             builder.Services.AddScoped<ILectureService, LectureService>();
             builder.Services.AddScoped<ICodeService, CodeService>();
