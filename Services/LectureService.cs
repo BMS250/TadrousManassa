@@ -32,6 +32,11 @@ namespace TadrousManassa.Services
             return lectureRepository.GetViewsCount(id);
         }
 
+        public Dictionary<string, int> GetNoWatchers()
+        {
+            return lectureRepository.GetNoWatchers();
+        }
+
         public OperationResult<int> IncrementViewsCount(string id)
         {
             return lectureRepository.IncrementViewsCount(id);

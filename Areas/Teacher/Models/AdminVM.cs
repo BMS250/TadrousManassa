@@ -17,5 +17,6 @@ namespace TadrousManassa.Areas.Teacher.Models
         public string? QuizPath { get; set; }
 
         public List<Lecture>? Lectures { get; set; }
+        public Dictionary<string, int> NoWatchers { get; set; }
     }
 }

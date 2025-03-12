@@ -6,6 +6,7 @@ using Amazon.S3.Model;
 using Amazon.S3.Transfer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors.Infrastructure;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Configuration;
@@ -26,15 +27,24 @@ namespace TadrousManassa.Areas.Teacher.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly IAppSettingsRepository _appSettingsRepo;
         private readonly ILectureService _lectureService;
+        private readonly IStudentService _studentService;
         private readonly ICodeService _codeService;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public HomeController(IAmazonS3 s3Client, IConfiguration configuration, ILogger<HomeController> logger, IAppSettingsRepository appSettingsRepo, ILectureService lectureService, ICodeService codeService)
+
+        public HomeController(IAmazonS3 s3Client, IConfiguration configuration, 
+                                ILogger<HomeController> logger, IAppSettingsRepository appSettingsRepo, 
+                                ILectureService lectureService, IStudentService studentService,
+                                ICodeService codeService, 
+                                UserManager<ApplicationUser> userManager)
         {
             _configuration = configuration;
             _logger = logger;
             _appSettingsRepo = appSettingsRepo;
             _lectureService = lectureService;
+            _studentService = studentService;
             _codeService = codeService;
+            _userManager = userManager;
             string accessKey = _configuration["AWS:AccessKey"];
             string secretKey = _configuration["AWS:SecretKey"];
             string region = _configuration["AWS:Region"];
@@ -56,11 +66,15 @@ namespace TadrousManassa.Areas.Teacher.Controllers
         public IActionResult Index()
         {
             var oldSettings = _appSettingsRepo.GetCurrentData();
+            var userId = _userManager.GetUserId(User);
+            var lectures = _lectureService.GetLectures();
+            var students = _studentService.GetStudents();
             AdminVM adminVM = new AdminVM()
             {
                 CurrentYear = oldSettings.CurrentYear,
                 CurrentSemester = oldSettings.CurrentSemester,
-                Lectures = _lectureService.GetLectures()
+                Lectures = lectures,
+                NoWatchers = _lectureService.GetNoWatchers()
             };
             return View(adminVM);
         }

@@ -114,6 +114,7 @@
                         <div class="card-body">
                             <h5 class="card-title">@lecture.Name</h5>
                             <p class="mt-2"><strong>Views:</strong> <span class="view-count" data-lecture-id="@lecture.Id">@lecture.ViewsCount</span></p>
+                            <p class="mt-2"><strong>Viewers:</strong> <span class="view-count" data-lecture-id="@lecture.Id">@Model.NoWatchers[lecture.Id]</span></p>
                         </div>
                     </div>
                 </div>
@@ -123,7 +124,7 @@
 </div>
 
 
-<script>
+@* <script>
     document.addEventListener("DOMContentLoaded", function () {
         var viewCountElements = document.querySelectorAll(".view-count");
 
@@ -142,4 +143,4 @@
             updateViewCount();
         });
     });
-</script>
+</script> *@

@@ -37,6 +37,17 @@ namespace TadrousManassa.Repositories
             return context.Lectures.FirstOrDefault(l => l.Id == id)?.ViewsCount ?? 0;
         }
 
+        public Dictionary<string, int> GetNoWatchers()
+        {
+            Dictionary<string, int> noWatcheres = [];
+            foreach (var studentLecture in context.StudentLectures)
+            {
+                noWatcheres[studentLecture.LectureId] = context.StudentLectures.Count(sl => sl.LectureId == studentLecture.LectureId
+                                                                                        && sl.IsWatched);
+            }
+            return noWatcheres;
+        }
+
         public OperationResult<int> IncrementViewsCount(string id)
         {
             var lecture = context.Lectures.FirstOrDefault(l => l.Id == id);

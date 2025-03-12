@@ -11,6 +11,8 @@ namespace TadrousManassa.Services
 
         public int GetViewsCount(string id);
 
+        public Dictionary<string, int> GetNoWatchers();
+
         public OperationResult<int> IncrementViewsCount(string id);
 
         public OperationResult<int> MarkAsWatched(string studentId, string lectureId);
