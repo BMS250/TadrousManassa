@@ -9,6 +9,12 @@ namespace TadrousManassa.Services
 
         public List<Lecture> GetCurrentLectures();
 
+        public int GetViewsCount(string id);
+
+        public OperationResult<int> IncrementViewsCount(string id);
+
+        public OperationResult<int> MarkAsWatched(string studentId, string lectureId);
+
         public OperationResult<Lecture> GetLecture(string id);
 
         public OperationResult<List<Lecture>> GetLecturesByGrade(int grade);
@@ -27,7 +33,7 @@ namespace TadrousManassa.Services
         
         //public OperationResult<LectureListViewModel> GetLecturesVMWithUnits(string studentId);
 
-        public OperationResult<bool> InsertLecture(Lecture lecture);
+        public OperationResult<Lecture> AddLecture(Lecture lecture);
 
         public Task<OperationResult<int>> UpdateLectureAsync(string id, Lecture lecture);
 

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TadrousManassa.Data;
 
@@ -11,9 +12,11 @@ using TadrousManassa.Data;
 namespace TadrousManassa.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250312010801_AddViewCounts")]
+    partial class AddViewCounts
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -260,13 +263,15 @@ namespace TadrousManassa.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("QuizPath")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<int>("Semester")
                         .HasColumnType("int");
 
                     b.Property<string>("SheetPath")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("Unit")
                         .HasMaxLength(255)
@@ -277,9 +282,10 @@ namespace TadrousManassa.Data.Migrations
 
                     b.Property<string>("VideoPath")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
-                    b.Property<int>("ViewsCount")
+                    b.Property<int>("ViewCounts")
                         .HasColumnType("int");
 
                     b.Property<int>("Year")

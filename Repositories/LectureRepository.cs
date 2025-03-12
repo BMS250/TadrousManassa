@@ -32,6 +32,56 @@ namespace TadrousManassa.Repositories
             return [.. context.Lectures.Where(l => l.Semester == currentSemester && l.UsedThisYear)];
         }
 
+        public int GetViewsCount(string id)
+        {
+            return context.Lectures.FirstOrDefault(l => l.Id == id)?.ViewsCount ?? 0;
+        }
+
+        public OperationResult<int> IncrementViewsCount(string id)
+        {
+            var lecture = context.Lectures.FirstOrDefault(l => l.Id == id);
+            if (lecture == null)
+                return OperationResult<int>.Fail("Lecture not found.");
+            lecture.ViewsCount++;
+            try
+            {
+                context.SaveChanges();
+                return OperationResult<int>.Ok(lecture.ViewsCount, "Views count incremented successfully.");
+            }
+            catch (Exception)
+            {
+                return OperationResult<int>.Fail("Views count didn't increment.");
+            }
+            
+        }
+
+        public OperationResult<int> MarkAsWatched(string studentId, string lectureId)
+        {
+            if (string.IsNullOrWhiteSpace(studentId))
+                return OperationResult<int>.Fail("Student ID cannot be null or empty.");
+            if (string.IsNullOrWhiteSpace(lectureId))
+                return OperationResult<int>.Fail("Lecture ID cannot be null or empty.");
+            var student = context.Students.FirstOrDefault(s => s.Id == studentId);
+            if (student == null)
+                return OperationResult<int>.Fail("Student not found.");
+            var lecture = context.Lectures.FirstOrDefault(l => l.Id == lectureId);
+            if (lecture == null)
+                return OperationResult<int>.Fail("Lecture not found.");
+            var studentLecture = context.StudentLectures.FirstOrDefault(sl => sl.StudentId == studentId && sl.LectureId == lectureId);
+            if (studentLecture == null)
+                return OperationResult<int>.Fail("Student lecture not found.");
+            studentLecture.IsWatched = true;
+            try
+            {
+                context.SaveChanges();
+                return OperationResult<int>.Ok(0, "Lecture marked as watched successfully.");
+            }
+            catch (Exception)
+            {
+                return OperationResult<int>.Fail("Lecture didn't mark as watched.");
+            }
+        }
+
         public OperationResult<Lecture> GetLecture(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
@@ -117,27 +167,21 @@ namespace TadrousManassa.Repositories
 
         public OperationResult<List<Lecture>> GetLecturesByUnit(string unit)
         {
-            //if (string.IsNullOrWhiteSpace(unit))
-            //    return OperationResult<List<Lecture>>.Fail("Unit cannot be null or empty.");
-            //var units = GetUnits();
-            //if (units.Success && !units.Data.Contains(unit))
-            //    return OperationResult<List<Lecture>>.Fail($"There is not any unit called {unit}.");
-
             var lectures = context.Lectures.Where(l => l.Unit == unit).ToList();
             if (lectures == null || lectures.Count == 0)
                 return OperationResult<List<Lecture>>.Fail($"No lectures found for unit '{unit}'.");
             return OperationResult<List<Lecture>>.Ok(lectures, $"Lectures for unit '{unit}' retrieved successfully.");
         }
 
-        public OperationResult<bool> InsertLecture(Lecture lecture)
+        public OperationResult<Lecture> AddLecture(Lecture lecture)
         {
             if (lecture == null)
-                return OperationResult<bool>.Fail("Lecture cannot be null.");
+                return OperationResult<Lecture>.Fail("Lecture cannot be null.");
 
             context.Lectures.Add(lecture);
             context.SaveChanges();
 
-            return OperationResult<bool>.Ok(true, "Lecture inserted successfully.");
+            return OperationResult<Lecture>.Ok(lecture, "Lecture inserted successfully.");
         }
 
         public async Task<OperationResult<int>> UpdateLectureAsync(string id, Lecture lecture)

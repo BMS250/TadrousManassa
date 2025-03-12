@@ -5,12 +5,15 @@ using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Transfer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Configuration;
+using System.Text;
 using TadrousManassa.Areas.Teacher.Models;
 using TadrousManassa.Models;
 using TadrousManassa.Repositories;
+using TadrousManassa.Services;
 
 namespace TadrousManassa.Areas.Teacher.Controllers
 {
@@ -22,12 +25,16 @@ namespace TadrousManassa.Areas.Teacher.Controllers
         private readonly IConfiguration _configuration;
         private readonly ILogger<HomeController> _logger;
         private readonly IAppSettingsRepository _appSettingsRepo;
+        private readonly ILectureService _lectureService;
+        private readonly ICodeService _codeService;
 
-        public HomeController(IAmazonS3 s3Client, IConfiguration configuration, ILogger<HomeController> logger, IAppSettingsRepository appSettingsRepo)
+        public HomeController(IAmazonS3 s3Client, IConfiguration configuration, ILogger<HomeController> logger, IAppSettingsRepository appSettingsRepo, ILectureService lectureService, ICodeService codeService)
         {
             _configuration = configuration;
             _logger = logger;
             _appSettingsRepo = appSettingsRepo;
+            _lectureService = lectureService;
+            _codeService = codeService;
             string accessKey = _configuration["AWS:AccessKey"];
             string secretKey = _configuration["AWS:SecretKey"];
             string region = _configuration["AWS:Region"];
@@ -42,6 +49,8 @@ namespace TadrousManassa.Areas.Teacher.Controllers
             {
                 _s3Client = new AmazonS3Client(regionEndpoint); // Use IAM Role if credentials are not provided
             }
+
+            _codeService = codeService;
         }
 
         public IActionResult Index()
@@ -50,17 +59,11 @@ namespace TadrousManassa.Areas.Teacher.Controllers
             AdminVM adminVM = new AdminVM()
             {
                 CurrentYear = oldSettings.CurrentYear,
-                CurrentSemester = oldSettings.CurrentSemester
+                CurrentSemester = oldSettings.CurrentSemester,
+                Lectures = _lectureService.GetLectures()
             };
             return View(adminVM);
         }
-
-        //[HttpGet]
-        //public IActionResult UpdateSettings()
-        //{
-        //    return View();
-        //}
-
 
         [HttpPost]
         public IActionResult UpdateSettings(AdminVM adminVM)
@@ -74,10 +77,10 @@ namespace TadrousManassa.Areas.Teacher.Controllers
             var result = _appSettingsRepo.UpdateCurrentData(adminVM.CurrentYear ?? oldSettings.CurrentYear, adminVM.CurrentSemester ?? oldSettings.CurrentSemester);
             if (!result.Success)
             {
-                TempData["ErrorMessage"] = result.Message;
+                TempData["error"] = result.Message;
                 return View(adminVM); // Return the view with an error message
             }
-            TempData["SuccessMessage"] = "Settings updated successfully.";
+            TempData["success"] = "Settings updated successfully.";
             return RedirectToAction("Index"); // Redirect to settings overview page
         }
 
@@ -86,7 +89,7 @@ namespace TadrousManassa.Areas.Teacher.Controllers
         {
             if (adminVM.Video == null || adminVM.Video.Length == 0)
             {
-                TempData["ErrorMessage"] = "No video file provided.";
+                TempData["error"] = "No video file provided.";
                 return RedirectToAction("Index");
             }
 
@@ -94,9 +97,9 @@ namespace TadrousManassa.Areas.Teacher.Controllers
             string bucketName = _configuration["AWS:BucketName"];
 
             ApplicationSettings appSettingsData = _appSettingsRepo.GetCurrentData();
-
+            string videoName = Path.GetFileName(adminVM.Video.FileName);
             // Create a unique object key (was) using a GUID and the original file name. /*{Guid.NewGuid()}_*/
-            string objectKey = $"{adminVM.Grade}/{appSettingsData.CurrentYear}/{appSettingsData.CurrentSemester}/{Path.GetFileName(adminVM.Video.FileName)}";
+            string videoPath = $"{adminVM.Grade ?? 1}/{appSettingsData.CurrentYear}/{appSettingsData.CurrentSemester}/{videoName}";
 
             try
             {
@@ -111,33 +114,94 @@ namespace TadrousManassa.Areas.Teacher.Controllers
 
                     var transferUtility = new TransferUtility(_s3Client);
                     // Asynchronously upload the video stream to S3.
-                    await transferUtility.UploadAsync(stream, bucketName, objectKey);
+                    await transferUtility.UploadAsync(stream, bucketName, videoPath);
                 }
 
-                //// Optionally, generate a pre-signed URL for immediate access.
-                //var preSignedRequest = new GetPreSignedUrlRequest
-                //{
-                //    BucketName = bucketName,
-                //    Key = objectKey,
-                //    Expires = DateTime.UtcNow.AddHours(1), // URL valid for 1 hour
-                //    Verb = HttpVerb.GET
-                //};
-                //string videoUrl = _s3Client.GetPreSignedURL(preSignedRequest);
-
-                TempData["SuccessMessage"] = "Video uploaded successfully!";
+                TempData["success"] = "Video uploaded successfully!";
                 // You might choose to save the object key or URL in your database.
+                Lecture lecture = new Lecture()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Name = adminVM.Name ?? videoName,
+                    Description = adminVM.Description,
+                    Grade = adminVM.Grade ?? 1,
+                    Unit = adminVM.Unit,
+                    Price = adminVM.Price ?? 0,
+                    VideoPath = videoPath,
+                    SheetPath = adminVM.SheetPath,
+                    QuizPath = adminVM.QuizPath,
+                    Semester = appSettingsData.CurrentSemester,
+                    Year = appSettingsData.CurrentYear,
+                    UsedThisYear = true
+                };
+                var result = _lectureService.AddLecture(lecture);
+                if (!result.Success)
+                {
+                    TempData["error"] = result.Message;
+                }
+                else
+                {
+                    TempData["success"] = "Video uploaded successfully!";
+                }
+                // Create Codes for the lecture
+                var lectureCodes = _codeService.GenerateCodes(100, result.Data.Id);
+                if (lectureCodes == null)
+                {
+                    TempData["error"] = "Error while generating lecture codes";
+                }
+                else
+                {
+                    TempData["success"] = "Codes generated successfully!";
+                    return DownloadCodes(lecture.Name, lectureCodes);
+                }
             }
             catch (AmazonServiceException ex)
             {
                 _logger.LogError(ex, "AWS Service Error: {Message}", ex.Message);
-                TempData["ErrorMessage"] = "Error uploading video. Check AWS permissions.";
+                TempData["error"] = "Error uploading video. Check AWS permissions.";
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Unexpected Error: {Message}", ex.Message);
-                TempData["ErrorMessage"] = "An unexpected error occurred.";
+                TempData["error"] = "An unexpected error occurred.";
             }
             return RedirectToAction("Index");
+        }
+
+        public IActionResult DownloadCodes(string lectureName, HashSet<string> lectureCodes)
+        {
+            int lastDotIndex = lectureName.LastIndexOf('.');
+            if (lastDotIndex > 0) // Ensure there's at least one character before the dot
+            {
+                lectureName = lectureName[..lastDotIndex];
+            }
+
+            var csvBuilder = new StringBuilder();
+            
+            foreach (var item in lectureCodes)
+            {
+                csvBuilder.AppendLine(item);
+            }
+            var preamble = Encoding.UTF8.GetPreamble();
+            var csvBytes = Encoding.UTF8.GetBytes(csvBuilder.ToString());
+            var combinedBytes = preamble.Concat(csvBytes).ToArray();
+            var csvStream = new MemoryStream(combinedBytes);
+
+            return File(csvStream, "text/plain; charset=utf-8", $"{lectureName} Codes.txt");
+        }
+
+        [HttpGet("play-count/{lectureId}")]
+        public IActionResult GetPlayCount(string lectureId)
+        {
+            try
+            {
+                int playCount = _lectureService.GetViewsCount(lectureId);
+                return Json(new { count = playCount });
+            }
+            catch (Exception)
+            {
+                return NotFound(new { message = "Could not retrieve play count" });
+            }
         }
     }
 }

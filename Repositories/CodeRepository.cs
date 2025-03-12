@@ -15,23 +15,51 @@ namespace TadrousManassa.Repositories
         {
             _context = context;
         }
-        public void GenerateCodes(int count, string lectureId)
+
+        public HashSet<string> GenerateCodes(int count, string lectureId)
         {
+            // Fetch existing codes from the database to check against
+            var existingCodes = _context.StudentLectures
+                                        .Select(sl => sl.Code)
+                                        .ToHashSet();
+
             List<StudentLecture> studentLectures = new List<StudentLecture>();
+            HashSet<string> generatedCodes = new HashSet<string>();
 
             for (int i = 0; i < count; i++)
             {
+                string code;
+                do
+                {
+                    code = GenerateAlphanumericCode(8);
+                } while (existingCodes.Contains(code) || generatedCodes.Contains(code));
+
+                // Track the newly generated code to avoid duplicates in this batch
+                generatedCodes.Add(code);
+                existingCodes.Add(code); // Optional: prevents duplicates if the loop runs again
+
                 studentLectures.Add(new StudentLecture
                 {
                     Id = Guid.NewGuid().ToString(),
-                    Code = GenerateAlphanumericCode(8),
+                    Code = code,
                     StudentId = null,
                     LectureId = lectureId
                 });
             }
 
-            _context.StudentLectures.AddRange(studentLectures);
-            _context.SaveChanges();
+            try
+            {
+                _context.StudentLectures.AddRange(studentLectures);
+                _context.SaveChanges();
+            }
+            catch (DbUpdateException ex)
+            {
+                // Handle unique constraint violation (e.g., log the error)
+                // Consider retrying or partial saves if applicable
+                return null;
+            }
+
+            return generatedCodes;
         }
 
         static string GenerateAlphanumericCode(int length)

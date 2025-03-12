@@ -15,5 +15,7 @@ namespace TadrousManassa.Areas.Teacher.Models
         public int? Price { get; set; }
         public string? SheetPath { get; set; }
         public string? QuizPath { get; set; }
+
+        public List<Lecture>? Lectures { get; set; }
     }
 }

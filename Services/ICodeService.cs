@@ -1,7 +1,9 @@
-﻿namespace TadrousManassa.Services
+﻿using TadrousManassa.Models;
+
+namespace TadrousManassa.Services
 {
     public interface ICodeService
     {
-        public void GenerateCodes(int count, string lectureId);
+        public HashSet<string> GenerateCodes(int count, string lectureId);
     }
 }

@@ -26,6 +26,7 @@
     <Folder Include="Areas\Assistant\Models\" />
     <Folder Include="Areas\Student\Data\" />
     <Folder Include="Areas\Teacher\Data\" />
+    <Folder Include="Controllers\" />
   </ItemGroup>
 
 </Project>

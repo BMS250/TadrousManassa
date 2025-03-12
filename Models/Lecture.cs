@@ -12,9 +12,8 @@ namespace TadrousManassa.Models
         [MaxLength(255)]
         public string Name { get; set; }
 
-        [Required]
         [MaxLength(255)]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         [Required]
         public int Grade { get; set; }
@@ -28,21 +27,20 @@ namespace TadrousManassa.Models
         [Required]
         public bool UsedThisYear { get; set; } = true;
 
-        [Required, MaxLength(255)]
-        public string Unit { get; set; }
+        [MaxLength(255)]
+        public string? Unit { get; set; }
 
         [Required]
         public int Price { get; set; }
 
         [Required]
-        [MaxLength(255)]
         public string VideoPath { get; set; }
 
-        [MaxLength(255)]
-        public string SheetPath { get; set; }
+        public string? SheetPath { get; set; }
 
-        [MaxLength(255)]
-        public string QuizPath { get; set; }
+        public string? QuizPath { get; set; }
+
+        public int ViewsCount { get; set; } = 0;
 
         public virtual ICollection<StudentLecture> StudentLectures { get; set; }
     }

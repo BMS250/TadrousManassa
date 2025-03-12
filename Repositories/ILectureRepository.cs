@@ -8,6 +8,12 @@ namespace TadrousManassa.Repositories
 
         public List<Lecture> GetCurrentLectures();
 
+        public int GetViewsCount(string id);
+
+        public OperationResult<int> IncrementViewsCount(string id);
+
+        public OperationResult<int> MarkAsWatched(string studentId, string lectureId);
+
         public OperationResult<List<Lecture>> GetLecturesByGrade(int grade);
 
         public OperationResult<List<Lecture>> GetCurrentLecturesByGrade(int grade);
@@ -24,7 +30,7 @@ namespace TadrousManassa.Repositories
 
         public OperationResult<List<string>> GetCurrentUnits(int grade);
 
-        public OperationResult<bool> InsertLecture(Lecture lecture);
+        public OperationResult<Lecture> AddLecture(Lecture lecture);
 
         public Task<OperationResult<int>> UpdateLectureAsync(string id, Lecture lecture);
 
