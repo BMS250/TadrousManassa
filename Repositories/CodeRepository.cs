@@ -16,6 +16,22 @@ namespace TadrousManassa.Repositories
             _context = context;
         }
 
+        public OperationResult<string> GetCode(string lectureId)
+        {
+            var code = _context.StudentLectures
+                           .Where(sl => sl.LectureId == lectureId && string.IsNullOrEmpty(sl.StudentId))
+                           .Select(sl => sl.Code)
+                           .FirstOrDefault();
+            if (code == null)
+            {
+                return OperationResult<string>.Fail("Code is failed to be got.");
+            }
+            else
+            {
+                return OperationResult<string>.Ok(code, "Code is got successfully.");
+            }
+        }
+
         public HashSet<string> GenerateCodes(int count, string lectureId)
         {
             // Fetch existing codes from the database to check against

@@ -9,11 +9,13 @@ namespace TadrousManassa.Services
     {
         private readonly IStudentRepository studentRepository;
         private readonly ILogger<StudentService> logger;
+        private readonly IStudentLectureRepository studentLectureRepository;
 
-        public StudentService(IStudentRepository studentRepository, ILogger<StudentService> logger)
+        public StudentService(IStudentRepository studentRepository, ILogger<StudentService> logger, IStudentLectureRepository studentLectureRepository)
         {
             this.studentRepository = studentRepository;
             this.logger = logger;
+            this.studentLectureRepository = studentLectureRepository;
         }
 
         public OperationResult<List<Student>> GetStudents()
@@ -44,7 +46,7 @@ namespace TadrousManassa.Services
             if (string.IsNullOrEmpty(lectureId))
                 return OperationResult<List<Student>>.Fail("Lecture id cannot be null or empty");
 
-            var students = studentRepository.GetStudentsByLecture(lectureId);
+            var students = studentLectureRepository.GetStudentsByLecture(lectureId);
             return OperationResult<List<Student>>.Ok(students);
         }
 
@@ -61,6 +63,21 @@ namespace TadrousManassa.Services
             catch (Exception ex)
             {
                 logger.LogError(ex, $"Error retrieving student with ID {id}");
+                return OperationResult<Student>.Fail("Failed to retrieve student.");
+            }
+        }
+        public OperationResult<Student> GetStudentByEmail(string email)
+        {
+            try
+            {
+                var student = studentRepository.GetStudentByEmail(email);
+                if (student == null)
+                    return OperationResult<Student>.Fail("Student not found.");
+                return OperationResult<Student>.Ok(student);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Error retrieving student with email {email}");
                 return OperationResult<Student>.Fail("Failed to retrieve student.");
             }
         }
@@ -94,6 +111,20 @@ namespace TadrousManassa.Services
             {
                 logger.LogError(ex, $"Error updating student with ID {id}");
                 return OperationResult<bool>.Fail("Failed to update student.");
+            }
+        }
+
+        public async Task<OperationResult<bool>> ResetDeviceId(string studentEmail)
+        {
+            try
+            {
+                await studentRepository.ResetDeviceId(studentEmail);
+                return OperationResult<bool>.Ok(true, "Device ID reset successfully.");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Error resetting device ID for student with Email {studentEmail}");
+                return OperationResult<bool>.Fail("Failed to reset device ID.");
             }
         }
 

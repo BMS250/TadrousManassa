@@ -8,15 +8,17 @@ namespace TadrousManassa.Repositories
 
         public Student? GetStudent(string id);
 
+        public Student? GetStudentByEmail(string email);
+
         public List<Student> GetStudentsByGrade(int grade);
 
-        public List<Student> GetStudentsByLecture(string lectureId);
-
-        public int GetStudentGrade(string studentId);
+        public int GetStudentGrade(string id);
 
         public void InsertStudent(Student student);
 
         public Task<int> UpdateStudentAsync(string id, Student student, string? newPassword = null);
+        
+        public Task ResetDeviceId(string studentEmail);
 
         public void DeleteStudent(string id);
     }

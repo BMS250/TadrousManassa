@@ -19,7 +19,8 @@ using TadrousManassa.Services;
 namespace TadrousManassa.Areas.Teacher.Controllers
 {
     [Area("Teacher")]
-    [Authorize]
+    [Route("[area]/[controller]/[action]")]
+    [Authorize(Roles = "Teacher")]
     public class HomeController : Controller
     {
         private readonly IAmazonS3 _s3Client;
@@ -28,14 +29,15 @@ namespace TadrousManassa.Areas.Teacher.Controllers
         private readonly IAppSettingsRepository _appSettingsRepo;
         private readonly ILectureService _lectureService;
         private readonly IStudentService _studentService;
+        private readonly IStudentLectureService _studentLectureService;
         private readonly ICodeService _codeService;
         private readonly UserManager<ApplicationUser> _userManager;
-
+        private readonly string bucketName;
 
         public HomeController(IAmazonS3 s3Client, IConfiguration configuration, 
                                 ILogger<HomeController> logger, IAppSettingsRepository appSettingsRepo, 
                                 ILectureService lectureService, IStudentService studentService,
-                                ICodeService codeService, 
+                                IStudentLectureService studentLectureService, ICodeService codeService,
                                 UserManager<ApplicationUser> userManager)
         {
             _configuration = configuration;
@@ -43,38 +45,39 @@ namespace TadrousManassa.Areas.Teacher.Controllers
             _appSettingsRepo = appSettingsRepo;
             _lectureService = lectureService;
             _studentService = studentService;
+            _studentLectureService = studentLectureService;
             _codeService = codeService;
             _userManager = userManager;
-            string accessKey = _configuration["AWS:AccessKey"];
-            string secretKey = _configuration["AWS:SecretKey"];
-            string region = _configuration["AWS:Region"];
+            //string accessKey = _configuration["AWS:AccessKey"];
+            //string secretKey = _configuration["AWS:SecretKey"];
+            //string region = _configuration["AWS:Region"];
+            bucketName = _configuration["AWS:BucketName"];
 
-            var regionEndpoint = RegionEndpoint.GetBySystemName(region); // Convert string to RegionEndpoint
+            //var regionEndpoint = RegionEndpoint.GetBySystemName(region); // Convert string to RegionEndpoint
 
-            if (!string.IsNullOrEmpty(accessKey) && !string.IsNullOrEmpty(secretKey))
-            {
-                _s3Client = new AmazonS3Client(new BasicAWSCredentials(accessKey, secretKey), regionEndpoint);
-            }
-            else
-            {
-                _s3Client = new AmazonS3Client(regionEndpoint); // Use IAM Role if credentials are not provided
-            }
-
+            //if (!string.IsNullOrEmpty(accessKey) && !string.IsNullOrEmpty(secretKey))
+            //{
+            //    _s3Client = new AmazonS3Client(new BasicAWSCredentials(accessKey, secretKey), regionEndpoint);
+            //}
+            //else
+            //{
+            //    _s3Client = new AmazonS3Client(regionEndpoint); // Use IAM Role if credentials are not provided
+            //}
+            _s3Client = s3Client;
             _codeService = codeService;
         }
 
         public IActionResult Index()
         {
             var oldSettings = _appSettingsRepo.GetCurrentData();
-            var userId = _userManager.GetUserId(User);
             var lectures = _lectureService.GetLectures();
-            var students = _studentService.GetStudents();
             AdminVM adminVM = new AdminVM()
             {
                 CurrentYear = oldSettings.CurrentYear,
                 CurrentSemester = oldSettings.CurrentSemester,
                 Lectures = lectures,
-                NoWatchers = _lectureService.GetNoWatchers()
+                NoWatchers = _studentLectureService.GetNoWatchers(),
+                ViewsCountPerStudents = _studentLectureService.GetViewsCountPerStudents()
             };
             return View(adminVM);
         }
@@ -99,6 +102,7 @@ namespace TadrousManassa.Areas.Teacher.Controllers
         }
 
         [HttpPost]
+        [DisableRequestSizeLimit]
         public async Task<IActionResult> UploadVideo(AdminVM adminVM)
         {
             if (adminVM.Video == null || adminVM.Video.Length == 0)
@@ -108,7 +112,7 @@ namespace TadrousManassa.Areas.Teacher.Controllers
             }
 
             // Load bucket name from configuration (e.g., appsettings.json under "AWS:BucketName")
-            string bucketName = _configuration["AWS:BucketName"];
+            
 
             ApplicationSettings appSettingsData = _appSettingsRepo.GetCurrentData();
             string videoName = Path.GetFileName(adminVM.Video.FileName);
@@ -216,6 +220,57 @@ namespace TadrousManassa.Areas.Teacher.Controllers
             {
                 return NotFound(new { message = "Could not retrieve play count" });
             }
+        }
+
+        [HttpPost]
+        public IActionResult GetCode([FromQuery] string lectureId)
+        {
+            if (string.IsNullOrEmpty(lectureId))
+            {
+                return BadRequest("Lecture ID is required");
+            }
+
+            var result = _codeService.GetCode(lectureId);
+            return result.Success
+                ? Ok(new { code = result.Data })
+                : BadRequest(result.Message);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetDeviceId(string userEmail)
+        {
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                TempData["Error"] = "Email is required.";
+                return RedirectToAction("Index");
+            }
+
+            try
+            {
+                // Find the user by email
+                //var user = await _userManager.FindByEmailAsync(userEmail);
+
+                //if (user == null)
+                //{
+                //    TempData["Error"] = "User not found.";
+                //    return RedirectToAction("Index");
+                //}
+
+                var result = await _studentService.ResetDeviceId(userEmail);
+                if (result.Success)
+                {
+                    TempData["Error"] = "Failed to reset device ID.";
+                    return RedirectToAction("Index");
+                }
+
+                TempData["Success"] = $"Device ID for user {userEmail} has been reset successfully.";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"An error occurred: {ex.Message}";
+            }
+
+            return RedirectToAction("Index");
         }
     }
 }

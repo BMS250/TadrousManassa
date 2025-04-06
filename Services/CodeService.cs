@@ -16,6 +16,11 @@ namespace TadrousManassa.Services
         {
             _codeRepository = codeRepository;
         }
+
+        public OperationResult<string> GetCode(string lectureId)
+        {
+            return _codeRepository.GetCode(lectureId);
+        }
         public HashSet<string> GenerateCodes(int count, string lectureId)
         {
             return _codeRepository.GenerateCodes(count, lectureId);

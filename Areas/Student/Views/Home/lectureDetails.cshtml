@@ -43,11 +43,10 @@
             Your browser does not support the video tag.
         </video> *@
         <video id="lectureVideo" data-lecture-id="@Model.Id" controls controlsList="nodownload" oncontextmenu="return false;" playsinline preload="metadata">
-            <source src="@Model.VideoPath" type="video/mp4">
+            <source src="@TempData["VideoPath"]" type="video/mp4">
             Your browser does not support the video tag.
         </video>
     </div>
-    <p><strong>Views:</strong> <span id="viewCount">@Model.ViewsCount</span></p>
 
     <div class="d-flex justify-content-around">
         @if (!string.IsNullOrEmpty(Model.SheetPath))

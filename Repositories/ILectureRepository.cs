@@ -10,21 +10,11 @@ namespace TadrousManassa.Repositories
 
         public int GetViewsCount(string id);
 
-        public Dictionary<string, int> GetNoWatchers();
-
-        public OperationResult<int> IncrementViewsCount(string id);
-
-        public OperationResult<int> MarkAsWatched(string studentId, string lectureId);
+        public OperationResult<Lecture> GetLecture(string id);
 
         public OperationResult<List<Lecture>> GetLecturesByGrade(int grade);
 
         public OperationResult<List<Lecture>> GetCurrentLecturesByGrade(int grade);
-
-        public OperationResult<Lecture> GetLecture(string id);
-
-        public OperationResult<List<Lecture>> GetLecturesByStudent(string studentId);
-
-        public OperationResult<List<Lecture>> GetCurrentLecturesByStudent(string studentId);
 
         public OperationResult<List<Lecture>> GetLecturesByUnit(string unit);
 
@@ -37,9 +27,5 @@ namespace TadrousManassa.Repositories
         public Task<OperationResult<int>> UpdateLectureAsync(string id, Lecture lecture);
 
         public Task<OperationResult<bool>> DeleteLectureAsync(string id);
-
-        public OperationResult<bool> IsLecturePurchased(string studentId, string lectureId);
-
-        public OperationResult<bool> BuyCode(string studentId, string code, string lectureId);
     }
 }

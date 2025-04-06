@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using System;
 using TadrousManassa.Data;
@@ -24,9 +25,14 @@ namespace TadrousManassa.Repositories
             return context.Students.ToList();
         }
 
-        public Student GetStudent(string id)
+        public Student? GetStudent(string id)
         {
             return context.Students.FirstOrDefault(s => s.Id == id);
+        }
+
+        public Student? GetStudentByEmail(string email)
+        {
+            return context.Students.FirstOrDefault(s => s.ApplicationUser.Email == email);
         }
 
         public List<Student> GetStudentsByGrade(int grade)
@@ -34,14 +40,9 @@ namespace TadrousManassa.Repositories
             return context.Students.Where(s => s.Grade == grade).ToList();
         }
 
-        public List<Student> GetStudentsByLecture(string lectureId)
+        public int GetStudentGrade(string id)
         {
-            return context.StudentLectures.Where(sl => sl.LectureId == lectureId).Select(sl => sl.Student).ToList();
-        }
-
-        public int GetStudentGrade(string studentId)
-        {
-            return context.Students.FirstOrDefault(s => s.Id == studentId).Grade;
+            return context.Students.FirstOrDefault(s => s.Id == id).Grade;
         }
 
         public void InsertStudent(Student student)
@@ -87,6 +88,17 @@ namespace TadrousManassa.Repositories
 
             await context.SaveChangesAsync();
             return 0;
+        }
+
+        public async Task ResetDeviceId(string studentEmail)
+        {
+            if (string.IsNullOrEmpty(studentEmail))
+                throw new ArgumentException("Student email cannot be null or empty", nameof(studentEmail));
+
+            Student? student = GetStudentByEmail(studentEmail) ?? throw new ArgumentException("Student cannot be null");
+            student.DeviceId = "000";
+            context.Entry(student).State = EntityState.Modified;
+            await context.SaveChangesAsync();
         }
 
         public void DeleteStudent(string id)

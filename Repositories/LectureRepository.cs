@@ -37,62 +37,6 @@ namespace TadrousManassa.Repositories
             return context.Lectures.FirstOrDefault(l => l.Id == id)?.ViewsCount ?? 0;
         }
 
-        public Dictionary<string, int> GetNoWatchers()
-        {
-            Dictionary<string, int> noWatcheres = [];
-            foreach (var studentLecture in context.StudentLectures)
-            {
-                noWatcheres[studentLecture.LectureId] = context.StudentLectures.Count(sl => sl.LectureId == studentLecture.LectureId
-                                                                                        && sl.IsWatched);
-            }
-            return noWatcheres;
-        }
-
-        public OperationResult<int> IncrementViewsCount(string id)
-        {
-            var lecture = context.Lectures.FirstOrDefault(l => l.Id == id);
-            if (lecture == null)
-                return OperationResult<int>.Fail("Lecture not found.");
-            lecture.ViewsCount++;
-            try
-            {
-                context.SaveChanges();
-                return OperationResult<int>.Ok(lecture.ViewsCount, "Views count incremented successfully.");
-            }
-            catch (Exception)
-            {
-                return OperationResult<int>.Fail("Views count didn't increment.");
-            }
-            
-        }
-
-        public OperationResult<int> MarkAsWatched(string studentId, string lectureId)
-        {
-            if (string.IsNullOrWhiteSpace(studentId))
-                return OperationResult<int>.Fail("Student ID cannot be null or empty.");
-            if (string.IsNullOrWhiteSpace(lectureId))
-                return OperationResult<int>.Fail("Lecture ID cannot be null or empty.");
-            var student = context.Students.FirstOrDefault(s => s.Id == studentId);
-            if (student == null)
-                return OperationResult<int>.Fail("Student not found.");
-            var lecture = context.Lectures.FirstOrDefault(l => l.Id == lectureId);
-            if (lecture == null)
-                return OperationResult<int>.Fail("Lecture not found.");
-            var studentLecture = context.StudentLectures.FirstOrDefault(sl => sl.StudentId == studentId && sl.LectureId == lectureId);
-            if (studentLecture == null)
-                return OperationResult<int>.Fail("Student lecture not found.");
-            studentLecture.IsWatched = true;
-            try
-            {
-                context.SaveChanges();
-                return OperationResult<int>.Ok(0, "Lecture marked as watched successfully.");
-            }
-            catch (Exception)
-            {
-                return OperationResult<int>.Fail("Lecture didn't mark as watched.");
-            }
-        }
-
         public OperationResult<Lecture> GetLecture(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
@@ -127,37 +71,6 @@ namespace TadrousManassa.Repositories
             if (lectures == null || lectures.Count == 0)
                 return OperationResult<List<Lecture>>.Fail($"No current lectures found for grade {grade}.");
             return OperationResult<List<Lecture>>.Ok(lectures, "Lectures retrieved successfully.");
-        }
-
-        public OperationResult<List<Lecture>> GetLecturesByStudent(string studentId)
-        {
-            if (string.IsNullOrWhiteSpace(studentId))
-                return OperationResult<List<Lecture>>.Fail("Student ID cannot be null or empty.");
-
-            var lectures = context.StudentLectures
-                .Where(sl => sl.StudentId == studentId)
-                .Select(sl => sl.Lecture)
-                .ToList();
-
-            return OperationResult<List<Lecture>>.Ok(lectures, "Lectures retrieved successfully for student.");
-        }
-
-        public OperationResult<List<Lecture>> GetCurrentLecturesByStudent(string studentId)
-        {
-            if (string.IsNullOrWhiteSpace(studentId))
-                return OperationResult<List<Lecture>>.Fail("Student ID cannot be null or empty.");
-
-            var student = context.Students.FirstOrDefault(s => s.Id == studentId);
-            if (student == null)
-                return OperationResult<List<Lecture>>.Fail("Student not found.");
-
-            var lectures = context.StudentLectures
-                .Where(sl => sl.StudentId == studentId)
-                .Select(sl => sl.Lecture)
-                .Where(l => l.Grade == student.Grade && l.Semester == currentSemester && l.UsedThisYear)
-                .ToList();
-
-            return OperationResult<List<Lecture>>.Ok(lectures, "Current lectures retrieved for student.");
         }
 
         public OperationResult<List<string>> GetUnits()
@@ -237,41 +150,6 @@ namespace TadrousManassa.Repositories
             catch (Exception ex)
             {
                 return OperationResult<bool>.Fail($"Error deleting lecture: {ex.Message}");
-            }
-        }
-
-        public OperationResult<bool> IsLecturePurchased(string studentId, string lectureId)
-        {
-            if (string.IsNullOrWhiteSpace(studentId))
-                return OperationResult<bool>.Fail("Student ID cannot be null or empty.");
-            if (string.IsNullOrWhiteSpace(lectureId))
-                return OperationResult<bool>.Fail("Lecture ID cannot be null or empty.");
-
-            bool isPurchased = context.StudentLectures.Any(sl => sl.StudentId == studentId && sl.LectureId == lectureId);
-            if (isPurchased)
-                return OperationResult<bool>.Ok(true, "Lecture is purchased.");
-            return OperationResult<bool>.Ok(false, "Lecture is not purchased.");
-        }
-
-        public OperationResult<bool> BuyCode(string studentId, string code, string lectureId)
-        {
-            if (string.IsNullOrWhiteSpace(code))
-                return OperationResult<bool>.Fail("Code cannot be null or empty.");
-            if (string.IsNullOrWhiteSpace(lectureId))
-                return OperationResult<bool>.Fail("Lecture ID cannot be null or empty.");
-
-                StudentLecture? row = context.StudentLectures.FirstOrDefault(sl => sl.Code == code && sl.LectureId == lectureId && (sl.StudentId == "" || sl.StudentId == null));
-                if (row == null)
-                    return OperationResult<bool>.Fail("Code is not valid.");
-            try
-            {
-                row.StudentId = studentId;
-                context.SaveChanges();
-                return OperationResult<bool>.Ok(true, "Code is valid.");
-            }
-            catch
-            {
-                return OperationResult<bool>.Fail("An Error happened while buying the lecture, please try again.");
             }
         }
     }

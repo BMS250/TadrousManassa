@@ -27,23 +27,56 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a asp-area="" asp-controller="Home" asp-action="Index">
-                    <img class="logo" src="~/images/Logo.jpg" alt="">
-                </a>
-                <ul class="navbar-nav flex-grow-1">
-                    <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
-                        <span>
-                            Mr. TadrOus Maher
-                        </span>
-                        <br>
-                        <p class="subtitle" style="color: gray;">El-Archmides</p>
+                @* To preveny 500 error if tring to go to index page in identity area, asp-area = "" means default area(student) while it may throws to some errors *@
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <a asp-controller="Home" asp-action="Index">
+                        <img class="logo" src="~/images/Logo.jpg" alt="">
                     </a>
-                </ul>
+                    <ul class="navbar-nav flex-grow-1">
+                        <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+                            <span>
+                                Mr. TadrOus Maher
+                            </span>
+                            <br>
+                            <p class="subtitle" style="color: gray;">El-Archmides</p>
+                        </a>
+                    </ul>
+                }
+                else
+                {
+                    <a asp-area="Student" asp-controller="Home" asp-action="Index">
+                        <img class="logo" src="~/images/Logo.jpg" alt="">
+                    </a>
+                    <ul class="navbar-nav flex-grow-1">
+                        <a asp-area="Student" class="navbar-brand" asp-controller="Home" asp-action="Index">
+                            <span>
+                                Mr. TadrOus Maher
+                            </span>
+                            <br>
+                            <p class="subtitle" style="color: gray;">El-Archmides</p>
+                        </a>
+                    </ul>
+                }
+                
                 <partial name="_LoginPartial" />
             </div>
         </nav>
 
     </header>
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger" role="alert">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success" role="alert">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
     <div class="container">
         <main role="main" class="pb-3">
             <partial name="_Notifications" />

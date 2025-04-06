@@ -29,14 +29,18 @@ namespace TadrousManassa.Areas.Identity.Pages.Account
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<LoginModel> _logger;
         private readonly DeviceIdentifierService _deviceService;
+        private readonly IConfiguration _configuration;
 
-        public LoginModel(IStudentRepository studentRepository, SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, ILogger<LoginModel> logger, DeviceIdentifierService deviceService)
+        public LoginModel(IStudentRepository studentRepository, SignInManager<ApplicationUser> signInManager, 
+            UserManager<ApplicationUser> userManager, ILogger<LoginModel> logger, 
+            DeviceIdentifierService deviceService, IConfiguration configuration)
         {
             _studentRepository = studentRepository;
             _signInManager = signInManager;
             _userManager = userManager;
             _logger = logger;
             _deviceService = deviceService;
+            _configuration = configuration;
         }
 
         /// <summary>
@@ -129,16 +133,23 @@ namespace TadrousManassa.Areas.Identity.Pages.Account
 
                 //string deviceId = GetDeviceFingerprint();
                 string deviceId = _deviceService.GetDeviceId();
-                if (user.Student.DeviceId == "000")
+                var emailAdmin = _configuration["AdminSimulation:Email"];
+                var deviceIdAdmin = _configuration["AdminSimulation:DeviceID"];
+                if (user.Email != emailAdmin && deviceId != deviceIdAdmin)
                 {
-                    user.Student.DeviceId = deviceId;
-                    await _studentRepository.UpdateStudentAsync(user.Student.Id, user.Student);
+                    // Reset DeviceId
+                    if (user.Student.DeviceId == "000")
+                    {
+                        user.Student.DeviceId = deviceId;
+                        await _studentRepository.UpdateStudentAsync(user.Student.Id, user.Student);
+                    }
+                    else if (user.Student.DeviceId != deviceId)
+                    {
+                        ModelState.AddModelError(string.Empty, "Please login by the same device you have used in registeration.");
+                        return Page();
+                    }
                 }
-                else if (user.Student.DeviceId != deviceId)
-                {
-                    ModelState.AddModelError(string.Empty, "Please login by the same device you have used in registeration.");
-                    return Page();
-                }
+                
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
                 var studentResult = await _signInManager.PasswordSignInAsync(user.UserName, Input.Password, Input.RememberMe, lockoutOnFailure: false);

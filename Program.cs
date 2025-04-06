@@ -1,3 +1,4 @@
+using Amazon.Runtime;
 using Amazon.S3;
 using Amazon.Util.Internal.PlatformServices;
 using Microsoft.AspNetCore.Identity;
@@ -39,12 +40,19 @@ namespace TadrousManassa
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             //.AddDefaultTokenProviders(); // This enables email confirmation & password reset
 
+            builder.WebHost.ConfigureKestrel(serverOptions =>
+            {
+                serverOptions.Limits.MaxRequestBodySize = 2L * 1024 * 1024 * 1024; // 2GB
+            });
+
             builder.Services.AddScoped<IStudentRepository, StudentRepository>();
             builder.Services.AddScoped<ILectureRepository, LectureRepository>();
             builder.Services.AddScoped<ICodeRepository, CodeRepository>();
             builder.Services.AddScoped<IAppSettingsRepository, AppSettingsRepository>();
             builder.Services.AddScoped<IStudentService, StudentService>();
             builder.Services.AddScoped<ILectureService, LectureService>();
+            builder.Services.AddScoped<IStudentLectureRepository, StudentLectureRepository>();
+            builder.Services.AddScoped<IStudentLectureService, StudentLectureService>();
             builder.Services.AddScoped<ICodeService, CodeService>();
             // Email Service
             builder.Services.AddScoped<IEmailSender, EmailSender>();
@@ -55,6 +63,12 @@ namespace TadrousManassa
             // Register your custom DeviceIdentifierService
             builder.Services.AddScoped<DeviceIdentifierService>();
 
+            var awsOptions = builder.Configuration.GetAWSOptions();
+            awsOptions.Credentials = new BasicAWSCredentials(
+                builder.Configuration["AWS:AccessKey"],
+                builder.Configuration["AWS:SecretKey"]
+            );
+            builder.Services.AddDefaultAWSOptions(awsOptions);
             builder.Services.AddAWSService<IAmazonS3>();
 
             // MVC & Razor Pages

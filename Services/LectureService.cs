@@ -10,11 +10,13 @@ namespace TadrousManassa.Services
     {
         private readonly ILectureRepository lectureRepository;
         private readonly IStudentRepository studentRepository;
+        private readonly IStudentLectureRepository studentLectureRepository;
 
-        public LectureService(ILectureRepository lectureRepository, IStudentRepository studentRepository)
+        public LectureService(ILectureRepository lectureRepository, IStudentRepository studentRepository, IStudentLectureRepository studentLectureRepository)
         {
             this.lectureRepository = lectureRepository;
             this.studentRepository = studentRepository;
+            this.studentLectureRepository = studentLectureRepository;
         }
 
         public List<Lecture> GetLectures()
@@ -32,21 +34,6 @@ namespace TadrousManassa.Services
             return lectureRepository.GetViewsCount(id);
         }
 
-        public Dictionary<string, int> GetNoWatchers()
-        {
-            return lectureRepository.GetNoWatchers();
-        }
-
-        public OperationResult<int> IncrementViewsCount(string id)
-        {
-            return lectureRepository.IncrementViewsCount(id);
-        }
-
-        public OperationResult<int> MarkAsWatched(string studentId, string lectureId)
-        {
-            return lectureRepository.MarkAsWatched(studentId, lectureId);
-        }
-
         public OperationResult<Lecture> GetLecture(string id)
         {
             return lectureRepository.GetLecture(id);
@@ -62,16 +49,6 @@ namespace TadrousManassa.Services
             return lectureRepository.GetCurrentLecturesByGrade(grade);
         }
 
-        public OperationResult<List<Lecture>> GetLecturesByStudent(string studentId)
-        {
-            return lectureRepository.GetLecturesByStudent(studentId);
-        }
-
-        public OperationResult<List<Lecture>> GetCurrentLecturesByStudent(string studentId)
-        {
-            return lectureRepository.GetCurrentLecturesByStudent(studentId);
-        }
-
         public OperationResult<List<string>> GetUnits()
         {
             return lectureRepository.GetUnits();
@@ -80,6 +57,11 @@ namespace TadrousManassa.Services
         public OperationResult<List<string>> GetCurrentUnits(int grade)
         {
             return lectureRepository.GetCurrentUnits(grade);
+        }
+
+        public OperationResult<List<Lecture>> GetLecturesByUnit(string unit)
+        {
+            return lectureRepository.GetLecturesByUnit(unit);
         }
 
         public OperationResult<LectureListViewModel> GetLecturesVM(string studentId)
@@ -97,12 +79,13 @@ namespace TadrousManassa.Services
                 int i = 1;
                 foreach (var lecture in lecturesResult.Data)
                 {
+                    var isLecturePurchased = studentLectureRepository.IsLecturePurchased(studentId, lecture.Id);
                     var lectureVM = new LectureViewModel
                     {
                         Id = lecture.Id,
                         Name = lecture.Name,
                         ImageURL = $"bg{i++}",
-                        IsPurchased = IsLecturePurchased(studentId, lecture.Id).Success && IsLecturePurchased(studentId, lecture.Id).Data
+                        IsPurchased = isLecturePurchased.Success && isLecturePurchased.Data
                     };
                     try
                     {
@@ -128,19 +111,9 @@ namespace TadrousManassa.Services
             return await lectureRepository.UpdateLectureAsync(id, lecture);
         }
 
-        public Task<OperationResult<bool>> DeleteLecture(string id)
+        public async Task<OperationResult<bool>> DeleteLectureAsync(string id)
         {
-            return lectureRepository.DeleteLectureAsync(id);
-        }
-
-        public OperationResult<bool> IsLecturePurchased(string studentId, string lectureId)
-        {
-            return lectureRepository.IsLecturePurchased(studentId, lectureId);
-        }
-
-        public OperationResult<bool> BuyCode(string studentId, string code, string lectureId)
-        {
-            return lectureRepository.BuyCode(studentId, code, lectureId);
+            return await lectureRepository.DeleteLectureAsync(id);
         }
     }
 }

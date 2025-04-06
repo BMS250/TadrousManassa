@@ -22,6 +22,16 @@
             Lecture List
         </button>
     </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="codes-tab" data-bs-toggle="tab" data-bs-target="#codes" type="button" role="tab" aria-controls="codes" aria-selected="false">
+            Lecture Codes
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="reset-tab" data-bs-toggle="tab" data-bs-target="#reset" type="button" role="tab" aria-controls="reset" aria-selected="false">
+            Reset Device ID
+        </button>
+    </li>
 </ul>
 
 <div class="tab-content" id="adminTabContent">
@@ -109,38 +119,152 @@
         <div class="row">
             @foreach (var lecture in Model.Lectures)
             {
-                <div class="col-md-4">
-                    <div class="card shadow-sm mb-3">
+                <div class="col-md-4 mb-3">
+                    <div class="card shadow-sm">
                         <div class="card-body">
-                            <h5 class="card-title">@lecture.Name</h5>
-                            <p class="mt-2"><strong>Views:</strong> <span class="view-count" data-lecture-id="@lecture.Id">@lecture.ViewsCount</span></p>
-                            <p class="mt-2"><strong>Viewers:</strong> <span class="view-count" data-lecture-id="@lecture.Id">@Model.NoWatchers[lecture.Id]</span></p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="card-title mb-0">@lecture.Name</h5>
+                                <button class="btn btn-sm btn-outline-primary"
+                                        type="button"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#studentViews-@lecture.Id"
+                                        aria-expanded="false"
+                                        aria-controls="studentViews-@lecture.Id">
+                                    Show Students
+                                </button>
+                            </div>
+                            <div class="mt-2">
+                                <small class="text-muted">Total Views: @lecture.ViewsCount</small><br>
+                                <small class="text-muted">Unique Viewers: @Model.NoWatchers[lecture.Id]</small>
+                            </div>
+
+                            <!-- Collapsible Student Views -->
+                            <div class="collapse" id="studentViews-@lecture.Id">
+                                @if (Model.ViewsCountPerStudents != null &&
+                               Model.ViewsCountPerStudents.TryGetValue(lecture.Id.ToString(), out var studentViews))
+                                {
+                                    <div class="mt-3 border-top pt-2">
+                                        <h6 class="text-muted mb-2">Student Views:</h6>
+                                        <div class="list-group">
+                                            @foreach (var student in studentViews)
+                                            {
+                                                <div class="list-group-item d-flex justify-content-between align-items-center py-2">
+                                                    <span>@student.Key</span>
+                                                    <span class="badge bg-primary rounded-pill">@student.Value</span>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="mt-3 text-center text-muted">
+                                        No student views recorded
+                                    </div>
+                                }
+                            </div>
                         </div>
                     </div>
                 </div>
             }
         </div>
     </div>
+    <!-- Tab 4: Lecture Codes -->
+    <div class="tab-pane fade p-3" id="codes" role="tabpanel" aria-labelledby="codes-tab">
+        <h3>Lecture Access Codes</h3>
+        <div class="row">
+            @foreach (var lecture in Model.Lectures)
+            {
+                <div class="col-md-6 mb-3">
+                    <div class="card shadow-sm">
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">@lecture.Name</h5>
+                            <div>
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-success"
+                                        onclick="fetchCode('@lecture.Id')">
+                                    Generate Code
+                                </button>
+                                <div id="codeResult-@lecture.Id" class="mt-2" style="display: none;">
+                                    <div class="alert alert-primary d-inline-block mb-0 p-2">
+                                        <span id="codeValue-@lecture.Id"></span>
+                                        <button class="btn btn-sm btn-link text-black"
+                                                onclick="copyCode('@lecture.Id')"
+                                                title="Copy code">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Tab 5: Reset Device ID -->
+    <div class="tab-pane fade p-3" id="reset" role="tabpanel" aria-labelledby="reset-tab">
+        <h3>Reset User Device ID</h3>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                @TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <form asp-action="ResetDeviceId" method="post">
+            <div class="mb-3">
+                <label for="userEmail" class="form-label">User Email</label>
+                <input type="email" class="form-control" id="userEmail" name="userEmail" required />
+                <div class="form-text">Enter the email of the user whose device ID needs to be reset.</div>
+            </div>
+            <button type="submit" class="btn btn-danger">Reset</button>
+        </form>
+    </div>
 </div>
 
+<!-- Add this script section -->
+@section Scripts {
+    <script>
+        function fetchCode(lectureId) {
+                fetch(`/Teacher/Home/GetCode?lectureId=${lectureId}`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                const codeElement = document.getElementById(`codeValue-${lectureId}`);
+                const resultDiv = document.getElementById(`codeResult-${lectureId}`);
+                codeElement.textContent = data.code;
+                resultDiv.style.display = 'block';
+            })
+            .catch(error => console.error('Error:', error));
+        }
 
-@* <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        var viewCountElements = document.querySelectorAll(".view-count");
+        function copyCode(lectureId) {
+            const code = document.getElementById(`codeValue-${lectureId}`).textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                // Show some feedback
+                const toast = new bootstrap.Toast(document.getElementById('copyToast'));
+                toast.show();
+            });
+        }
+    </script>
 
-        viewCountElements.forEach(function (element) {
-            var lectureId = element.dataset.lectureId;
-
-            function updateViewCount() {
-                fetch(`/Admin/Lectures/GetPlayCount?lectureId=${lectureId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        element.innerText = data.count;
-                    })
-                    .catch(error => console.error("Error fetching play count:", error));
-            }
-
-            updateViewCount();
-        });
-    });
-</script> *@
+    <!-- Add this toast for copy feedback -->
+    <div class="toast position-fixed bottom-0 end-0 m-3" id="copyToast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="2000">
+        <div class="toast-body bg-success text-white">
+            Code copied to clipboard!
+        </div>
+    </div>
+}
