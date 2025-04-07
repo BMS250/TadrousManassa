@@ -259,11 +259,12 @@ namespace TadrousManassa.Areas.Teacher.Controllers
                 var result = await _studentService.ResetDeviceId(userEmail);
                 if (result.Success)
                 {
-                    TempData["Error"] = "Failed to reset device ID.";
-                    return RedirectToAction("Index");
+                    TempData["Success"] = $"Device ID for user {userEmail} has been reset successfully.";
                 }
-
-                TempData["Success"] = $"Device ID for user {userEmail} has been reset successfully.";
+                else
+                {
+                    TempData["Error"] = "Failed to reset device ID.";
+                }
             }
             catch (Exception ex)
             {
