@@ -20,6 +20,8 @@ namespace TadrousManassa.Repositories
         
         public Task ResetDeviceId(string studentEmail);
 
+        public Task<bool> ResetPassword(string studentEmail, string newPassword);
+
         public void DeleteStudent(string id);
     }
 }

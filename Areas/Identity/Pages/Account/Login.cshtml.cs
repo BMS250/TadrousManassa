@@ -75,7 +75,7 @@ namespace TadrousManassa.Areas.Identity.Pages.Account
             if (User.Identity.IsAuthenticated)
             {
                 // Logout
-                await _signInManager.SignOutAsync();
+                //await _signInManager.SignOutAsync();
                 //return RedirectToAction("Index", "Home", new { area = "Student" });
             }
             if (!string.IsNullOrEmpty(ErrorMessage))
@@ -86,7 +86,7 @@ namespace TadrousManassa.Areas.Identity.Pages.Account
             returnUrl ??= Url.Content("~/");
 
             // Clear the existing external cookie to ensure a clean login process
-            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            //await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
@@ -135,7 +135,9 @@ namespace TadrousManassa.Areas.Identity.Pages.Account
                 string deviceId = _deviceService.GetDeviceId();
                 var emailAdmin = _configuration["AdminSimulation:Email"];
                 var deviceIdAdmin = _configuration["AdminSimulation:DeviceID"];
-                if (user.Email != emailAdmin && deviceId != deviceIdAdmin)
+                var deviceIdAdmin1 = _configuration["AdminSimulation:ChromeDebugDeviceID"];
+                var deviceIdAdmin2 = _configuration["AdminSimulation:BraveDebugDeviceID"];
+                if (user.Email != emailAdmin && deviceId != deviceIdAdmin && deviceId != deviceIdAdmin1 && deviceId != deviceIdAdmin2)
                 {
                     // Reset DeviceId
                     if (user.Student.DeviceId == "000")

@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using System;
+using System.Web.Helpers;
 using TadrousManassa.Data;
 using TadrousManassa.Models;
 
@@ -99,6 +100,41 @@ namespace TadrousManassa.Repositories
             student.DeviceId = "000";
             context.Entry(student).State = EntityState.Modified;
             await context.SaveChangesAsync();
+        }
+
+        public async Task<bool> ResetPassword(string email, string newPassword)
+        {
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(newPassword))
+            {
+                Console.WriteLine("Email or new password is empty.");
+                return false;
+            }
+
+            var user = await userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                Console.WriteLine("User not found.");
+                return false;
+            }
+
+            var resetToken = await userManager.GeneratePasswordResetTokenAsync(user);
+
+            var result = await userManager.ResetPasswordAsync(user, resetToken, newPassword);
+
+            if (result.Succeeded)
+            {
+                Console.WriteLine("Password reset successfully.");
+                return true;
+            }
+            else
+            {
+                Console.WriteLine("Failed to reset password:");
+                foreach (var error in result.Errors)
+                {
+                    Console.WriteLine($"- {error.Code}: {error.Description}");
+                }
+                return false;
+            }
         }
 
         public void DeleteStudent(string id)

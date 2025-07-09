@@ -1,9 +1,14 @@
+using Amazon.Extensions.NETCore.Setup;
 using Amazon.Runtime;
 using Amazon.S3;
 using Amazon.Util.Internal.PlatformServices;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using System.Configuration;
 using TadrousManassa.Data;
 using TadrousManassa.Models;
@@ -29,6 +34,8 @@ namespace TadrousManassa
             // Identity Configuration
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {
+                //options.User.AllowedUserNameCharacters =
+                //    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+ ";
                 options.User.RequireUniqueEmail = true;
                 options.User.AllowedUserNameCharacters = null; // Allows all characters, including duplicates
                 options.Password.RequireDigit = false;       // No numbers required
@@ -40,10 +47,24 @@ namespace TadrousManassa
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             //.AddDefaultTokenProviders(); // This enables email confirmation & password reset
 
-            builder.WebHost.ConfigureKestrel(serverOptions =>
+            // In Program.cs or Startup.cs
+            builder.Services.Configure<KestrelServerOptions>(options =>
             {
-                serverOptions.Limits.MaxRequestBodySize = 2L * 1024 * 1024 * 1024; // 2GB
+                options.Limits.MaxRequestBodySize = 2_147_483_648; // Set a reasonable limit like 2GB
+                options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(10);
+                options.Limits.RequestHeadersTimeout = TimeSpan.FromMinutes(5);
             });
+
+            builder.Services.Configure<IISServerOptions>(options =>
+            {
+                options.MaxRequestBodySize = 2_147_483_648; // Same limit for IIS
+            });
+
+            builder.Services.Configure<FormOptions>(options =>
+            {
+                options.MultipartBodyLengthLimit = 2_147_483_648; // Same limit for form uploads
+            });
+
 
             builder.Services.AddScoped<IStudentRepository, StudentRepository>();
             builder.Services.AddScoped<ILectureRepository, LectureRepository>();
@@ -63,13 +84,23 @@ namespace TadrousManassa
             // Register your custom DeviceIdentifierService
             builder.Services.AddScoped<DeviceIdentifierService>();
 
+            // Keep your existing AWS options setup
             var awsOptions = builder.Configuration.GetAWSOptions();
             awsOptions.Credentials = new BasicAWSCredentials(
                 builder.Configuration["AWS:AccessKey"],
                 builder.Configuration["AWS:SecretKey"]
             );
+
             builder.Services.AddDefaultAWSOptions(awsOptions);
             builder.Services.AddAWSService<IAmazonS3>();
+
+            // Configure S3 client options separately
+            builder.Services.AddOptions<AmazonS3Config>()
+                .Configure<IOptions<AWSOptions>>((s3Config, awsOptionsAccessor) =>
+                {
+                    s3Config.Timeout = TimeSpan.FromMinutes(15);
+                    s3Config.MaxErrorRetry = 5;
+                });
 
             // MVC & Razor Pages
             builder.Services.AddControllersWithViews();
@@ -98,6 +129,13 @@ namespace TadrousManassa
                 app.UseExceptionHandler("/Home/Error");
                 app.UseHsts();
             }
+
+            app.Use(async (context, next) =>
+            {
+                context.Features.Get<IHttpMaxRequestBodySizeFeature>().MaxRequestBodySize = null;
+                await next();
+            });
+
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();

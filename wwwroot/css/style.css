@@ -1,6 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Open+Sans:wght@300;400;600;700&display=swap");
 body {
-  font-family: "Open Sans", sans-serif;
+/*  font-family: "Open Sans", sans-serif;*/
   overflow-x: hidden;
 }
 
@@ -813,5 +813,17 @@ a:focus {
   padding: 25px 0;
   margin: 0;
 }
+
+#tsparticles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1; /* ensures it's behind content but above body background */
+    pointer-events: none; /* lets users click through */
+}
+
+
 
 /*# sourceMappingURL=style.css.map */

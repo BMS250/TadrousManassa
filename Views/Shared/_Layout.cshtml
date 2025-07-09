@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>El-Archmides</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/TadrousManassa.styles.css" asp-append-version="true" />
+    @* <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/TadrousManassa.styles.css" asp-append-version="true" /> *@
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
 
-    <link rel="shortcut icon" href="~/images/Logo.jpg" type="">
+    <link rel="shortcut icon" href="~/images/Logo.jpg" type="image/jpeg">
 
     <!--owl slider stylesheet -->
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css" />
@@ -20,12 +20,15 @@
     <link href="~/css/responsive.css" rel="stylesheet" />
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUa8nHJ0R5U1BMnJv4xQ0sN5NjaS28lO4JJznldErIYV9i/zzK/6L+TpcqUs" crossorigin="anonymous">
+    <link rel="stylesheet" href="~/css/fun-layout.css" />
 
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 
 <body>
+    <div id="tsparticles"></div>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light border-bottom box-shadow mb-3">
             <div class="container-fluid">
                 @* To preveny 500 error if tring to go to index page in identity area, asp-area = "" means default area(student) while it may throws to some errors *@
                 @if (User.Identity.IsAuthenticated)
@@ -86,7 +89,7 @@
 
     <footer class="border-top footer text-muted">
         <div class="container" style="text-align: center">
-            &copy; 2025 - The only way to learn Mathematics is to do Mathematics 👌🏻❤
+            &copy; 2025 - The only way to learn Mathematics is to do Mathematics 👌❤️💪
 
             <br />
             Developed by <a href="https://www.linkedin.com/in/bola-milad-bb1206195/">Bola</a>
@@ -96,16 +99,16 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+    @* <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+94wtF5HB3W+5MC4NSLFYduw98P6a"
-            crossorigin="anonymous"></script>
+            crossorigin="anonymous"></script> *@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
             integrity="sha384-DfXdAiqz6p7pDB3X4N2/QUPDtEwAYIITiP28IEVFNqM/Y4xc0xbS9pD9b3n3hw33"
             crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"
+    @* <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-Piv4xVNRyMGpqk6PHW2FjYJvUju9Ul1N2qgl/mUP5ZnZB3Zuo8Ncb7EN4FLfL7p"
-            crossorigin="anonymous"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script></script>
+            crossorigin="anonymous"></script> *@
+    <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
     <script>
         // Check for existing device ID in cookies/localStorage
         function getOrCreateDeviceId() {
@@ -150,12 +153,35 @@
         // Initialize on page load
         getOrCreateDeviceId();
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
+    <script>
+        tsParticles.load("tsparticles", {
+            fullScreen: { enable: false },
+            background: { color: { value: "transparent" } },
+            particles: {
+                number: { value: 80, density: { enable: true, area: 800 } },
+                color: { value: "#ff6f61" },
+                shape: { type: "circle" },
+                opacity: { value: 0.6 },
+                size: { value: 3 },
+                move: { enable: true, speed: 1, direction: "none", outMode: "bounce" },
+                links: {
+                    enable: true,
+                    distance: 120,
+                    color: "#000000",
+                    opacity: 0.4,
+                    width: 1.5
+                }
+            },
+            interactivity: {
+                events: { onHover: { enable: true, mode: "grab" }, resize: true },
+                modes: { grab: { distance: 140, line_linked: { opacity: 1 } } }
+            }
+        });
+    </script>
+
+
     @await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>
-<style>
-    .subtitle {
-        /* font-size: 0.1rem; /* Smaller font size */ */
-        color: gray; /* Gray color */
-    }
-</style>
