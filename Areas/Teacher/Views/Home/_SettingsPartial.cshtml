@@ -1,0 +1,21 @@
+@using TadrousManassa.Areas.Teacher.Models
+@model AdminVM
+
+<form asp-action="UpdateSettings" method="post">
+    <div class="mb-3">
+        <label asp-for="CurrentYear" class="form-label">Current Year</label>
+        <input asp-for="CurrentYear" class="form-control" value="@Model.CurrentYear" />
+        <span asp-validation-for="CurrentYear" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="CurrentSemester" class="form-label">Current Semester</label>
+        <select asp-for="CurrentSemester" class="form-control">
+            <option value="1" selected="@(Model.CurrentSemester == 1)">1</option>
+            <option value="2" selected="@(Model.CurrentSemester == 2)">2</option>
+        </select>
+        <span asp-validation-for="CurrentSemester" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Update Settings</button>
+</form> 

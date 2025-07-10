@@ -69,17 +69,8 @@ namespace TadrousManassa.Areas.Teacher.Controllers
 
         public IActionResult Index()
         {
-            var oldSettings = _appSettingsRepo.GetCurrentData();
-            var lectures = _lectureService.GetLectures();
-            AdminVM adminVM = new AdminVM()
-            {
-                CurrentYear = oldSettings.CurrentYear,
-                CurrentSemester = oldSettings.CurrentSemester,
-                Lectures = lectures,
-                NoWatchers = _studentLectureService.GetNoWatchers(),
-                ViewsCountPerStudents = _studentLectureService.GetViewsCountPerStudents()
-            };
-            return View(adminVM);
+            // Return empty AdminVM since data will be loaded via AJAX
+            return View(new AdminVM());
         }
 
         [HttpPost]
@@ -272,6 +263,52 @@ namespace TadrousManassa.Areas.Teacher.Controllers
             }
 
             return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public IActionResult LoadSettingsTab()
+        {
+            var oldSettings = _appSettingsRepo.GetCurrentData();
+            AdminVM adminVM = new AdminVM()
+            {
+                CurrentYear = oldSettings.CurrentYear,
+                CurrentSemester = oldSettings.CurrentSemester
+            };
+            return PartialView("_SettingsPartial", adminVM);
+        }
+        [HttpGet]
+        public IActionResult LoadVideoTab()
+        {
+            return PartialView("_VideoPartial");
+        }
+        [HttpGet]
+        public IActionResult LoadLecturesTab()
+        {
+            var lectures = _lectureService.GetLectures();
+            var noWatchers = _studentLectureService.GetNoWatchers();
+            var viewsCountPerStudents = _studentLectureService.GetViewsCountPerStudents();
+            AdminVM adminVM = new AdminVM()
+            {
+                Lectures = lectures,
+                NoWatchers = noWatchers,
+                ViewsCountPerStudents = viewsCountPerStudents
+            };
+            return PartialView("_LecturesPartial", adminVM);
+        }
+        [HttpGet]
+        public IActionResult LoadCodesTab()
+        {
+            var lectures = _lectureService.GetLectures();
+            AdminVM adminVM = new AdminVM()
+            {
+                Lectures = lectures
+            };
+            return PartialView("_CodesPartial", adminVM);
+        }
+        [HttpGet]
+        public IActionResult LoadResetTab()
+        {
+            return PartialView("_ResetDevicePartial");
         }
     }
 }
