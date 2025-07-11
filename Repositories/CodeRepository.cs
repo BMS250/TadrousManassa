@@ -19,7 +19,7 @@ namespace TadrousManassa.Repositories
         public OperationResult<string> GetCode(string lectureId)
         {
             var code = _context.StudentLectures
-                           .Where(sl => sl.LectureId == lectureId && string.IsNullOrEmpty(sl.StudentId))
+                           .Where(sl => sl.LectureId == lectureId && string.IsNullOrEmpty(sl.StudentId) && !sl.IsSold)
                            .Select(sl => sl.Code)
                            .FirstOrDefault();
             if (code == null)

@@ -5,34 +5,6 @@
 
 <h1>Admin Page</h1>
 
-<!-- Bootstrap Nav Tabs
-<ul class="nav nav-tabs" id="adminTab" role="tablist">
-    <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab" aria-controls="settings" aria-selected="true">
-            Settings
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="video-tab" data-bs-toggle="tab" data-bs-target="#video" type="button" role="tab" aria-controls="video" aria-selected="false">
-            Video Upload
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="lectures-tab" data-bs-toggle="tab" data-bs-target="#lectures" type="button" role="tab" aria-controls="lectures" aria-selected="false">
-            Lecture List
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="codes-tab" data-bs-toggle="tab" data-bs-target="#codes" type="button" role="tab" aria-controls="codes" aria-selected="false">
-            Lecture Codes
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="reset-tab" data-bs-toggle="tab" data-bs-target="#reset" type="button" role="tab" aria-controls="reset" aria-selected="false">
-            Reset Device ID
-        </button>
-    </li>
-</ul> -->
 <div class="row">
     <div class="col-md-3">
         <!-- Vertical Nav Tabs -->
@@ -122,21 +94,46 @@
             }
         });
     </script>
-    <!-- باقي السكريبتات والتوست كما هي -->
+
     <script>
         function fetchCode(lectureId) {
-                fetch(`/Teacher/Home/GetCode?lectureId=${lectureId}`, {
-                method: 'POST'
-            })
-            .then(response => response.json())
-            .then(data => {
-                const codeElement = document.getElementById(`codeValue-${lectureId}`);
-                const resultDiv = document.getElementById(`codeResult-${lectureId}`);
-                codeElement.textContent = data.code;
-                resultDiv.style.display = 'block';
-            })
-            .catch(error => console.error('Error:', error));
+        fetch(`/Teacher/Home/GetCode?lectureId=${lectureId}`, {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            const codeElement = document.getElementById(`codeValue-${lectureId}`);
+            const resultDiv = document.getElementById(`codeResult-${lectureId}`);
+            const soldBtn = document.getElementById(`soldBtn-${lectureId}`);
+            codeElement.textContent = data.code;
+            resultDiv.style.display = 'block';
+            if(soldBtn) soldBtn.style.display = 'inline-block';
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function confirmSold(lectureId) {
+        if (window.confirm('Are you sure that this code has been sold to a student?')) {
+            markCodeAsSold(lectureId);
         }
+    }
+
+    function markCodeAsSold(lectureId) {
+        const code = document.getElementById(`codeValue-${lectureId}`).textContent;
+        fetch(`/Teacher/Home/MarkCodeAsSold`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ lectureId: lectureId, code: code })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.success) {
+                document.getElementById(`codeResult-${lectureId}`).style.display = 'none';
+            } else {
+                alert('Error: ' + data.message);
+            }
+        });
+    }
 
         function copyCode(lectureId) {
             const code = document.getElementById(`codeValue-${lectureId}`).textContent;

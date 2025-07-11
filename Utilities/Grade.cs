@@ -4,10 +4,10 @@ namespace TadrousManassa.Utilities
 {
     public enum Grade
     {
-        [Display(Name = "Fifth primary")]
+        [Display(Name = "Fifth Primary")]
         FifthPrimary = 5,
 
-        [Display(Name = "Sixth primary")]
+        [Display(Name = "Sixth Primary")]
         SixthPrimary = 6,
 
         [Display(Name = "First Preparatory")]
@@ -18,17 +18,5 @@ namespace TadrousManassa.Utilities
 
         [Display(Name = "Third Preparatory")]
         ThirdPreparatory = 3
-    }
-
-    // Helper class to get display names
-    public static class GradeHelper
-    {
-        public static string GetDisplayName(this Grade grade)
-        {
-            var fieldInfo = grade.GetType().GetField(grade.ToString());
-            var attribute = fieldInfo?.GetCustomAttributes(typeof(DisplayAttribute), false)
-                .FirstOrDefault() as DisplayAttribute;
-            return attribute?.Name ?? grade.ToString();
-        }
     }
 }

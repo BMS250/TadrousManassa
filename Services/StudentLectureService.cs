@@ -65,5 +65,10 @@ namespace TadrousManassa.Services
         {
             return _studentLectureRepository.IsLecturePurchased(studentId, lectureId);
         }
+
+        public OperationResult<bool> MarkCodeAsSold(string lectureId, string code)
+        {
+            return _studentLectureRepository.MarkCodeAsSold(lectureId, code);
+        }
     }
 }

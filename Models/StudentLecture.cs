@@ -26,5 +26,7 @@ namespace TadrousManassa.Models
         public bool IsWatched { get; set; } = false;
 
         public int ViewsCount { get; set; } = 0;
+
+        public bool IsSold { get; set; } = false;
     }
 }

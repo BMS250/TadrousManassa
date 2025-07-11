@@ -69,7 +69,6 @@ namespace TadrousManassa.Areas.Teacher.Controllers
 
         public IActionResult Index()
         {
-            // Return empty AdminVM since data will be loaded via AJAX
             return View(new AdminVM());
         }
 
@@ -264,6 +263,20 @@ namespace TadrousManassa.Areas.Teacher.Controllers
 
             return RedirectToAction("Index");
         }
+
+
+        [HttpPost]
+        public IActionResult MarkCodeAsSold([FromBody] MarkSold request)
+        {
+            if (string.IsNullOrEmpty(request.LectureId) || string.IsNullOrEmpty(request.Code))
+                return Json(new { success = false, message = "Invalid data" });
+            var result = _studentLectureService.MarkCodeAsSold(request.LectureId, request.Code);
+            if (result.Success)
+                return Json(new { success = true });
+            else
+                return Json(new { success = false, message = result.Message });
+        }
+
 
         [HttpGet]
         public IActionResult LoadSettingsTab()

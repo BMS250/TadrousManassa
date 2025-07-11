@@ -23,5 +23,7 @@ namespace TadrousManassa.Services
         public int GetRemainingCodes(string lectureId);
 
         public void CheckRemainingCodes(string lectureId);
+
+        public OperationResult<bool> MarkCodeAsSold(string lectureId, string code);
     }
 }
