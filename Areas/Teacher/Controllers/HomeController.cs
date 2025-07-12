@@ -69,33 +69,47 @@ namespace TadrousManassa.Areas.Teacher.Controllers
 
         public IActionResult Index()
         {
-            return View(new AdminVM());
+            return View();
+        }
+
+
+        [HttpGet]
+        public IActionResult LoadSettingsTab()
+        {
+            var currentSettings = _appSettingsRepo.GetCurrentData();
+            return PartialView("_SettingsPartial", currentSettings);
         }
 
         [HttpPost]
-        public IActionResult UpdateSettings(AdminVM adminVM)
+        public IActionResult UpdateSettings(DateChangingPartialVM dateVM)
         {
             if (!ModelState.IsValid)
             {
-                return View(adminVM); // Return the view with validation errors
+                return View(dateVM); // Return the view with validation errors
             }
             var oldSettings = _appSettingsRepo.GetCurrentData();
             // Retrieve existing settings from the database (assuming a singleton settings entry)
-            var result = _appSettingsRepo.UpdateCurrentData(adminVM.CurrentYear ?? oldSettings.CurrentYear, adminVM.CurrentSemester ?? oldSettings.CurrentSemester);
+            var result = _appSettingsRepo.UpdateCurrentData(dateVM.CurrentYear ?? oldSettings.CurrentYear, dateVM.CurrentSemester ?? oldSettings.CurrentSemester);
             if (!result.Success)
             {
                 TempData["error"] = result.Message;
-                return View(adminVM); // Return the view with an error message
+                return View(dateVM); // Return the view with an error message
             }
             TempData["success"] = "Settings updated successfully.";
             return RedirectToAction("Index"); // Redirect to settings overview page
         }
 
+        [HttpGet]
+        public IActionResult LoadVideoTab()
+        {
+            return PartialView("_VideoPartial");
+        }
+
         [HttpPost]
         [DisableRequestSizeLimit]
-        public async Task<IActionResult> UploadVideo(AdminVM adminVM)
+        public async Task<IActionResult> UploadVideo(VideoUploadingPartialVM videoUploadingVM)
         {
-            if (adminVM.Video == null || adminVM.Video.Length == 0)
+            if (videoUploadingVM.Video == null || videoUploadingVM.Video.Length == 0)
             {
                 TempData["error"] = "No video file provided.";
                 return RedirectToAction("Index");
@@ -105,13 +119,13 @@ namespace TadrousManassa.Areas.Teacher.Controllers
             
 
             ApplicationSettings appSettingsData = _appSettingsRepo.GetCurrentData();
-            string videoName = Path.GetFileName(adminVM.Video.FileName);
+            string videoName = Path.GetFileName(videoUploadingVM.Video.FileName);
             // Create a unique object key (was) using a GUID and the original file name. /*{Guid.NewGuid()}_*/
-            string videoPath = $"{adminVM.Grade ?? 1}/{appSettingsData.CurrentYear}/{appSettingsData.CurrentSemester}/{videoName}";
+            string videoPath = $"{videoUploadingVM.Grade ?? 1}/{appSettingsData.CurrentYear}/{appSettingsData.CurrentSemester}/{videoName}";
 
             try
             {
-                using (var stream = adminVM.Video.OpenReadStream())
+                using (var stream = videoUploadingVM.Video.OpenReadStream())
                 {
                     // Reset the stream position if needed.
                     if (stream.CanSeek)
@@ -130,14 +144,14 @@ namespace TadrousManassa.Areas.Teacher.Controllers
                 Lecture lecture = new Lecture()
                 {
                     Id = Guid.NewGuid().ToString(),
-                    Name = adminVM.Name ?? videoName,
-                    Description = adminVM.Description,
-                    Grade = adminVM.Grade ?? 1,
-                    Unit = adminVM.Unit,
-                    Price = adminVM.Price ?? 0,
+                    Name = videoUploadingVM.Name ?? videoName,
+                    Description = videoUploadingVM.Description,
+                    Grade = videoUploadingVM.Grade ?? 1,
+                    Unit = videoUploadingVM.Unit,
+                    Price = videoUploadingVM.Price ?? 0,
                     VideoPath = videoPath,
-                    SheetPath = adminVM.SheetPath,
-                    QuizPath = adminVM.QuizPath,
+                    SheetPath = videoUploadingVM.SheetPath,
+                    QuizPath = videoUploadingVM.QuizPath,
                     Semester = appSettingsData.CurrentSemester,
                     Year = appSettingsData.CurrentYear,
                     UsedThisYear = true
@@ -198,18 +212,39 @@ namespace TadrousManassa.Areas.Teacher.Controllers
             return File(csvStream, "text/plain; charset=utf-8", $"{lectureName} Codes.txt");
         }
 
-        [HttpGet("play-count/{lectureId}")]
-        public IActionResult GetPlayCount(string lectureId)
+        [HttpGet]
+        public IActionResult LoadLecturesTab()
         {
-            try
+            var lectures = _lectureService.GetLecturesViewsCount();
+            var noWatchers = _studentLectureService.GetNoWatchers();
+            var viewsCountForStudents = _studentLectureService.GetViewsCountForStudents();
+            LectureAnalysingPartialVM lectureWatchingVM = new()
             {
-                int playCount = _lectureService.GetViewsCount(lectureId);
-                return Json(new { count = playCount });
-            }
-            catch (Exception)
-            {
-                return NotFound(new { message = "Could not retrieve play count" });
-            }
+                Lectures = lectures,
+                NoWatchers = noWatchers,
+                ViewsCountForStudents = viewsCountForStudents
+            };
+            return PartialView("_LecturesPartial", lectureWatchingVM);
+        }
+
+        [HttpPost]
+        public IActionResult MarkCodeAsSold([FromBody] SoldCodeDTO request)
+        {
+            if (string.IsNullOrEmpty(request.LectureId) || string.IsNullOrEmpty(request.Code))
+                return Json(new { success = false, message = "Invalid data" });
+            var result = _studentLectureService.MarkCodeAsSold(request.LectureId, request.Code);
+            if (result.Success)
+                return Json(new { success = true });
+            else
+                return Json(new { success = false, message = result.Message });
+        }
+
+        [HttpGet]
+        public IActionResult LoadCodesTab()
+        {
+            var lectures = _lectureService.GetLecturesBasicData();
+            CodeGeneratingPartialVM codeVM = new() { Lectures = lectures };
+            return PartialView("_CodesPartial", codeVM);
         }
 
         [HttpPost]
@@ -226,6 +261,12 @@ namespace TadrousManassa.Areas.Teacher.Controllers
                 : BadRequest(result.Message);
         }
 
+        [HttpGet]
+        public IActionResult LoadResetTab()
+        {
+            return PartialView("_ResetDevicePartial");
+        }
+
         [HttpPost]
         public async Task<IActionResult> ResetDeviceId(string userEmail)
         {
@@ -237,15 +278,6 @@ namespace TadrousManassa.Areas.Teacher.Controllers
 
             try
             {
-                // Find the user by email
-                //var user = await _userManager.FindByEmailAsync(userEmail);
-
-                //if (user == null)
-                //{
-                //    TempData["Error"] = "User not found.";
-                //    return RedirectToAction("Index");
-                //}
-
                 var result = await _studentService.ResetDeviceId(userEmail);
                 if (result.Success)
                 {
@@ -262,66 +294,6 @@ namespace TadrousManassa.Areas.Teacher.Controllers
             }
 
             return RedirectToAction("Index");
-        }
-
-
-        [HttpPost]
-        public IActionResult MarkCodeAsSold([FromBody] MarkSold request)
-        {
-            if (string.IsNullOrEmpty(request.LectureId) || string.IsNullOrEmpty(request.Code))
-                return Json(new { success = false, message = "Invalid data" });
-            var result = _studentLectureService.MarkCodeAsSold(request.LectureId, request.Code);
-            if (result.Success)
-                return Json(new { success = true });
-            else
-                return Json(new { success = false, message = result.Message });
-        }
-
-
-        [HttpGet]
-        public IActionResult LoadSettingsTab()
-        {
-            var oldSettings = _appSettingsRepo.GetCurrentData();
-            AdminVM adminVM = new AdminVM()
-            {
-                CurrentYear = oldSettings.CurrentYear,
-                CurrentSemester = oldSettings.CurrentSemester
-            };
-            return PartialView("_SettingsPartial", adminVM);
-        }
-        [HttpGet]
-        public IActionResult LoadVideoTab()
-        {
-            return PartialView("_VideoPartial");
-        }
-        [HttpGet]
-        public IActionResult LoadLecturesTab()
-        {
-            var lectures = _lectureService.GetLectures();
-            var noWatchers = _studentLectureService.GetNoWatchers();
-            var viewsCountPerStudents = _studentLectureService.GetViewsCountPerStudents();
-            AdminVM adminVM = new AdminVM()
-            {
-                Lectures = lectures,
-                NoWatchers = noWatchers,
-                ViewsCountPerStudents = viewsCountPerStudents
-            };
-            return PartialView("_LecturesPartial", adminVM);
-        }
-        [HttpGet]
-        public IActionResult LoadCodesTab()
-        {
-            var lectures = _lectureService.GetLectures();
-            AdminVM adminVM = new AdminVM()
-            {
-                Lectures = lectures
-            };
-            return PartialView("_CodesPartial", adminVM);
-        }
-        [HttpGet]
-        public IActionResult LoadResetTab()
-        {
-            return PartialView("_ResetDevicePartial");
         }
     }
 }

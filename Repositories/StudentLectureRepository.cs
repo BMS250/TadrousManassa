@@ -63,38 +63,39 @@ namespace TadrousManassa.Repositories
             return _context.StudentLectures.Where(sl => sl.LectureId == lectureId).Select(sl => sl.Student).ToList();
         }
 
-        public Dictionary<string, Dictionary<string, int>> GetViewsCountPerStudents()
+        public Dictionary<string, Dictionary<string, int>> GetViewsCountForStudents()
         {
-            Dictionary<string, Dictionary<string, int>> ViewsCountPerStudents = [];
-            foreach (var studentLecture in _context.StudentLectures
-                                            .Where(sl => !string.IsNullOrEmpty(sl.StudentId)))
+            Dictionary<string, Dictionary<string, int>> ViewsCountForStudents = [];
+            var studentLectures = _context.StudentLectures
+                .Where(sl => sl.StudentId != null)
+                .Select(sl => new StudentLectureDTO { LectureId = sl.LectureId, StudentId = sl.StudentId!, ViewsCount = sl.ViewsCount });
+
+            foreach (var studentLecture in studentLectures)
             {
-                var student = userManager.Users.FirstOrDefault(u => u.Id == studentLecture.StudentId);
-                if (student == null)
+                var studentName = userManager.Users.FirstOrDefault(u => u.Id == studentLecture.StudentId)?.UserName ?? null;
+                if (studentName == null)
                     continue;
 
-                string studentName = student.UserName;
-
                 // Ensure the dictionary entry exists
-                if (!ViewsCountPerStudents.TryGetValue(studentLecture.LectureId, out var studentViews))
+                if (!ViewsCountForStudents.TryGetValue(studentLecture.LectureId, out var studentViews))
                 {
                     studentViews = new Dictionary<string, int>();
-                    ViewsCountPerStudents[studentLecture.LectureId] = studentViews;
+                    ViewsCountForStudents[studentLecture.LectureId] = studentViews;
                 }
 
                 // Update the student's view count
                 studentViews[studentName] = studentLecture.ViewsCount;
-
             }
-            return ViewsCountPerStudents;
+            return ViewsCountForStudents;
         }
 
         public Dictionary<string, int> GetNoWatchers()
         {
             Dictionary<string, int> noWatcheres = [];
-            foreach (var studentLecture in _context.StudentLectures)
+            var lectureIDs = _context.Lectures.Select(l => l.Id);
+            foreach (var lectureId in lectureIDs)
             {
-                noWatcheres[studentLecture.LectureId] = _context.StudentLectures.Count(sl => sl.LectureId == studentLecture.LectureId
+                noWatcheres[lectureId] = _context.StudentLectures.Count(sl => sl.LectureId == lectureId
                                                                                         && sl.IsWatched);
             }
             return noWatcheres;

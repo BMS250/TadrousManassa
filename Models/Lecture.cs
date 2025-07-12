@@ -36,6 +36,8 @@ namespace TadrousManassa.Models
         [Required]
         public string VideoPath { get; set; }
 
+        public string? ImagePath { get; set; }
+
         public string? SheetPath { get; set; }
 
         public string? QuizPath { get; set; }

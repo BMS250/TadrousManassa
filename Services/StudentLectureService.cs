@@ -51,9 +51,9 @@ namespace TadrousManassa.Services
             return _studentLectureRepository.GetStudentsByLecture(lectureId);
         }
 
-        public Dictionary<string, Dictionary<string, int>> GetViewsCountPerStudents()
+        public Dictionary<string, Dictionary<string, int>> GetViewsCountForStudents()
         {
-            return _studentLectureRepository.GetViewsCountPerStudents();
+            return _studentLectureRepository.GetViewsCountForStudents();
         }
 
         public OperationResult<object> IncrementViewsCount(string studentId, string lectureId)

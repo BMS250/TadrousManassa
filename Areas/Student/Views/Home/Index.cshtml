@@ -1,5 +1,5 @@
 ﻿@using TadrousManassa.Areas.Student.Models
-@model LectureListViewModel
+@model LecturesBySemesterVM
 
 
 <div class="text-center">
@@ -86,9 +86,9 @@
 <div class="container">
     <!-- Semester Cards Section -->
     <div class="row">
-        @foreach (var semester in Model.LecturesOfSemesters.Keys)
+        @foreach (var semester in Model.LecturesOfSemestersByUnits.Keys)
         {
-            var lectureCount = Model.LecturesOfSemesters[semester].Count;
+            var lectureCount = Model.LecturesOfSemestersByUnits[semester].Count;
             <div class="col-md-12 semester-card" data-semester="@semester">
                 <h4>Term: @semester</h4>
                 <p>@lectureCount lecture@(lectureCount > 1 ? "s" : "")</p>
@@ -98,11 +98,11 @@
     
     <!-- Lecture List Section -->
     <div>
-        @foreach (var semester in Model.LecturesOfSemesters.Keys)
+        @foreach (var semester in Model.LecturesOfSemestersByUnits.Keys)
         {
             <div class="lecture-group" data-semester="@semester" style="display:none;">
-                @* <h5>Lectures for term @semester: @Model.LecturesOfSemesters[semester].Count()</h5> *@
-                @foreach (var lecture in Model.LecturesOfSemesters[semester])
+                @* <h5>Lectures for term @semester: @Model.LecturesOfSemestersByUnits[semester].Count()</h5> *@
+                @foreach (var lecture in Model.LecturesOfSemestersByUnits[semester])
                 {
                     <!-- Add style="cursor:default" to the row -->
                     <div class="lecture-row" data-lecture-id="@lecture.Id" style="cursor:default">

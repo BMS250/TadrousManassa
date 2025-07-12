@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using TadrousManassa.Areas.Student.Models;
+using TadrousManassa.Areas.Teacher.Models;
 using TadrousManassa.Models;
 using TadrousManassa.Repositories;
 using TadrousManassa.Utilities;
@@ -22,6 +23,15 @@ namespace TadrousManassa.Services
         public List<Lecture> GetLectures()
         {
             return lectureRepository.GetLectures();
+        }
+
+        public List<LectureBasicDTO> GetLecturesBasicData()
+        {
+            return lectureRepository.GetLecturesBasicData();
+        }
+        public List<LectureViewsCountDTO> GetLecturesViewsCount()
+        {
+            return lectureRepository.GetLecturesViewsCount();
         }
 
         public List<Lecture> GetCurrentLectures()
@@ -64,14 +74,14 @@ namespace TadrousManassa.Services
             return lectureRepository.GetLecturesByUnit(unit);
         }
 
-        public OperationResult<LectureListViewModel> GetLecturesVM(string studentId)
+        public OperationResult<LecturesBySemesterVM> GetLecturesVM(string studentId)
         {
             if (string.IsNullOrWhiteSpace(studentId))
-                return OperationResult<LectureListViewModel>.Fail("Student ID cannot be null or empty.");
+                return OperationResult<LecturesBySemesterVM>.Fail("Student ID cannot be null or empty.");
             Student student = studentRepository.GetStudent(studentId);
             if (student == null)
-                return OperationResult<LectureListViewModel>.Fail("Student not found.");
-            var lecturesVM = new Dictionary<int, List<LectureViewModel>>();
+                return OperationResult<LecturesBySemesterVM>.Fail("Student not found.");
+            var lecturesVM = new Dictionary<int, List<LectureVM>>();
             //var lecturesResult = lectureRepository.GetLecturesByStudent(studentId);
             var lecturesResult = lectureRepository.GetCurrentLecturesByGrade(student.Grade);
             if (lecturesResult.Success)
@@ -80,7 +90,7 @@ namespace TadrousManassa.Services
                 foreach (var lecture in lecturesResult.Data)
                 {
                     var isLecturePurchased = studentLectureRepository.IsLecturePurchased(studentId, lecture.Id);
-                    var lectureVM = new LectureViewModel
+                    var lectureVM = new LectureVM
                     {
                         Id = lecture.Id,
                         Name = lecture.Name,
@@ -97,8 +107,8 @@ namespace TadrousManassa.Services
                     }
                 }
             }
-            var result = new LectureListViewModel { LecturesOfSemesters = lecturesVM };
-            return OperationResult<LectureListViewModel>.Ok(result, "Lectures retrieved successfully.");
+            var result = new LecturesBySemesterVM { LecturesOfSemestersByUnits = lecturesVM };
+            return OperationResult<LecturesBySemesterVM>.Ok(result, "Lectures retrieved successfully.");
         }
 
         public OperationResult<Lecture> AddLecture(Lecture lecture)

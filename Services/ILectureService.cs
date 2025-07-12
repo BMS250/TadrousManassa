@@ -1,11 +1,16 @@
 ﻿using TadrousManassa.Models;
 using TadrousManassa.Areas.Student.Models;
+using TadrousManassa.Areas.Teacher.Models;
 
 namespace TadrousManassa.Services
 {
     public interface ILectureService
     {
         public List<Lecture> GetLectures();
+
+        public List<LectureBasicDTO> GetLecturesBasicData();
+
+        public List<LectureViewsCountDTO> GetLecturesViewsCount();
 
         public List<Lecture> GetCurrentLectures();
 
@@ -23,7 +28,7 @@ namespace TadrousManassa.Services
 
         public OperationResult<List<Lecture>> GetLecturesByUnit(string unit);
 
-        public OperationResult<LectureListViewModel> GetLecturesVM(string studentId);
+        public OperationResult<LecturesBySemesterVM> GetLecturesVM(string studentId);
 
         public OperationResult<Lecture> AddLecture(Lecture lecture);
 

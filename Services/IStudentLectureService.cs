@@ -10,7 +10,7 @@ namespace TadrousManassa.Services
 
         public List<Student> GetStudentsByLecture(string lectureId);
 
-        public Dictionary<string, Dictionary<string, int>> GetViewsCountPerStudents();
+        public Dictionary<string, Dictionary<string, int>> GetViewsCountForStudents();
 
         public Dictionary<string, int> GetNoWatchers();
 

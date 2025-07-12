@@ -1,10 +1,15 @@
-﻿using TadrousManassa.Models;
+﻿using TadrousManassa.Areas.Teacher.Models;
+using TadrousManassa.Models;
 
 namespace TadrousManassa.Repositories
 {
     public interface ILectureRepository
     {
         public List<Lecture> GetLectures();
+
+        public List<LectureBasicDTO> GetLecturesBasicData();
+
+        public List<LectureViewsCountDTO> GetLecturesViewsCount();
 
         public List<Lecture> GetCurrentLectures();
 

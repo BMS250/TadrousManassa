@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using TadrousManassa.Areas.Teacher.Models;
 using TadrousManassa.Data;
 using TadrousManassa.Models;
 
@@ -25,6 +26,16 @@ namespace TadrousManassa.Repositories
         public List<Lecture> GetLectures()
         {
             return [.. context.Lectures];
+        }
+
+        public List<LectureBasicDTO> GetLecturesBasicData()
+        {
+            return [.. context.Lectures.Select(l => new LectureBasicDTO { Id = l.Id, Name = l.Name })];
+        }
+
+        public List<LectureViewsCountDTO> GetLecturesViewsCount()
+        {
+            return [.. context.Lectures.Select(l => new LectureViewsCountDTO { Id = l.Id, Name = l.Name, ViewsCount = l.ViewsCount })];
         }
 
         public List<Lecture> GetCurrentLectures()
