@@ -1,10 +1,4 @@
-﻿using Amazon;
-using Amazon.Extensions.NETCore.Setup;
-using Amazon.Runtime;
-using Amazon.S3;
-using Amazon.S3.Model;
-using Amazon.S3.Transfer;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +17,6 @@ namespace TadrousManassa.Areas.Teacher.Controllers
     [Authorize(Roles = "Teacher")]
     public class HomeController : Controller
     {
-        private readonly IAmazonS3 _s3Client;
         private readonly IConfiguration _configuration;
         private readonly ILogger<HomeController> _logger;
         private readonly IAppSettingsRepository _appSettingsRepo;
@@ -32,9 +25,8 @@ namespace TadrousManassa.Areas.Teacher.Controllers
         private readonly IStudentLectureService _studentLectureService;
         private readonly ICodeService _codeService;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly string bucketName;
 
-        public HomeController(IAmazonS3 s3Client, IConfiguration configuration, 
+        public HomeController(IConfiguration configuration, 
                                 ILogger<HomeController> logger, IAppSettingsRepository appSettingsRepo, 
                                 ILectureService lectureService, IStudentService studentService,
                                 IStudentLectureService studentLectureService, ICodeService codeService,
@@ -48,22 +40,6 @@ namespace TadrousManassa.Areas.Teacher.Controllers
             _studentLectureService = studentLectureService;
             _codeService = codeService;
             _userManager = userManager;
-            //string accessKey = _configuration["AWS:AccessKey"];
-            //string secretKey = _configuration["AWS:SecretKey"];
-            //string region = _configuration["AWS:Region"];
-            bucketName = _configuration["AWS:BucketName"];
-
-            //var regionEndpoint = RegionEndpoint.GetBySystemName(region); // Convert string to RegionEndpoint
-
-            //if (!string.IsNullOrEmpty(accessKey) && !string.IsNullOrEmpty(secretKey))
-            //{
-            //    _s3Client = new AmazonS3Client(new BasicAWSCredentials(accessKey, secretKey), regionEndpoint);
-            //}
-            //else
-            //{
-            //    _s3Client = new AmazonS3Client(regionEndpoint); // Use IAM Role if credentials are not provided
-            //}
-            _s3Client = s3Client;
             _codeService = codeService;
         }
 
@@ -115,9 +91,6 @@ namespace TadrousManassa.Areas.Teacher.Controllers
                 return RedirectToAction("Index");
             }
 
-            // Load bucket name from configuration (e.g., appsettings.json under "AWS:BucketName")
-            
-
             ApplicationSettings appSettingsData = _appSettingsRepo.GetCurrentData();
             string videoName = Path.GetFileName(videoUploadingVM.Video.FileName);
             // Create a unique object key (was) using a GUID and the original file name. /*{Guid.NewGuid()}_*/
@@ -132,11 +105,6 @@ namespace TadrousManassa.Areas.Teacher.Controllers
                     {
                         stream.Seek(0, SeekOrigin.Begin);
                     }
-
-
-                    var transferUtility = new TransferUtility(_s3Client);
-                    // Asynchronously upload the video stream to S3.
-                    await transferUtility.UploadAsync(stream, bucketName, videoPath);
                 }
 
                 TempData["success"] = "Video uploaded successfully!";
@@ -176,11 +144,6 @@ namespace TadrousManassa.Areas.Teacher.Controllers
                     TempData["success"] = "Codes generated successfully!";
                     return DownloadCodes(lecture.Name, lectureCodes);
                 }
-            }
-            catch (AmazonServiceException ex)
-            {
-                _logger.LogError(ex, "AWS Service Error: {Message}", ex.Message);
-                TempData["error"] = "Error uploading video. Check AWS permissions.";
             }
             catch (Exception ex)
             {

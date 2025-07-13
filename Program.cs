@@ -1,7 +1,3 @@
-using Amazon.Extensions.NETCore.Setup;
-using Amazon.Runtime;
-using Amazon.S3;
-using Amazon.Util.Internal.PlatformServices;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -83,24 +79,6 @@ namespace TadrousManassa
 
             // Register your custom DeviceIdentifierService
             builder.Services.AddScoped<DeviceIdentifierService>();
-
-            // Keep your existing AWS options setup
-            var awsOptions = builder.Configuration.GetAWSOptions();
-            awsOptions.Credentials = new BasicAWSCredentials(
-                builder.Configuration["AWS:AccessKey"],
-                builder.Configuration["AWS:SecretKey"]
-            );
-
-            builder.Services.AddDefaultAWSOptions(awsOptions);
-            builder.Services.AddAWSService<IAmazonS3>();
-
-            // Configure S3 client options separately
-            builder.Services.AddOptions<AmazonS3Config>()
-                .Configure<IOptions<AWSOptions>>((s3Config, awsOptionsAccessor) =>
-                {
-                    s3Config.Timeout = TimeSpan.FromMinutes(15);
-                    s3Config.MaxErrorRetry = 5;
-                });
 
             // MVC & Razor Pages
             builder.Services.AddControllersWithViews();
