@@ -12,26 +12,6 @@ namespace TadrousManassa.Models
 
         public virtual ApplicationUser ApplicationUser { get; set; }
 
-        //[Required]
-        //[MaxLength(70)]
-        //public string Name { get; set; }
-
-        //[Required]
-        //[DataType(DataType.EmailAddress)]
-        //[EmailAddress]
-        //[MaxLength(70)]
-        //public string Email { get; set; }
-
-        //[Required]
-        //[DataType(DataType.Password)]
-        //[MaxLength(255)]
-        //public string PasswordHash { get; set; }
-
-        //[Required]
-        //[DataType (DataType.PhoneNumber)]
-        //[StringLength(11)]
-        //public string PhoneNumber { get; set; }
-
         [Required]
         [DataType(DataType.PhoneNumber)]
         [StringLength(11)]
@@ -56,6 +36,8 @@ namespace TadrousManassa.Models
         [Required]
         [MaxLength(255)]
         public string DeviceId { get; set; }
+
+        public string? ProfileImage { get; set; }
 
         public virtual ICollection<StudentLecture> StudentLectures { get; set; }
     }

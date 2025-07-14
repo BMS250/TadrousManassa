@@ -40,10 +40,10 @@ namespace TadrousManassa.Models
 
         public string? SheetPath { get; set; }
 
-        public string? QuizPath { get; set; }
-
         public int ViewsCount { get; set; } = 0;
 
         public virtual ICollection<StudentLecture> StudentLectures { get; set; }
+
+        public virtual ICollection<Quiz> Quizzes { get; set; }
     }
 }

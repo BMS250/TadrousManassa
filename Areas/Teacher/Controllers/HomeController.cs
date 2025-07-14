@@ -119,7 +119,7 @@ namespace TadrousManassa.Areas.Teacher.Controllers
                     Price = videoUploadingVM.Price ?? 0,
                     VideoPath = videoPath,
                     SheetPath = videoUploadingVM.SheetPath,
-                    QuizPath = videoUploadingVM.QuizPath,
+                    //Quizzes = null,
                     Semester = appSettingsData.CurrentSemester,
                     Year = appSettingsData.CurrentYear,
                     UsedThisYear = true

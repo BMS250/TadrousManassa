@@ -43,10 +43,30 @@ namespace TadrousManassa.Data
                 .WithOne(a => a.Student)
                 .HasForeignKey<Student>(s => s.Id)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Lecture>()
+                .HasMany(l => l.Quizzes)
+                .WithOne(q => q.Lecture)
+                .HasForeignKey(q => q.LectureId);
+
+            modelBuilder.Entity<Quiz>()
+                .HasMany(q => q.Questions)
+                .WithOne(qu => qu.Quiz)
+                .HasForeignKey(q => q.QuizId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Question>()
+                .HasMany(qu => qu.Choices)
+                .WithOne(c => c.Question)
+                .HasForeignKey(q => q.QuestionId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
         public virtual DbSet<Student> Students { get; set; }
         public virtual DbSet<Lecture> Lectures { get; set; }
         public virtual DbSet<StudentLecture> StudentLectures { get; set; }
         public virtual DbSet<ApplicationSettings> ApplicationSettings { get; set; }
+        public virtual DbSet<Quiz> Quizzes { get; set; }
+        public virtual DbSet<Question> Questions { get; set; }
+        public virtual DbSet<Choice> Choices { get; set; }
     }
 }

@@ -6,43 +6,17 @@
     integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumxWNU3hPU4tYLIprf3b0WxJf7BYJ5O4vRII5Ym" 
     crossorigin="anonymous">
     <link rel="stylesheet" href="~/css/fun-layout.css" />
-    <style>
-        .video-container {
-          position: relative;
-          padding-bottom: 56.25%;
-          height: 0;
-          margin-bottom: 1.5rem;
-        }
-
-        .video-container video {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-        }
-
-        
-        video {
-          -webkit-user-select: none;
-          -webkit-touch-callout: none;
-          user-select: none;
-        }
-    </style>
+    <link rel="stylesheet" href="~/css/lecDet.css" />
 </head>
 <div class="container mt-4">
     <h1 class="mb-3">@Model.Name</h1>
-    <p class="text-muted"><strong>Unit:</strong> @Model.Unit</p>
+    @if (!string.IsNullOrEmpty(Model.Unit))
+    {
+        <p class="text-muted"><strong>Unit:</strong> @Model.Unit</p>
+    }
     <p>@Model.Description</p>
 
     <div class="video-container">
-        @* <video id="lecture" controls controlsList="nodownload" oncontextmenu="return false;" playsinline preload="metadata">
-            <source src="@Model.VideoPath" type="video/mp4">
-            <source src="@Model.VideoPath" type="video/webm">
-            <source src="@Model.VideoPath" type="video/ogg">
-            Your browser does not support the video tag.
-        </video> *@
         <video id="lectureVideo" data-lecture-id="@Model.Id" controls controlsList="nodownload" oncontextmenu="return false;" playsinline preload="metadata">
             <source src="@TempData["VideoPath"]" type="video/mp4">
             Your browser does not support the video tag.
@@ -52,12 +26,13 @@
     <div class="d-flex justify-content-around">
         @if (!string.IsNullOrEmpty(Model.SheetPath))
         {
-            <a href="@Model.SheetPath" class="btn btn-outline-primary" target="_blank">View Sheet</a>
+            <a href="@Url.Action("DownloadSheet", new { path = Model.SheetPath })"
+               class="btn btn-outline-primary" target="_blank">
+                Download Sheet
+            </a>
+
         }
-        @if (!string.IsNullOrEmpty(Model.QuizPath))
-        {
-            <a href="@Model.QuizPath" class="btn btn-outline-success" target="_blank">Take Quiz</a>
-        }
+        <a href="@Url.Action("TakeQuiz", new { lectureId = Model.Id})" class="btn btn-outline-success" target="_blank">Take Quiz</a>
     </div>
 </div>
     
@@ -71,43 +46,3 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
-
-@* <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        var lectureVideo = document.getElementById("lecture");
-        var lectureId = "@Model.Id"; // Ensure you pass Lecture ID to the frontend
-        var viewCountElement = document.getElementById("viewCount");
-
-        // ✅ Show Toastr notifications from TempData
-        @if (TempData["success"] != null)
-        {
-            <text>toastr.success("@TempData["success"]");</text>
-        }
-        @if (TempData["error"] != null)
-        {
-            <text>toastr.error("@TempData["error"]");</text>
-        }
-
-        // ✅ Track views when the video starts playing (only once)
-        if (lectureVideo) {
-            lectureVideo.addEventListener("play", function () {
-                fetch(`/Student/Home/video-play`, { // Ensure this matches your controller route
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ lectureId: lectureId })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (viewCountElement && data.count !== undefined) {
-                        viewCountElement.innerText = data.count; // ✅ Update UI
-                    }
-                })
-                .catch(error => {
-                    console.error("Error tracking video play:", error);
-                    toastr.error("Failed to track video view.");
-                });
-            }, { once: true });
-        }
-    });
-</script>
- *@

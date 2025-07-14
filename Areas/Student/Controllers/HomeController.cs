@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using TadrousManassa.Areas.Student.Models;
@@ -16,19 +17,22 @@ namespace TadrousManassa.Areas.Student.Controllers
         private readonly IStudentService _studentService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<HomeController> _logger;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
         public HomeController(
             ILectureService lectureService,
             IStudentLectureService studentLectureService,
             IStudentService studentService,
             UserManager<ApplicationUser> userManager,
-            ILogger<HomeController> logger)
+            ILogger<HomeController> logger,
+            IWebHostEnvironment webHostEnvironment)
         {
             _lectureService = lectureService;
             _studentLectureService = studentLectureService;
             _studentService = studentService;
             _userManager = userManager;
             _logger = logger;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         public async Task<IActionResult> Index()
@@ -149,5 +153,16 @@ namespace TadrousManassa.Areas.Student.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
+
+        public IActionResult DownloadSheet(string path)
+        {
+            // Ensure it's a valid URL to prevent open redirects
+            if (!Uri.IsWellFormedUriString(path, UriKind.Absolute))
+                return BadRequest("Invalid path");
+
+            return Redirect(path);
+        }
+
+
     }
 } 

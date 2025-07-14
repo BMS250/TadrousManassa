@@ -1,4 +1,6 @@
-﻿namespace TadrousManassa.Areas.Teacher.Models
+﻿using TadrousManassa.Models;
+
+namespace TadrousManassa.Areas.Teacher.Models
 {
     public class VideoUploadingPartialVM
     {
@@ -9,6 +11,6 @@
         public string? Unit { get; set; }
         public int? Price { get; set; }
         public string? SheetPath { get; set; }
-        public string? QuizPath { get; set; }
+        public virtual ICollection<Quiz> Quizzes { get; set; }
     }
 }

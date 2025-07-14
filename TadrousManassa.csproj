@@ -21,12 +21,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Areas\Assistant\Controllers\" />
-    <Folder Include="Areas\Assistant\Data\" />
-    <Folder Include="Areas\Assistant\Models\" />
     <Folder Include="Areas\Student\Data\" />
     <Folder Include="Areas\Teacher\Data\" />
     <Folder Include="Controllers\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Services\IQuestionService.cs" />
   </ItemGroup>
 
 </Project>
