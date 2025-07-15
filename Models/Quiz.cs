@@ -23,5 +23,7 @@ namespace TadrousManassa.Models
         public Lecture Lecture { get; set; }
 
         public ICollection<Question> Questions { get; set; } = [];
+
+        public virtual ICollection<StudentQuiz> StudentQuizzes { get; set; }
     }
 }

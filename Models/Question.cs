@@ -14,6 +14,8 @@ namespace TadrousManassa.Models
 
         public string QuizId { get; set; }
 
+        public float Score { get; set; }
+
         [ForeignKey("QuizId")]
         public Quiz Quiz { get; set; }
 

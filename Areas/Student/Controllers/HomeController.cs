@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TadrousManassa.Areas.Student.Models;
 using TadrousManassa.Models;
 using TadrousManassa.Services;
@@ -141,8 +142,8 @@ namespace TadrousManassa.Areas.Student.Controllers
                     TempData["error"] = "The lecture is not found";
                     return RedirectToAction(nameof(Index));
                 }
-
-                TempData["VideoPath"] = lecture.Data.VideoPath;
+                // TODO make the index by order
+                TempData["VideoPath"] = lecture.Data.Videos?[0] ?? new Video();
 
                 return View("lectureDetails", lecture.Data);
             }
@@ -163,6 +164,31 @@ namespace TadrousManassa.Areas.Student.Controllers
             return Redirect(path);
         }
 
+        public IActionResult TakeQuiz(string lectureId)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(lectureId))
+                {
+                    TempData["error"] = "Lecture ID is required.";
+                    return RedirectToAction(nameof(Index));
+                }
+                //var x = _context.StudentQuizzes
+                //    .Select(sq => new { sq.StudentId, sq.QuizId })
+                //    .ToHashSet();
+                //if (x.TryGetValue((lecture.Id, lecture.Id), out var _))
+                //{
+                //    return OperationResult<bool>.Fail("Cannot delete lecture because it is associated with student quizzes.");
+                //}
 
+                return View("TakeQuiz", lectureId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in TakeQuiz action");
+                TempData["error"] = "Error in TakeQuiz action";
+                return RedirectToAction(nameof(Index));
+            }
+        }
     }
 } 

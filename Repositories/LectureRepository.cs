@@ -7,7 +7,7 @@ namespace TadrousManassa.Repositories
 {
     public class LectureRepository : ILectureRepository
     {
-        private readonly ApplicationDbContext context;
+        private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> userManager;
         private readonly IStudentRepository studentRepo;
         private readonly int currentYear;
@@ -15,7 +15,7 @@ namespace TadrousManassa.Repositories
 
         public LectureRepository(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IStudentRepository studentRepo, IAppSettingsRepository appSettingsRepo)
         {
-            this.context = context;
+            _context = context;
             this.userManager = userManager;
             this.studentRepo = studentRepo;
             var currentData = appSettingsRepo.GetCurrentData();
@@ -25,27 +25,27 @@ namespace TadrousManassa.Repositories
 
         public List<Lecture> GetLectures()
         {
-            return [.. context.Lectures];
+            return [.. _context.Lectures];
         }
 
         public List<LectureBasicDTO> GetLecturesBasicData()
         {
-            return [.. context.Lectures.Select(l => new LectureBasicDTO { Id = l.Id, Name = l.Name })];
+            return [.. _context.Lectures.Select(l => new LectureBasicDTO { Id = l.Id, Name = l.Name })];
         }
 
         public List<LectureViewsCountDTO> GetLecturesViewsCount()
         {
-            return [.. context.Lectures.Select(l => new LectureViewsCountDTO { Id = l.Id, Name = l.Name, ViewsCount = l.ViewsCount })];
+            return [.. _context.Lectures.Select(l => new LectureViewsCountDTO { Id = l.Id, Name = l.Name, ViewsCount = l.ViewsCount })];
         }
 
         public List<Lecture> GetCurrentLectures()
         {
-            return [.. context.Lectures.Where(l => l.Semester == currentSemester && l.UsedThisYear)];
+            return [.. _context.Lectures.Where(l => l.Semester == currentSemester && l.UsedThisYear)];
         }
 
         public int GetViewsCount(string id)
         {
-            return context.Lectures.FirstOrDefault(l => l.Id == id)?.ViewsCount ?? 0;
+            return _context.Lectures.FirstOrDefault(l => l.Id == id)?.ViewsCount ?? 0;
         }
 
         public OperationResult<Lecture> GetLecture(string id)
@@ -53,7 +53,7 @@ namespace TadrousManassa.Repositories
             if (string.IsNullOrWhiteSpace(id))
                 return OperationResult<Lecture>.Fail("Lecture ID cannot be null or empty.");
 
-            var lecture = context.Lectures.FirstOrDefault(l => l.Id == id);
+            var lecture = _context.Lectures.FirstOrDefault(l => l.Id == id);
             if (lecture == null)
                 return OperationResult<Lecture>.Fail("Lecture not found.");
 
@@ -66,7 +66,7 @@ namespace TadrousManassa.Repositories
         {
             if (!IsValidGrade(grade))
                 return OperationResult<List<Lecture>>.Fail("Grade must be between 1 and 6");
-            var lectures = context.Lectures.Where(l => l.Grade == grade).ToList();
+            var lectures = _context.Lectures.Where(l => l.Grade == grade).ToList();
             if (lectures == null || lectures.Count == 0)
                 return OperationResult<List<Lecture>>.Fail($"No current lectures found for grade {grade}.");
             return OperationResult<List<Lecture>>.Ok(lectures, "Lectures retrieved successfully.");
@@ -76,7 +76,7 @@ namespace TadrousManassa.Repositories
         {
             if (!IsValidGrade(grade))
                 return OperationResult<List<Lecture>>.Fail("Grade must be between 1 and 6");
-            var lectures = context.Lectures
+            var lectures = _context.Lectures
                 .Where(l => /*l.Semester == ApplicationSettings.CurrentSemester && */l.UsedThisYear && l.Grade == grade)
                 .ToList();
             if (lectures == null || lectures.Count == 0)
@@ -86,7 +86,7 @@ namespace TadrousManassa.Repositories
 
         public OperationResult<List<string>> GetUnits()
         {
-            var units = context.Lectures.Select(l => l.Unit).Distinct().ToList();
+            var units = _context.Lectures.Select(l => l.Unit).Distinct().ToList();
             if (units == null || units.Count == 0)
                 return OperationResult<List<string>>.Fail("No units found.");
             return OperationResult<List<string>>.Ok(units, "Units retrieved successfully.");
@@ -94,7 +94,7 @@ namespace TadrousManassa.Repositories
 
         public OperationResult<List<string>> GetCurrentUnits(int grade)
         {
-            var units = context.Lectures.Where(l => l.Grade == grade && l.Semester == currentSemester && l.UsedThisYear).Select(l => l.Unit).Distinct().ToList();
+            var units = _context.Lectures.Where(l => l.Grade == grade && l.Semester == currentSemester && l.UsedThisYear).Select(l => l.Unit).Distinct().ToList();
             if (units == null || units.Count == 0)
                 return OperationResult<List<string>>.Fail("No units found.");
             return OperationResult<List<string>>.Ok(units, "Units retrieved successfully.");
@@ -102,7 +102,7 @@ namespace TadrousManassa.Repositories
 
         public OperationResult<List<Lecture>> GetLecturesByUnit(string unit)
         {
-            var lectures = context.Lectures.Where(l => l.Unit == unit).ToList();
+            var lectures = _context.Lectures.Where(l => l.Unit == unit).ToList();
             if (lectures == null || lectures.Count == 0)
                 return OperationResult<List<Lecture>>.Fail($"No lectures found for unit '{unit}'.");
             return OperationResult<List<Lecture>>.Ok(lectures, $"Lectures for unit '{unit}' retrieved successfully.");
@@ -113,8 +113,8 @@ namespace TadrousManassa.Repositories
             if (lecture == null)
                 return OperationResult<Lecture>.Fail("Lecture cannot be null.");
 
-            context.Lectures.Add(lecture);
-            context.SaveChanges();
+            _context.Lectures.Add(lecture);
+            _context.SaveChanges();
 
             return OperationResult<Lecture>.Ok(lecture, "Lecture inserted successfully.");
         }
@@ -127,14 +127,14 @@ namespace TadrousManassa.Repositories
             if (lecture == null)
                 return OperationResult<int>.Fail("Lecture cannot be null.");
 
-            var existingLecture = context.Lectures.FirstOrDefault(l => l.Id == id);
+            var existingLecture = _context.Lectures.FirstOrDefault(l => l.Id == id);
             if (existingLecture == null)
                 return OperationResult<int>.Fail("Lecture not found.");
 
-            context.Entry(existingLecture).CurrentValues.SetValues(lecture);
+            _context.Entry(existingLecture).CurrentValues.SetValues(lecture);
             try
             {
-                await context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
                 return OperationResult<int>.Ok(0, "Lecture updated successfully.");
             }
             catch (Exception ex)
@@ -148,14 +148,14 @@ namespace TadrousManassa.Repositories
             if (string.IsNullOrWhiteSpace(id))
                 return OperationResult<bool>.Fail("Lecture ID cannot be null or empty.");
 
-            var lecture = context.Lectures.FirstOrDefault(l => l.Id == id);
+            var lecture = _context.Lectures.FirstOrDefault(l => l.Id == id);
             if (lecture == null)
                 return OperationResult<bool>.Fail("Lecture not found.");
 
             try
             {
-                context.Lectures.Remove(lecture);
-                await context.SaveChangesAsync();
+                _context.Lectures.Remove(lecture);
+                await _context.SaveChangesAsync();
                 return OperationResult<bool>.Ok(true, "Lecture deleted successfully.");
             }
             catch (Exception ex)

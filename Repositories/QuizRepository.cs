@@ -4,22 +4,18 @@ using TadrousManassa.Models;
 
 namespace TadrousManassa.Repositories
 {
-    public class QuizRepository : IQuizRepository
+    public class QuizRepository(ApplicationDbContext context) : IQuizRepository
     {
-        private readonly ApplicationDbContext _context;
-        public QuizRepository(ApplicationDbContext context)
+        private readonly ApplicationDbContext _context = context;
+
+        public async Task<Quiz?> GetQuizByIdAsync(string id)
         {
-            _context = context;
+            return await _context.Quizzes
+                .FirstOrDefaultAsync(q => q.Id == id);
         }
 
-        public async Task<Quiz> CreateQuizAsync(Quiz quiz)
-        {
-            _context.Quizzes.Add(quiz);
-            await _context.SaveChangesAsync();
-            return quiz;
-        }
-
-        public async Task<List<Quiz>> GetQuizzesAsync(string lectureId)
+        
+        public async Task<List<Quiz>> GetQuizzesByLectureIdAsync(string lectureId)
         {
             return await _context.Quizzes
                 .Where(q => q.LectureId == lectureId)
@@ -28,48 +24,24 @@ namespace TadrousManassa.Repositories
                 .ToListAsync();
         }
 
-        public async Task<Quiz> GetQuizByIdAsync(string quizId)
+        public async Task CreateQuizAsync(Quiz quiz)
         {
-            return await _context.Quizzes
-                .Include(q => q.Questions)
-                    .ThenInclude(q => q.Choices)
-                .FirstOrDefaultAsync(q => q.Id == quizId);
-        }
-
-        public async Task<Quiz> GetQuizByLectureIdAsync(string lectureId)
-        {
-            return await _context.Quizzes
-                .Include(q => q.Questions)
-                    .ThenInclude(q => q.Choices)
-                .FirstOrDefaultAsync(q => q.LectureId == lectureId);
-        }
-
-        public async Task<Question> AddQuestionAsync(Question question)
-        {
-            _context.Questions.Add(question);
+            _context.Quizzes.Add(quiz);
             await _context.SaveChangesAsync();
-            return question;
         }
 
-        public void AddQuestionToQuiz(Quiz quiz, Question question)
+        public async Task UpdateQuizAsync(Quiz quiz)
         {
-            quiz.Questions.Add(question);
-        }
-
-        // update question
-        public async Task<Question> UpdateQuestionAsync(Question question)
-        {
-            _context.Questions.Update(question);
+            _context.Quizzes.Update(quiz);
             await _context.SaveChangesAsync();
-            return question;
         }
 
-        public async Task DeleteQuizAsync(string quizId)
+        public async Task DeleteQuizAsync(string id)
         {
             var quiz = await _context.Quizzes
                 .Include(q => q.Questions)
                     .ThenInclude(q => q.Choices)
-                .FirstOrDefaultAsync(q => q.Id == quizId);
+                .FirstOrDefaultAsync(q => q.Id == id);
 
             if (quiz != null)
             {

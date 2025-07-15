@@ -40,5 +40,7 @@ namespace TadrousManassa.Models
         public string? ProfileImage { get; set; }
 
         public virtual ICollection<StudentLecture> StudentLectures { get; set; }
+
+        public virtual ICollection<StudentQuiz> StudentQuizzes { get; set; }
     }
 }

@@ -12,45 +12,45 @@ namespace TadrousManassa.Repositories
 {
     public class StudentRepository : IStudentRepository
     {
-        private readonly ApplicationDbContext context;
+        private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> userManager;
 
         public StudentRepository(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
-            this.context = context;
+            _context = context;
             this.userManager = userManager;
         }
 
         public List<Student> GetStudents()
         {
-            return context.Students.ToList();
+            return _context.Students.ToList();
         }
 
         public Student? GetStudent(string id)
         {
-            return context.Students.FirstOrDefault(s => s.Id == id);
+            return _context.Students.FirstOrDefault(s => s.Id == id);
         }
 
         public Student? GetStudentByEmail(string email)
         {
-            return context.Students.FirstOrDefault(s => s.ApplicationUser.Email == email);
+            return _context.Students.FirstOrDefault(s => s.ApplicationUser.Email == email);
         }
 
         public List<Student> GetStudentsByGrade(int grade)
         {
-            return context.Students.Where(s => s.Grade == grade).ToList();
+            return _context.Students.Where(s => s.Grade == grade).ToList();
         }
 
         public int GetStudentGrade(string id)
         {
-            return context.Students.FirstOrDefault(s => s.Id == id).Grade;
+            return _context.Students.FirstOrDefault(s => s.Id == id).Grade;
         }
 
         public void InsertStudent(Student student)
         {
             ArgumentNullException.ThrowIfNull(student);
-            context.Students.Add(student);
-            context.SaveChanges();
+            _context.Students.Add(student);
+            _context.SaveChanges();
         }
 
         public async Task<int> UpdateStudentAsync(string id, Student student, string? newPassword = null)
@@ -77,7 +77,7 @@ namespace TadrousManassa.Repositories
                     }
                 }
 
-                context.Entry(oldStudent.ApplicationUser).State = EntityState.Modified; // Ensure it's tracked
+                _context.Entry(oldStudent.ApplicationUser).State = EntityState.Modified; // Ensure it's tracked
             }
 
             // Update student-specific properties
@@ -87,7 +87,7 @@ namespace TadrousManassa.Repositories
             oldStudent.School = student.School;
             oldStudent.ReferralSource = student.ReferralSource;
 
-            await context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             return 0;
         }
 
@@ -98,8 +98,8 @@ namespace TadrousManassa.Repositories
 
             Student? student = GetStudentByEmail(studentEmail) ?? throw new ArgumentException("Student cannot be null");
             student.DeviceId = "000";
-            context.Entry(student).State = EntityState.Modified;
-            await context.SaveChangesAsync();
+            _context.Entry(student).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
         }
 
         public async Task<bool> ResetPassword(string email, string newPassword)
@@ -143,8 +143,8 @@ namespace TadrousManassa.Repositories
                 throw new ArgumentException("Student id cannot be null or empty", nameof(id));
             Student student = GetStudent(id);
             ArgumentNullException.ThrowIfNull(student);
-            context.Students.Remove(student);
-            context.SaveChanges();
+            _context.Students.Remove(student);
+            _context.SaveChanges();
         }
     }
 }

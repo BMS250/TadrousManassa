@@ -117,7 +117,8 @@ namespace TadrousManassa.Areas.Teacher.Controllers
                     Grade = videoUploadingVM.Grade ?? 1,
                     Unit = videoUploadingVM.Unit,
                     Price = videoUploadingVM.Price ?? 0,
-                    VideoPath = videoPath,
+                    // TODO Add videos initialization with quizzes here and in frontend part
+                    Videos = [],
                     SheetPath = videoUploadingVM.SheetPath,
                     //Quizzes = null,
                     Semester = appSettingsData.CurrentSemester,

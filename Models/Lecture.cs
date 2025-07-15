@@ -33,9 +33,6 @@ namespace TadrousManassa.Models
         [Required]
         public int Price { get; set; }
 
-        [Required]
-        public string VideoPath { get; set; }
-
         public string? ImagePath { get; set; }
 
         public string? SheetPath { get; set; }
@@ -43,6 +40,8 @@ namespace TadrousManassa.Models
         public int ViewsCount { get; set; } = 0;
 
         public virtual ICollection<StudentLecture> StudentLectures { get; set; }
+
+        public virtual List<Video> Videos { get; set; }
 
         public virtual ICollection<Quiz> Quizzes { get; set; }
     }
