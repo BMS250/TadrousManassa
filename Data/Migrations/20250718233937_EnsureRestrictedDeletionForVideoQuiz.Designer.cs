@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TadrousManassa.Data;
 
@@ -11,9 +12,11 @@ using TadrousManassa.Data;
 namespace TadrousManassa.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250718233937_EnsureRestrictedDeletionForVideoQuiz")]
+    partial class EnsureRestrictedDeletionForVideoQuiz
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -353,9 +356,6 @@ namespace TadrousManassa.Data.Migrations
                     b.Property<int>("NumOfQuestions")
                         .HasColumnType("int");
 
-                    b.Property<int>("NumOfRemainingAttempts")
-                        .HasColumnType("int");
-
                     b.Property<int>("TimeHours")
                         .HasColumnType("int");
 
@@ -402,9 +402,6 @@ namespace TadrousManassa.Data.Migrations
                     b.Property<string>("ProfileImage")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Rank")
-                        .HasColumnType("int");
-
                     b.Property<string>("ReferralSource")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -414,9 +411,6 @@ namespace TadrousManassa.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(70)
                         .HasColumnType("nvarchar(70)");
-
-                    b.Property<int>("Score")
-                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

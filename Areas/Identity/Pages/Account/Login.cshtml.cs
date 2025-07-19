@@ -17,8 +17,9 @@ using Microsoft.Extensions.Logging;
 using TadrousManassa.Models;
 using System.Text;
 using System.Security.Cryptography;
-using TadrousManassa.Repositories;
 using TadrousManassa.Services;
+using TadrousManassa.Models.ViewModels;
+using TadrousManassa.Repositories.IRepositories;
 
 namespace TadrousManassa.Areas.Identity.Pages.Account
 {

@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using TadrousManassa.Data;
 using TadrousManassa.Models;
+using TadrousManassa.Repositories.IRepositories;
 
 namespace TadrousManassa.Repositories
 {

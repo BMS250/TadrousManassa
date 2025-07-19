@@ -7,6 +7,7 @@ using System;
 using System.Web.Helpers;
 using TadrousManassa.Data;
 using TadrousManassa.Models;
+using TadrousManassa.Repositories.IRepositories;
 
 namespace TadrousManassa.Repositories
 {

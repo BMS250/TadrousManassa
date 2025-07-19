@@ -1,6 +1,6 @@
 ﻿using TadrousManassa.Models;
 
-namespace TadrousManassa.Services
+namespace TadrousManassa.Services.IServices
 {
     public interface IStudentService
     {

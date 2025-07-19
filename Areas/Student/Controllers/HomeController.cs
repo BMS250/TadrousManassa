@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TadrousManassa.Areas.Student.Models;
 using TadrousManassa.Models;
-using TadrousManassa.Services;
+using TadrousManassa.Services.IServices;
 
 namespace TadrousManassa.Areas.Student.Controllers
 {
@@ -112,7 +112,7 @@ namespace TadrousManassa.Areas.Student.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> LectureDetails(string lectureId)
+        public async Task<IActionResult> LectureDetails(string lectureId, int order = 0)
         {
             try
             {
@@ -164,13 +164,34 @@ namespace TadrousManassa.Areas.Student.Controllers
             return Redirect(path);
         }
 
-        public IActionResult TakeQuiz(string lectureId)
+        public IActionResult QuizDetails(string videoId)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(lectureId))
+                if (string.IsNullOrWhiteSpace(videoId))
                 {
-                    TempData["error"] = "Lecture ID is required.";
+                    TempData["error"] = "Video ID is required.";
+                    return RedirectToAction(nameof(Index));
+                }
+                
+
+                return View("TakeQuiz", videoId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in TakeQuiz action");
+                TempData["error"] = "Error in TakeQuiz action";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        public IActionResult TakeQuiz(string quizId)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(quizId))
+                {
+                    TempData["error"] = "Quiz ID is required.";
                     return RedirectToAction(nameof(Index));
                 }
                 //var x = _context.StudentQuizzes
@@ -181,7 +202,7 @@ namespace TadrousManassa.Areas.Student.Controllers
                 //    return OperationResult<bool>.Fail("Cannot delete lecture because it is associated with student quizzes.");
                 //}
 
-                return View("TakeQuiz", lectureId);
+                return View("TakeQuiz", quizId);
             }
             catch (Exception ex)
             {

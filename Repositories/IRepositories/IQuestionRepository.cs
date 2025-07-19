@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using TadrousManassa.Models;
 
-namespace TadrousManassa.Repositories
+namespace TadrousManassa.Repositories.IRepositories
 {
     public interface IQuestionRepository
     {

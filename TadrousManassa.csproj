@@ -27,7 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="Services\IQuestionService.cs" />
+    <None Include="Services\IServices\IQuestionService.cs" />
   </ItemGroup>
 
 </Project>

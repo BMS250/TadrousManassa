@@ -1,8 +1,8 @@
 ﻿using TadrousManassa.Models;
 
-namespace TadrousManassa.Services
+namespace TadrousManassa.Repositories.IRepositories
 {
-    public interface IStudentLectureService
+    public interface IStudentLectureRepository
     {
         public OperationResult<List<Lecture>> GetLecturesByStudent(string studentId);
 

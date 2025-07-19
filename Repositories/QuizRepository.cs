@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TadrousManassa.Data;
 using TadrousManassa.Models;
+using TadrousManassa.Repositories.IRepositories;
 
 namespace TadrousManassa.Repositories
 {
@@ -11,6 +12,19 @@ namespace TadrousManassa.Repositories
         public async Task<Quiz?> GetQuizByIdAsync(string id)
         {
             return await _context.Quizzes
+                .FirstOrDefaultAsync(q => q.Id == id);
+        }
+        
+        public async Task<object?> GetQuizDetailsByIdAsync(string id)
+        {
+            return await _context.Quizzes
+                .Select(q => new
+                {
+                    q.Id,
+                    q.Description,
+                    q.TimeHours,
+                    q.TimeMinutes
+                })
                 .FirstOrDefaultAsync(q => q.Id == id);
         }
 

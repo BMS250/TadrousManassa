@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using TadrousManassa.Data;
 using TadrousManassa.Models;
+using TadrousManassa.Models.ViewModels;
+using TadrousManassa.Repositories.IRepositories;
 
 namespace TadrousManassa.Repositories
 {
@@ -32,6 +34,7 @@ namespace TadrousManassa.Repositories
                 return OperationResult<List<Lecture>>.Fail("Student ID cannot be null or empty.");
 
             var lectures = _context.StudentLectures
+                .AsNoTracking()
                 .Where(sl => sl.StudentId == studentId)
                 .Select(sl => sl.Lecture)
                 .ToList();
@@ -44,11 +47,12 @@ namespace TadrousManassa.Repositories
             if (string.IsNullOrWhiteSpace(studentId))
                 return OperationResult<List<Lecture>>.Fail("Student ID cannot be null or empty.");
 
-            var student = _context.Students.FirstOrDefault(s => s.Id == studentId);
+            var student = _context.Students.AsNoTracking().FirstOrDefault(s => s.Id == studentId);
             if (student == null)
                 return OperationResult<List<Lecture>>.Fail("Student not found.");
 
             var lectures = _context.StudentLectures
+                .AsNoTracking()
                 .Where(sl => sl.StudentId == studentId)
                 .Select(sl => sl.Lecture)
                 .Where(l => l.Grade == student.Grade && l.Semester == currentSemester && l.UsedThisYear)
@@ -59,13 +63,14 @@ namespace TadrousManassa.Repositories
 
         public List<Student> GetStudentsByLecture(string lectureId)
         {
-            return _context.StudentLectures.Where(sl => sl.LectureId == lectureId).Select(sl => sl.Student).ToList();
+            return _context.StudentLectures.AsNoTracking().Where(sl => sl.LectureId == lectureId).Select(sl => sl.Student).ToList();
         }
 
         public Dictionary<string, Dictionary<string, int>> GetViewsCountForStudents()
         {
             Dictionary<string, Dictionary<string, int>> ViewsCountForStudents = [];
             var studentLectures = _context.StudentLectures
+                .AsNoTracking()
                 .Where(sl => sl.StudentId != null)
                 .Select(sl => new StudentLectureDTO { LectureId = sl.LectureId, StudentId = sl.StudentId!, ViewsCount = sl.ViewsCount });
 
@@ -91,10 +96,10 @@ namespace TadrousManassa.Repositories
         public Dictionary<string, int> GetNoWatchers()
         {
             Dictionary<string, int> noWatcheres = [];
-            var lectureIDs = _context.Lectures.Select(l => l.Id);
+            var lectureIDs = _context.Lectures.AsNoTracking().Select(l => l.Id);
             foreach (var lectureId in lectureIDs)
             {
-                noWatcheres[lectureId] = _context.StudentLectures.Count(sl => sl.LectureId == lectureId
+                noWatcheres[lectureId] = _context.StudentLectures.AsNoTracking().Count(sl => sl.LectureId == lectureId
                                                                                         && sl.IsWatched);
             }
             return noWatcheres;
@@ -129,7 +134,7 @@ namespace TadrousManassa.Repositories
             if (string.IsNullOrWhiteSpace(lectureId))
                 return OperationResult<bool>.Fail("Lecture ID cannot be null or empty.");
 
-            bool isPurchased = _context.StudentLectures.Any(sl => sl.StudentId == studentId && sl.LectureId == lectureId);
+            bool isPurchased = _context.StudentLectures.AsNoTracking().Any(sl => sl.StudentId == studentId && sl.LectureId == lectureId);
             if (isPurchased)
                 return OperationResult<bool>.Ok(true, "Lecture is purchased.");
             return OperationResult<bool>.Ok(false, "Lecture is not purchased.");
@@ -142,7 +147,8 @@ namespace TadrousManassa.Repositories
             if (string.IsNullOrWhiteSpace(lectureId))
                 return OperationResult<bool>.Fail("Lecture ID cannot be null or empty.");
 
-            StudentLecture? row = _context.StudentLectures.FirstOrDefault(sl => sl.Code == code && sl.LectureId == lectureId && (sl.StudentId == "" || sl.StudentId == null));
+            StudentLecture? row = _context.StudentLectures
+                .FirstOrDefault(sl => sl.Code == code && sl.LectureId == lectureId && (sl.StudentId == "" || sl.StudentId == null));
             if (row == null)
                 return OperationResult<bool>.Fail("Code is not valid.");
             try
@@ -159,7 +165,7 @@ namespace TadrousManassa.Repositories
 
         public int GetRemainingCodes(string lectureId)
         {
-            return _context.StudentLectures.Count(sl => sl.LectureId == lectureId && (sl.StudentId == "" || sl.StudentId == null));
+            return _context.StudentLectures.AsNoTracking().Count(sl => sl.LectureId == lectureId && (sl.StudentId == "" || sl.StudentId == null));
         }
 
         public void CheckRemainingCodes(string lectureId)

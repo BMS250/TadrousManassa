@@ -34,6 +34,12 @@ namespace TadrousManassa.Models
         public string ReferralSource { get; set; }
 
         [Required]
+        public int Score { get; set; }
+        
+        [Required]
+        public int Rank { get; set; }
+
+        [Required]
         [MaxLength(255)]
         public string DeviceId { get; set; }
 

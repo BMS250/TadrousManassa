@@ -50,6 +50,12 @@ namespace TadrousManassa.Data
                 .WithOne(q => q.Lecture)
                 .HasForeignKey(q => q.LectureId);
 
+            modelBuilder.Entity<Lecture>()
+                .HasMany(l => l.Videos)
+                .WithOne(v => v.Lecture)
+                .HasForeignKey(v => v.LectureId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             modelBuilder.Entity<Quiz>()
                 .HasMany(q => q.Questions)
                 .WithOne(qu => qu.Quiz)
@@ -71,11 +77,18 @@ namespace TadrousManassa.Data
                 .HasOne(sq => sq.Quiz)
                 .WithMany(q => q.StudentQuizzes)
                 .HasForeignKey(sq => sq.QuizId);
+
+            modelBuilder.Entity<Video>()
+                .HasOne(v => v.Quiz)
+                .WithOne(q => q.Video)
+                .HasForeignKey<Quiz>(q => q.VideoId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
         public virtual DbSet<Student> Students { get; set; }
         public virtual DbSet<Lecture> Lectures { get; set; }
         public virtual DbSet<StudentLecture> StudentLectures { get; set; }
         public virtual DbSet<ApplicationSettings> ApplicationSettings { get; set; }
+        public virtual DbSet<Video> Videos { get; set; }
         public virtual DbSet<Quiz> Quizzes { get; set; }
         public virtual DbSet<Question> Questions { get; set; }
         public virtual DbSet<Choice> Choices { get; set; }

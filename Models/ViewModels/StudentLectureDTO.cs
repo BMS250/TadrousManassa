@@ -1,4 +1,4 @@
-﻿namespace TadrousManassa.Models
+﻿namespace TadrousManassa.Models.ViewModels
 {
     public class StudentLectureDTO
     {

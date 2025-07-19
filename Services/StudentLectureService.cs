@@ -1,5 +1,6 @@
 ﻿using TadrousManassa.Models;
-using TadrousManassa.Repositories;
+using TadrousManassa.Repositories.IRepositories;
+using TadrousManassa.Services.IServices;
 
 namespace TadrousManassa.Services
 {

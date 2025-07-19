@@ -2,7 +2,8 @@
 using TadrousManassa.Areas.Student.Models;
 using TadrousManassa.Areas.Teacher.Models;
 using TadrousManassa.Models;
-using TadrousManassa.Repositories;
+using TadrousManassa.Repositories.IRepositories;
+using TadrousManassa.Services.IServices;
 using TadrousManassa.Utilities;
 
 namespace TadrousManassa.Services

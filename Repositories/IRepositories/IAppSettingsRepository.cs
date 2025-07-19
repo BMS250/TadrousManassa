@@ -1,7 +1,7 @@
 ﻿using TadrousManassa.Data;
 using TadrousManassa.Models;
 
-namespace TadrousManassa.Repositories
+namespace TadrousManassa.Repositories.IRepositories
 {
     public interface IAppSettingsRepository
     {

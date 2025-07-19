@@ -1,10 +1,9 @@
-﻿using TadrousManassa.Models;
-using TadrousManassa.Areas.Student.Models;
-using TadrousManassa.Areas.Teacher.Models;
+﻿using TadrousManassa.Areas.Teacher.Models;
+using TadrousManassa.Models;
 
-namespace TadrousManassa.Services
+namespace TadrousManassa.Repositories.IRepositories
 {
-    public interface ILectureService
+    public interface ILectureRepository
     {
         public List<Lecture> GetLectures();
 
@@ -22,13 +21,11 @@ namespace TadrousManassa.Services
 
         public OperationResult<List<Lecture>> GetCurrentLecturesByGrade(int grade);
 
+        public OperationResult<List<Lecture>> GetLecturesByUnit(string unit);
+
         public OperationResult<List<string>> GetUnits();
 
         public OperationResult<List<string>> GetCurrentUnits(int grade);
-
-        public OperationResult<List<Lecture>> GetLecturesByUnit(string unit);
-
-        public OperationResult<LecturesBySemesterVM> GetLecturesVM(string studentId);
 
         public OperationResult<Lecture> AddLecture(Lecture lecture);
 

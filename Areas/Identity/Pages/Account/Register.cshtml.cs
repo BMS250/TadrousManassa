@@ -20,7 +20,9 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using TadrousManassa.Models;
+using TadrousManassa.Models.ViewModels;
 using TadrousManassa.Services;
+using TadrousManassa.Services.IServices;
 
 namespace TadrousManassa.Areas.Identity.Pages.Account
 {

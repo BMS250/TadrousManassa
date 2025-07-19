@@ -1,7 +1,7 @@
 ﻿using NuGet.Protocol.Plugins;
 using System.ComponentModel.DataAnnotations;
 
-namespace TadrousManassa.Models
+namespace TadrousManassa.Models.ViewModels
 {
     public class LoginStudentVM
     {

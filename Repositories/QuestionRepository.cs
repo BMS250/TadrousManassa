@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TadrousManassa.Data;
 using TadrousManassa.Models;
+using TadrousManassa.Repositories.IRepositories;
 
 namespace TadrousManassa.Repositories
 {

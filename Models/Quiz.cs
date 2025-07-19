@@ -16,11 +16,21 @@ namespace TadrousManassa.Models
 
         public int TimeMinutes { get; set; } = 0;
 
+        public int NumOfQuestions { get; set; }
+
+        public int NumOfRemainingAttempts { get; set; } = 2;
+
         [Required]
         public required string LectureId { get; set; }
 
         [ForeignKey("LectureId")]
         public Lecture Lecture { get; set; }
+
+        [Required]
+        public required string VideoId { get; set; }
+
+        [ForeignKey("VideoId")]
+        public Video Video { get; set; }
 
         public ICollection<Question> Questions { get; set; } = [];
 

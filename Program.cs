@@ -9,7 +9,9 @@ using System.Configuration;
 using TadrousManassa.Data;
 using TadrousManassa.Models;
 using TadrousManassa.Repositories;
+using TadrousManassa.Repositories.IRepositories;
 using TadrousManassa.Services;
+using TadrousManassa.Services.IServices;
 using TadrousManassa.Utilities;
 
 namespace TadrousManassa

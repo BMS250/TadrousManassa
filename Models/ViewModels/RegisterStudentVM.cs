@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using TadrousManassa.Utilities;
 
-namespace TadrousManassa.Models
+namespace TadrousManassa.Models.ViewModels
 {
     public class RegisterStudentVM
     {

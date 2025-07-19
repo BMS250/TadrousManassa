@@ -7,8 +7,8 @@ using NuGet.Configuration;
 using System.Text;
 using TadrousManassa.Areas.Teacher.Models;
 using TadrousManassa.Models;
-using TadrousManassa.Repositories;
-using TadrousManassa.Services;
+using TadrousManassa.Repositories.IRepositories;
+using TadrousManassa.Services.IServices;
 
 namespace TadrousManassa.Areas.Teacher.Controllers
 {
