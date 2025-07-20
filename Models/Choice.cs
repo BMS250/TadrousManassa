@@ -8,8 +8,11 @@ namespace TadrousManassa.Models
         [Key]
         public string Id { get; set; }
 
+        [Required]
+        [MaxLength(500)]
         public string Text { get; set; }
 
+        [Required]
         public string QuestionId { get; set; }
 
         [ForeignKey("QuestionId")]

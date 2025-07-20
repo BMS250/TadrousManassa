@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TadrousManassa.Areas.Student.Models;
 using TadrousManassa.Data;
 using TadrousManassa.Models;
 using TadrousManassa.Repositories.IRepositories;
@@ -9,21 +10,31 @@ namespace TadrousManassa.Repositories
     {
         private readonly ApplicationDbContext _context = context;
 
+
+        public Task<string?> GetQuizIdByVideoIdAsync(string videoId)
+        {
+            return _context.Videos
+                .AsNoTracking()
+                .Where(v => v.Id == videoId)
+                .Select(v => v.QuizId)
+                .FirstOrDefaultAsync();
+        }
         public async Task<Quiz?> GetQuizByIdAsync(string id)
         {
             return await _context.Quizzes
                 .FirstOrDefaultAsync(q => q.Id == id);
         }
         
-        public async Task<object?> GetQuizDetailsByIdAsync(string id)
+        public async Task<QuizDetailsDTO?> GetQuizDetailsAsync(string id)
         {
             return await _context.Quizzes
-                .Select(q => new
+                .Select(q => new QuizDetailsDTO
                 {
-                    q.Id,
-                    q.Description,
-                    q.TimeHours,
-                    q.TimeMinutes
+                    Id = q.Id,
+                    Name = q.Name ?? "Quiz",
+                    Description = q.Description ?? string.Empty,
+                    TimeHours = q.TimeHours,
+                    TimeMinutes = q.TimeMinutes
                 })
                 .FirstOrDefaultAsync(q => q.Id == id);
         }

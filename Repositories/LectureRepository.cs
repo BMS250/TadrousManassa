@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using TadrousManassa.Areas.Student.Models;
 using TadrousManassa.Areas.Teacher.Models;
 using TadrousManassa.Data;
 using TadrousManassa.Models;
@@ -60,6 +61,35 @@ namespace TadrousManassa.Repositories
                 return OperationResult<Lecture>.Fail("Lecture not found.");
 
             return OperationResult<Lecture>.Ok(lecture, "Lecture retrieved successfully.");
+        }
+
+        public OperationResult<VideoDetailsDTO> GetVideoDetails(string id, int order)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                return OperationResult<VideoDetailsDTO>.Fail("Lecture ID cannot be null or empty.");
+
+            string videoId = _context.Lectures.AsNoTracking()
+                .Where(l => l.Id == id)
+                .Select(l => l.Videos[order].Id)
+                .FirstOrDefault()!;
+
+            VideoDetailsDTO? videoDetails = _context.Lectures.AsNoTracking()
+                .Include(vd => vd.Videos)
+                .Select(vd => new VideoDetailsDTO
+                {
+                    Id = videoId,
+                    Name = vd.Name,
+                    Description = vd.Description,
+                    Path = vd.Videos[order].Path ?? string.Empty,
+                    Unit = vd.Unit,
+                    Order = order,
+                    SheetPath = vd.SheetPath ?? string.Empty
+                })
+                .FirstOrDefault(vd => vd.Id == videoId && vd.Order == order);
+            if (videoDetails == null)
+                return OperationResult<VideoDetailsDTO>.Fail("Lecture not found.");
+
+            return OperationResult<VideoDetailsDTO>.Ok(videoDetails, "Lecture retrieved successfully.");
         }
 
         private static bool IsValidGrade(int grade) => grade >= 1 && grade <= 6;

@@ -1,4 +1,4 @@
-﻿@model TadrousManassa.Models.Lecture
+﻿@model TadrousManassa.Areas.Student.Models.VideoDetailsDTO
 
 <head>
     <meta charset="utf-8" />
@@ -18,7 +18,8 @@
 
     <div class="video-container">
         <video id="lectureVideo" data-lecture-id="@Model.Id" controls controlsList="nodownload" oncontextmenu="return false;" playsinline preload="metadata">
-            <source src="@TempData["VideoPath"]" type="video/mp4">
+            @* <source src="@TempData["VideoPath"]" type="video/mp4"> *@
+            <source src="@Model.Path" type="video/mp4">
             Your browser does not support the video tag.
         </video>
     </div>
@@ -32,7 +33,10 @@
             </a>
 
         }
-        <a href="@Url.Action("QuizDetails", new { lectureId = Model.Id})" class="btn btn-outline-success" target="_blank">Go to quiz</a>
+        <form action="@Url.Action("QuizDetails")" method="get" target="_blank" style="display:inline;">
+            <input type="hidden" name="videoId" value="@Model.Id" />
+            <button type="submit" class="btn btn-outline-success">Go to Quiz</button>
+        </form>
     </div>
 </div>
     

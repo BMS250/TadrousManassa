@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TadrousManassa.Data;
 
@@ -11,9 +12,11 @@ using TadrousManassa.Data;
 namespace TadrousManassa.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250719202253_ModityTitleToName")]
+    partial class ModityTitleToName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -359,6 +362,9 @@ namespace TadrousManassa.Data.Migrations
                     b.Property<int>("NumOfQuestions")
                         .HasColumnType("int");
 
+                    b.Property<int>("NumOfRemainingAttempts")
+                        .HasColumnType("int");
+
                     b.Property<int>("TimeHours")
                         .HasColumnType("int");
 
@@ -469,9 +475,6 @@ namespace TadrousManassa.Data.Migrations
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("NumOfRemainingAttempts")
-                        .HasColumnType("int");
 
                     b.Property<string>("QuizId")
                         .IsRequired()

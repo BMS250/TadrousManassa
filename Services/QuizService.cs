@@ -1,17 +1,23 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TadrousManassa.Areas.Student.Models;
 using TadrousManassa.Data;
 using TadrousManassa.Models;
-using TadrousManassa.Repositories;
+using TadrousManassa.Repositories.IRepositories;
 using TadrousManassa.Services.IServices;
 
 namespace TadrousManassa.Services
 {
     public class QuizService : IQuizService
     {
-        private readonly QuizRepository _quizRepository;
-        public QuizService(QuizRepository quizRepository)
+        private readonly IQuizRepository _quizRepository;
+        public QuizService(IQuizRepository quizRepository)
         {
             _quizRepository = quizRepository;
+        }
+
+        public Task<string?> GetQuizIdByVideoIdAsync(string videoId)
+        {
+            return _quizRepository.GetQuizIdByVideoIdAsync(videoId);
         }
 
         public async Task<Quiz?> GetQuizByIdAsync(string id)
@@ -19,6 +25,10 @@ namespace TadrousManassa.Services
             return await _quizRepository.GetQuizByIdAsync(id);
         }
 
+        public async Task<QuizDetailsDTO?> GetQuizDetailsAsync(string id)
+        {
+            return await _quizRepository.GetQuizDetailsAsync(id);
+        }
 
         public async Task<List<Quiz>> GetQuizzesByLectureIdAsync(string lectureId)
         {

@@ -27,14 +27,16 @@ namespace TadrousManassa.Models
         [Required]
         public bool UsedThisYear { get; set; } = true;
 
-        [MaxLength(255)]
+        [MaxLength(75)]
         public string? Unit { get; set; }
 
         [Required]
         public int Price { get; set; }
 
+        [MaxLength(255)]
         public string? ImagePath { get; set; }
 
+        [MaxLength(255)]
         public string? SheetPath { get; set; }
 
         public int ViewsCount { get; set; } = 0;

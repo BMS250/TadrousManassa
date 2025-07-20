@@ -18,6 +18,8 @@ namespace TadrousManassa.Services.IServices
 
         public OperationResult<Lecture> GetLecture(string id);
 
+        public OperationResult<VideoDetailsDTO> GetVideoDetails(string id, int order);
+
         public OperationResult<List<Lecture>> GetLecturesByGrade(int grade);
 
         public OperationResult<List<Lecture>> GetCurrentLecturesByGrade(int grade);

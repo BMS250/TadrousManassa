@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TadrousManassa.Data;
 
@@ -11,9 +12,11 @@ using TadrousManassa.Data;
 namespace TadrousManassa.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250719191221_AddDataAnnotationMaxLength")]
+    partial class AddDataAnnotationMaxLength
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -359,6 +362,9 @@ namespace TadrousManassa.Data.Migrations
                     b.Property<int>("NumOfQuestions")
                         .HasColumnType("int");
 
+                    b.Property<int>("NumOfRemainingAttempts")
+                        .HasColumnType("int");
+
                     b.Property<int>("TimeHours")
                         .HasColumnType("int");
 
@@ -470,9 +476,6 @@ namespace TadrousManassa.Data.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("NumOfRemainingAttempts")
-                        .HasColumnType("int");
-
                     b.Property<string>("QuizId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -506,10 +509,6 @@ namespace TadrousManassa.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("Name")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<int>("Order")
                         .HasColumnType("int");
 
@@ -520,6 +519,10 @@ namespace TadrousManassa.Data.Migrations
 
                     b.Property<string>("QuizId")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("ViewsCount")
                         .HasColumnType("int");

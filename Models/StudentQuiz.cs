@@ -22,5 +22,8 @@ namespace TadrousManassa.Models
 
         [Required]
         public float Score { get; set; } = 0;
+
+        [Required]
+        public int NumOfRemainingAttempts { get; set; } = 2;
     }
 }

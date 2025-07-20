@@ -43,6 +43,7 @@ namespace TadrousManassa.Models
         [MaxLength(255)]
         public string DeviceId { get; set; }
 
+        [MaxLength(500)]
         public string? ProfileImage { get; set; }
 
         public virtual ICollection<StudentLecture> StudentLectures { get; set; }

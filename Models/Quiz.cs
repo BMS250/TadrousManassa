@@ -8,8 +8,10 @@ namespace TadrousManassa.Models
         [Key]
         public string Id { get; set; }
 
-        public string? Title => $"{Lecture?.Name} Quiz" ?? "Quiz";
+        [MaxLength(50)]
+        public string? Name => $"{Lecture?.Name} Quiz" ?? "Quiz";
 
+        [MaxLength(255)]
         public string? Description { get; set; }
 
         public int TimeHours { get; set; } = 1;
@@ -17,8 +19,6 @@ namespace TadrousManassa.Models
         public int TimeMinutes { get; set; } = 0;
 
         public int NumOfQuestions { get; set; }
-
-        public int NumOfRemainingAttempts { get; set; } = 2;
 
         [Required]
         public required string LectureId { get; set; }

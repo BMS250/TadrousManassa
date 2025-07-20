@@ -6,6 +6,7 @@ namespace TadrousManassa.Models
 {
     public class StudentLecture
     {
+        [Key]
         public string Id { get; set; }
 
         [Required]

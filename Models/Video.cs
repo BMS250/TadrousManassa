@@ -9,12 +9,13 @@ namespace TadrousManassa.Models
         public string Id { get; set; }
 
         [Required]
-        [MaxLength(500)]
+        [MaxLength(255)]
         public string Path { get; set; }
 
-        [MaxLength(255)]
-        public string? Title { get; set; }
+        [MaxLength(100)]
+        public string? Name { get; set; }
 
+        [MaxLength(255)]
         public string? Description { get; set; }
 
         // Optional if a quiz is not always required after a video

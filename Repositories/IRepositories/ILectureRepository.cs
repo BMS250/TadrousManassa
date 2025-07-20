@@ -1,4 +1,5 @@
-﻿using TadrousManassa.Areas.Teacher.Models;
+﻿using TadrousManassa.Areas.Student.Models;
+using TadrousManassa.Areas.Teacher.Models;
 using TadrousManassa.Models;
 
 namespace TadrousManassa.Repositories.IRepositories
@@ -16,6 +17,8 @@ namespace TadrousManassa.Repositories.IRepositories
         public int GetViewsCount(string id);
 
         public OperationResult<Lecture> GetLecture(string id);
+
+        public OperationResult<VideoDetailsDTO> GetVideoDetails(string id, int order);
 
         public OperationResult<List<Lecture>> GetLecturesByGrade(int grade);
 

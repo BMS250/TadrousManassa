@@ -122,10 +122,11 @@
                             else
                             {
                                 <!-- Use form POST to avoid URL parameters -->
-                                <form method="post" action="@Url.Action("LectureDetails", "Home")" style="display:inline;">
+                                <form method="get" action="@Url.Action("LectureDetails", "Home")" style="display:inline;">
                                     <input type="hidden" name="lectureId" value="@lecture.Id" />
                                     <button type="submit" class="btn btn-primary go-btn">Go to the lecture</button>
                                 </form>
+                                @* <a href="@Url.Action("LectureDetails", "Home", new { lectureId = @lecture.Id})" style="display:inline;" class="btn btn-primary go-btn" target="_blank">Go to the lecture</a> *@
                             }
                         </div>
                     </div>

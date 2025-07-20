@@ -2,13 +2,13 @@
 using System.Threading.Tasks;
 using TadrousManassa.Data;
 using TadrousManassa.Models;
-using TadrousManassa.Repositories;
+using TadrousManassa.Repositories.IRepositories;
 
 namespace TadrousManassa.Services
 {
-    public class QuestionService(QuestionRepository questionRepository) : IQuestionService
+    public class QuestionService(IQuestionRepository questionRepository) : IQuestionService
     {
-        private readonly QuestionRepository _questionRepository = questionRepository;
+        private readonly IQuestionRepository _questionRepository = questionRepository;
 
         public async Task<Question?> GetQuestionByIdAsync(string questionId)
         {

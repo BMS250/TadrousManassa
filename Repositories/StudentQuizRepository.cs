@@ -33,8 +33,26 @@ namespace TadrousManassa.Repositories
                 .ToListAsync();
         }
 
-        public bool IsQuizTaken(string studentId, string quizId)
+        public Task<int> GetRemainingAttemptsAsync(string studentId, string videoId)
         {
+            var quizId = _context.Quizzes
+                .AsNoTracking()
+                .Where(q => q.VideoId == videoId)
+                .Select(q => q.Id)
+                .FirstOrDefault();
+            return _context.StudentQuizzes
+                .Where(sq => sq.StudentId == studentId && sq.QuizId == quizId)
+                .Select(sq => sq.NumOfRemainingAttempts)
+                .FirstOrDefaultAsync();
+        }
+
+        public bool IsQuizSolved(string studentId, string videoId)
+        {
+            var quizId = _context.Quizzes
+                .AsNoTracking()
+                .Where(q => q.VideoId == videoId)
+                .Select(q => q.Id)
+                .FirstOrDefault();
             return _context.StudentQuizzes.Any(sq => sq.StudentId == studentId && sq.QuizId == quizId);
         }
 

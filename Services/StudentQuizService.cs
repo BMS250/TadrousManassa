@@ -1,15 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TadrousManassa.Data;
 using TadrousManassa.Models;
-using TadrousManassa.Repositories;
+using TadrousManassa.Repositories.IRepositories;
 using TadrousManassa.Services.IServices;
 
 namespace TadrousManassa.Services
 {
     public class StudentQuizService : IStudentQuizService
     {
-        private readonly StudentQuizRepository _studentQuizRepository;
-        public StudentQuizService(StudentQuizRepository studentQuizRepository)
+        private readonly IStudentQuizRepository _studentQuizRepository;
+        public StudentQuizService(IStudentQuizRepository studentQuizRepository)
         {
             _studentQuizRepository = studentQuizRepository;
         }
@@ -19,9 +19,14 @@ namespace TadrousManassa.Services
             return _studentQuizRepository.GetFullQuizzesByStudentIdAsync(studentId);
         }
 
-        public bool IsQuizTaken(string studentId, string quizId)
+        public Task<int> GetRemainingAttemptsAsync(string studentId, string videoId)
         {
-            return _studentQuizRepository.IsQuizTaken(studentId, quizId);
+            return _studentQuizRepository.GetRemainingAttemptsAsync(studentId, videoId);
+        }
+
+        public bool IsQuizSolved(string studentId, string videoId)
+        {
+            return _studentQuizRepository.IsQuizSolved(studentId, videoId);
         }
     }
 }
