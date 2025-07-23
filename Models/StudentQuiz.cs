@@ -21,7 +21,10 @@ namespace TadrousManassa.Models
         public Quiz Quiz { get; set; }
 
         [Required]
-        public float Score { get; set; } = 0;
+        public float Score1 { get; set; } = -1;
+        
+        [Required]
+        public float Score2 { get; set; } = -1;
 
         [Required]
         public int NumOfRemainingAttempts { get; set; } = 2;

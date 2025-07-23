@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Newtonsoft.Json;
+//using System.Text.Json.Serialization;
 
 namespace TadrousManassa.Models
 {
@@ -21,10 +23,10 @@ namespace TadrousManassa.Models
         public float Score { get; set; }
 
         [ForeignKey("QuizId")]
+        [JsonIgnore]
         public Quiz Quiz { get; set; }
 
-        [Required]
-        public string AnswerId { get; set; }
+        public string? AnswerId { get; set; }
 
         [ForeignKey("AnswerId")]
         public Choice Answer { get; set; }

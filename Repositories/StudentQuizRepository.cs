@@ -41,6 +41,7 @@ namespace TadrousManassa.Repositories
                 .Select(q => q.Id)
                 .FirstOrDefault();
             return _context.StudentQuizzes
+                .AsNoTracking()
                 .Where(sq => sq.StudentId == studentId && sq.QuizId == quizId)
                 .Select(sq => sq.NumOfRemainingAttempts)
                 .FirstOrDefaultAsync();

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 using TadrousManassa.Areas.Student.Models;
 using TadrousManassa.Models;
 using TadrousManassa.Services.IServices;
@@ -234,7 +235,7 @@ namespace TadrousManassa.Areas.Student.Controllers
             }
         }
 
-        public IActionResult SolveQuiz(string quizId)
+        public async Task<IActionResult> SolveQuiz(string quizId)
         {
             try
             {
@@ -243,16 +244,15 @@ namespace TadrousManassa.Areas.Student.Controllers
                     TempData["error"] = "Quiz ID is required.";
                     return RedirectToAction(nameof(Index));
                 }
-                //var x = _context.StudentQuizzes
-                //    .Select(sq => new { sq.StudentId, sq.QuizId })
-                //    .ToHashSet();
-                //if (x.TryGetValue((lecture.Id, lecture.Id), out var _))
-                //{
-                //    return OperationResult<bool>.Fail("Cannot delete lecture because it is associated with student quizzes.");
-                //}
-                //var quiz = _quizService.GetQuizByVideoIdAsync(videoId);
+                
+                Quiz? quiz = await _quizService.GetQuizByIdAsync(quizId);
+                if (quiz == null)
+                {
+                    TempData["error"] = "Quiz not found.";
+                    return RedirectToAction(nameof(Index));
+                }
 
-                return View("SolveQuiz", quizId);
+                return View("SolveQuiz", quiz);
             }
             catch (Exception ex)
             {
@@ -262,48 +262,51 @@ namespace TadrousManassa.Areas.Student.Controllers
             }
         }
 
-        [HttpGet]
+        [HttpPost]
         public IActionResult QuizResult()
         {
-            return View();
+            // يمكنك قراءة القيم من Request.Form
+            var quizId = Request.Form["quizId"];
+            // باقي المعالجة...
+            return Ok(new { success = true });
         }
-        [HttpPost("/Student/Home/add-quiz")]
-        public async Task<IActionResult> AddQuiz(string id/*[FromBody] Quiz quiz*/)
-        {
-            _logger.LogInformation("=== AddQuiz ACTION CALLED ===");
-            _logger.LogInformation("Request Headers: {Headers}", Request.Headers.ToString());
-            _logger.LogInformation("Content-Type: {ContentType}", Request.ContentType);
-            //_logger.LogInformation("Quiz object is null: {IsNull}", quiz == null);
+        //[HttpPost("/Student/Home/add-quiz")]
+        //public async Task<IActionResult> AddQuiz(string id/*[FromBody] Quiz quiz*/)
+        //{
+        //    _logger.LogInformation("=== AddQuiz ACTION CALLED ===");
+        //    _logger.LogInformation("Request Headers: {Headers}", Request.Headers.ToString());
+        //    _logger.LogInformation("Content-Type: {ContentType}", Request.ContentType);
+        //    //_logger.LogInformation("Quiz object is null: {IsNull}", quiz == null);
 
-            //if (quiz != null)
-            //{
-            //    _logger.LogInformation("Quiz data: {@Quiz}", quiz);
-            //}
-            Quiz quiz = new Quiz
-            {
-                Id = id,
-                VideoId = "ferf",
-                Description = "tyki",
-                TimeHours = 0,
-                TimeMinutes = 30,
-                LectureId = "LectureId", // Replace with actual lecture ID
-                Questions = new List<Question>() // Initialize with an empty list or add questions as needed
-            };
-            //try
-            //{
-            //    // Your existing code here...
-            await _quizService.CreateQuizAsync(quiz);
+        //    //if (quiz != null)
+        //    //{
+        //    //    _logger.LogInformation("Quiz data: {@Quiz}", quiz);
+        //    //}
+        //    Quiz quiz = new Quiz
+        //    {
+        //        Id = id,
+        //        VideoId = "ferf",
+        //        Description = "tyki",
+        //        TimeHours = 0,
+        //        TimeMinutes = 30,
+        //        LectureId = "LectureId", // Replace with actual lecture ID
+        //        Questions = new List<Question>() // Initialize with an empty list or add questions as needed
+        //    };
+        //    //try
+        //    //{
+        //    //    // Your existing code here...
+        //    await _quizService.CreateQuizAsync(quiz);
 
-            //    _logger.LogInformation("Quiz created successfully");
-                return Ok(new { success = true, message = "Quiz added successfully." });
-            //}
-            //catch (Exception ex)
-            //{
-            //    _logger.LogError(ex, "Error in AddQuiz action");
-            //    return BadRequest(new { success = false, message = ex.Message });
-            //}
-        }
+        //    //    _logger.LogInformation("Quiz created successfully");
+        //        return Ok(new { success = true, message = "Quiz added successfully." });
+        //    //}
+        //    //catch (Exception ex)
+        //    //{
+        //    //    _logger.LogError(ex, "Error in AddQuiz action");
+        //    //    return BadRequest(new { success = false, message = ex.Message });
+        //    //}
+        //}
 
 
     }
-} 
+}  

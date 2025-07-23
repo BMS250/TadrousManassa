@@ -1,5 +1,430 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model TadrousManassa.Models.Quiz
 @{
+    ViewData["Title"] = "Solve Quiz";
+    var totalSeconds = (Model.TimeHours * 60 + Model.TimeMinutes) * 60;
 }
+
+<!-- Timer -->
+<div id="quiz-timer" class="alert alert-warning text-center fw-bold fs-4" style="margin-bottom:0;">
+    Remaining Time: <span id="timer"></span>
+</div>
+
+<div class="container mt-4 mb-5">
+    <h2 class="text-center mb-4">@Model.Name</h2>
+
+    <form id="quizForm" method="post">
+        <input type="hidden" name="quizId" value="@Model.Id" />
+        <div id="questions-container">
+            <!-- Questions will be loaded here by JavaScript -->
+            <div class="text-center">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p>Loading questions...</p>
+            </div>
+        </div>
+        <div class="text-center mt-4" id="submit-section" style="display: none;">
+            <button type="button" id="submitBtn" class="btn btn-success btn-lg px-5">Submit</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // --- Get data from server with debugging ---
+        const questionsData = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Questions));
+        const totalSeconds = @totalSeconds;
+        let timerInterval;
+        let timeLeft = totalSeconds;
+
+        // Debug the received data
+        console.log('Raw questionsData:', questionsData);
+        console.log('Total questions received:', questionsData ? questionsData.length : 'No data');
+        console.log('Total seconds for quiz:', totalSeconds);
+
+        // --- Shuffle function ---
+        function shuffle(array) {
+            const shuffled = [...array]; // Create a copy first
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // --- Display questions and choices with random order ---
+        function renderQuestions() {
+            console.log('Starting renderQuestions function...');
+            const container = document.getElementById('questions-container');
+
+            if (!container) {
+                console.error('Questions container not found!');
+                return;
+            }
+
+            // Clear loading content
+            container.innerHTML = '';
+
+            // Check if we have questions data
+            if (!questionsData) {
+                console.error('No questions data received');
+                container.innerHTML = '<div class="alert alert-danger text-center">No questions data received from server</div>';
+                return;
+            }
+
+            if (!Array.isArray(questionsData) || questionsData.length === 0) {
+                console.error('Questions data is empty or not an array');
+                container.innerHTML = '<div class="alert alert-warning text-center">No questions available for this quiz</div>';
+                return;
+            }
+
+            console.log(`Rendering ${questionsData.length} questions...`);
+
+            try {
+                // Shuffle questions for random order
+                const shuffledQuestions = shuffle(questionsData);
+
+                shuffledQuestions.forEach((question, index) => {
+                    console.log(`Processing question ${index + 1}:`, question);
+
+                    // Handle both PascalCase and camelCase property names
+                    const questionId = question.id || question.Id;
+                    const questionText = question.text || question.Text;
+                    const questionImage = question.image || question.Image;
+                    const questionChoices = question.choices || question.Choices;
+
+                    if (!questionId) {
+                        console.error(`Question ${index + 1} missing ID:`, question);
+                        return;
+                    }
+
+                    if (!questionText) {
+                        console.error(`Question ${index + 1} missing text:`, question);
+                        return;
+                    }
+
+                    if (!questionChoices || !Array.isArray(questionChoices) || questionChoices.length === 0) {
+                        console.error(`Question ${index + 1} has no choices:`, question);
+                        return;
+                    }
+
+                    // Shuffle choices for random order
+                    const shuffledChoices = shuffle(questionChoices);
+
+                    // Build question HTML
+                    let questionHtml = `<div class='card mb-4 question-block' id='question-block-${questionId}'>`;
+                    questionHtml += `<div class='card-header fw-bold'>سؤال ${index + 1}:</div>`;
+                    questionHtml += `<div class='card-body'>`;
+                    questionHtml += `<p class='fs-5 mb-3'>${questionText}</p>`;
+
+                    // Add image if exists
+                    if (questionImage) {
+                        questionHtml += `<img src='${questionImage}' alt='صورة السؤال' class='img-fluid mb-3' style='max-width:300px;' />`;
+                    }
+
+                    questionHtml += `<div class='choices-list'>`;
+
+                    // Add choices
+                    shuffledChoices.forEach(choice => {
+                        const choiceId = choice.id || choice.Id;
+                        const choiceText = choice.text || choice.Text;
+                        const choiceImage = choice.image || choice.Image;
+
+                        if (!choiceId) {
+                            console.error('Choice missing ID:', choice);
+                            return;
+                        }
+
+                        questionHtml += `<div class='form-check mb-2 choice-row' data-choice-id='${choiceId}' data-question-id='${questionId}'>`;
+                        questionHtml += `<input class='form-check-input' type='radio' name='answers[${questionId}]' id='choice-${choiceId}' value='${choiceId}'>`;
+                        questionHtml += `<label class='form-check-label' for='choice-${choiceId}'>`;
+
+                        if (choiceText) {
+                            questionHtml += choiceText;
+                        }
+
+                        if (choiceImage) {
+                            questionHtml += `<br><img src='${choiceImage}' alt='صورة الاختيار' class='img-fluid mt-2' style='max-width:200px;' />`;
+                        }
+
+                        questionHtml += `</label></div>`;
+                    });
+
+                    questionHtml += `</div></div></div>`;
+
+                    // Add to container
+                    container.innerHTML += questionHtml;
+                });
+
+                console.log('Questions rendered successfully');
+
+                // Show submit button
+                document.getElementById('submit-section').style.display = 'block';
+
+                // Add click event listeners to choice rows
+                addChoiceClickListeners();
+
+            } catch (error) {
+                console.error('Error rendering questions:', error);
+                container.innerHTML = '<div class="alert alert-danger text-center">Error displaying questions. Please refresh the page.</div>';
+            }
+        }
+
+        // --- Add click listeners to choice rows ---
+        function addChoiceClickListeners() {
+            const choiceRows = document.querySelectorAll('.choice-row');
+            choiceRows.forEach(row => {
+                row.addEventListener('click', function(e) {
+                    // Prevent double triggering if user clicks directly on radio button or label
+                    if (e.target.type === 'radio' || e.target.tagName === 'LABEL') {
+                        return;
+                    }
+
+                    const choiceId = this.getAttribute('data-choice-id');
+                    const radioButton = document.getElementById(`choice-${choiceId}`);
+
+                    if (radioButton) {
+                        radioButton.checked = true;
+                        // Trigger change event for any other listeners
+                        radioButton.dispatchEvent(new Event('change'));
+                    }
+                });
+
+                // Add cursor pointer to indicate clickability
+                row.style.cursor = 'pointer';
+            });
+        }
+
+        // --- Timer functions ---
+        function startTimer() {
+            if (totalSeconds <= 0) {
+                console.error('Invalid timer duration');
+                return;
+            }
+
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    autoSubmitQuiz();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const timerElement = document.getElementById('timer');
+            if (timerElement) {
+                timerElement.textContent = `${minutes} minutes ${seconds < 10 ? '0' : ''}${seconds} seconds`;
+            }
+        }
+
+        // --- Check if all questions are answered ---
+        function getUnansweredQuestionId() {
+            if (!questionsData || !Array.isArray(questionsData)) {
+                return null;
+            }
+
+            for (const question of questionsData) {
+                const questionId = question.id || question.Id;
+                const radios = document.getElementsByName(`answers[${questionId}]`);
+                let answered = false;
+
+                for (const radio of radios) {
+                    if (radio.checked) {
+                        answered = true;
+                        break;
+                    }
+                }
+
+                if (!answered) {
+                    return questionId;
+                }
+            }
+            return null;
+        }
+
+        // --- Submit quiz ---
+        function submitQuiz() {
+            console.log('Submit button clicked');
+
+            const unansweredId = getUnansweredQuestionId();
+            if (unansweredId) {
+                // Scroll to unanswered question
+                const questionBlock = document.getElementById(`question-block-${unansweredId}`);
+                if (questionBlock) {
+                    questionBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Please solve all questions before submitting',
+                    confirmButtonText: 'Okay'
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: 'Confirm Submitting',
+                text: 'You will not be able to change your solutions after submitting. Are you sure?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, submit now',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    sendQuizForm();
+                }
+            });
+        }
+
+        // --- Actually send the form ---
+        function sendQuizForm() {
+            console.log('Sending quiz form...');
+            clearInterval(timerInterval);
+
+            const form = document.getElementById('quizForm');
+            if (!form) {
+                console.error('Quiz form not found');
+                return;
+            }
+
+            const formData = new FormData(form);
+
+            // Show loading
+            Swal.fire({
+                title: 'Submitting...',
+                text: 'Please wait while we process your answers',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            fetch('@Url.Action("QuizResult", "Home")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = '@Url.Action("QuizResult", "Home")';
+                } else {
+                    throw new Error('Network response was not ok');
+                }
+            })
+            .catch(error => {
+                console.error('Error submitting quiz:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Submission Error',
+                    text: 'There was an error submitting your quiz. Please try again.'
+                });
+            });
+        }
+
+        // --- Auto submit when time runs out ---
+        function autoSubmitQuiz() {
+            console.log('Time up - auto submitting...');
+
+            Swal.fire({
+                icon: 'info',
+                title: 'Time Out!',
+                text: 'Your solutions have been submitted automatically',
+                showConfirmButton: false,
+                timer: 2000
+            });
+
+            setTimeout(() => {
+                sendQuizForm();
+            }, 2000);
+        }
+
+        // --- Initialize page ---
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('DOM loaded, initializing quiz...');
+
+            // Render questions first
+            renderQuestions();
+
+            // Start timer
+            startTimer();
+
+            // Add submit button event listener
+            const submitBtn = document.getElementById('submitBtn');
+            if (submitBtn) {
+                submitBtn.addEventListener('click', submitQuiz);
+            } else {
+                console.error('Submit button not found');
+            }
+
+            console.log('Quiz initialization complete');
+        });
+    </script>
+}
+
+<style>
+    #quiz-timer {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        font-size: 1.5rem;
+    }
+
+    .question-block {
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: box-shadow 0.3s ease;
+    }
+
+        .question-block:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+    .choices-list .form-check {
+        direction: rtl;
+        padding: 12px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        margin-bottom: 8px;
+        border: 2px solid transparent;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .choices-list .form-check-input {
+        display: none;
+    }
+
+    .choices-list .form-check:hover {
+        background-color: #e3f2fd;
+        border-color: #bbdefb;
+        transform: translateX(-2px);
+    }
+
+    .choices-list .form-check:has(input:checked) {
+        background-color: #e8f5e8;
+        border-color: #4caf50;
+        box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
+    }
+
+    .choices-list .form-check-input:checked + .form-check-label {
+        color: #2e7d32;
+        font-weight: 600;
+    }
+
+    #submit-section {
+        margin-top: 2rem;
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .spinner-border {
+        color: #0d6efd;
+    }
+</style>

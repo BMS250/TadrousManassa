@@ -22,6 +22,8 @@ namespace TadrousManassa.Repositories
         public async Task<Quiz?> GetQuizByIdAsync(string id)
         {
             return await _context.Quizzes
+                .Include(q => q.Questions)
+                    .ThenInclude(q => q.Choices)
                 .FirstOrDefaultAsync(q => q.Id == id);
         }
         
