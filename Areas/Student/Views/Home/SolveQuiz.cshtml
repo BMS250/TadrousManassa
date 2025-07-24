@@ -284,6 +284,49 @@
         }
 
         // --- Actually send the form ---
+        // function sendQuizForm() {
+        //     console.log('Sending quiz form...');
+        //     clearInterval(timerInterval);
+
+        //     const form = document.getElementById('quizForm');
+        //     if (!form) {
+        //         console.error('Quiz form not found');
+        //         return;
+        //     }
+
+        //     const formData = new FormData(form);
+
+        //     Show loading
+        //     Swal.fire({
+        //         title: 'Submitting...',
+        //         text: 'Please wait while we process your answers',
+        //         allowOutsideClick: false,
+        //         didOpen: () => {
+        //             Swal.showLoading();
+        //         }
+        //     });
+
+        //     fetch('@Url.Action("QuizResult", "Home")', {
+        //         method: 'POST',
+        //         body: formData
+        //     })
+        //     .then(response => {
+        //         if (response.ok) {
+        //             window.location.href = '@Url.Action("QuizResult", "Home")';
+        //         } else {
+        //             throw new Error('Network response was not ok');
+        //         }
+        //     })
+        //     .catch(error => {
+        //         console.error('*****************************************************Error submitting quiz:', error);
+        //         Swal.fire({
+        //             icon: 'error',
+        //             title: 'Submission Error',
+        //             text: 'There was an error submitting your quiz. Please try again.'
+        //         });
+        //     });
+        // }
+                // --- Actually send the form ---
         function sendQuizForm() {
             console.log('Sending quiz form...');
             clearInterval(timerInterval);
@@ -294,37 +337,50 @@
                 return;
             }
 
-            const formData = new FormData(form);
+            // Disable submit button to prevent double submission
+            const submitBtn = document.getElementById('submitBtn');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>جاري الإرسال...';
+            }
 
-            // Show loading
+            // Show loading message
             Swal.fire({
-                title: 'Submitting...',
-                text: 'Please wait while we process your answers',
+                title: 'جاري الإرسال...',
+                text: 'يرجى الانتظار أثناء معالجة إجاباتك',
                 allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
                 didOpen: () => {
                     Swal.showLoading();
                 }
             });
 
-            fetch('@Url.Action("QuizResult", "Home")', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (response.ok) {
-                    window.location.href = '@Url.Action("QuizResult", "Home")';
-                } else {
-                    throw new Error('Network response was not ok');
+            // Set form action and method
+            form.action = '@Url.Action("QuizResult", "Home")';
+            form.method = 'POST';
+
+            // Add a small delay to show the loading message, then submit
+            setTimeout(() => {
+                try {
+                    form.submit();
+                } catch (error) {
+                    console.error('Error submitting form:', error);
+
+                    // Re-enable submit button
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = 'إرسال';
+                    }
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'خطأ في الإرسال',
+                        text: 'حدث خطأ أثناء إرسال الاختبار. يرجى المحاولة مرة أخرى.',
+                        confirmButtonText: 'موافق'
+                    });
                 }
-            })
-            .catch(error => {
-                console.error('Error submitting quiz:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Submission Error',
-                    text: 'There was an error submitting your quiz. Please try again.'
-                });
-            });
+            }, 1000);
         }
 
         // --- Auto submit when time runs out ---
@@ -332,16 +388,17 @@
             console.log('Time up - auto submitting...');
 
             Swal.fire({
-                icon: 'info',
-                title: 'Time Out!',
-                text: 'Your solutions have been submitted automatically',
+                icon: 'warning',
+                title: 'انتهى الوقت!',
+                text: 'سيتم إرسال إجاباتك تلقائياً',
                 showConfirmButton: false,
-                timer: 2000
+                timer: 3000,
+                timerProgressBar: true
             });
 
             setTimeout(() => {
                 sendQuizForm();
-            }, 2000);
+            }, 3000);
         }
 
         // --- Initialize page ---

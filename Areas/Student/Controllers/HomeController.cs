@@ -244,7 +244,7 @@ namespace TadrousManassa.Areas.Student.Controllers
                     TempData["error"] = "Quiz ID is required.";
                     return RedirectToAction(nameof(Index));
                 }
-                
+
                 Quiz? quiz = await _quizService.GetQuizByIdAsync(quizId);
                 if (quiz == null)
                 {
@@ -262,51 +262,152 @@ namespace TadrousManassa.Areas.Student.Controllers
             }
         }
 
+        // Controller Actions
         [HttpPost]
         public IActionResult QuizResult()
         {
-            // يمكنك قراءة القيم من Request.Form
-            var quizId = Request.Form["quizId"];
-            // باقي المعالجة...
-            return Ok(new { success = true });
+            try
+            {
+                // قراءة معرف الاختبار
+                var quizId = Request.Form["quizId"].ToString();
+
+                if (string.IsNullOrEmpty(quizId))
+                {
+                    TempData["ErrorMessage"] = "Quiz Id doesn't exist";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                // قراءة إجابات الطالب من الفورم
+                var answers = new Dictionary<string, string>();
+                foreach (var key in Request.Form.Keys)
+                {
+                    if (key.StartsWith("answers[") && key.EndsWith("]"))
+                    {
+                        var questionId = key.Substring(8, key.Length - 9);
+                        var choiceId = Request.Form[key].ToString();
+
+                        if (!string.IsNullOrEmpty(choiceId))
+                        {
+                            answers[questionId] = choiceId;
+                        }
+                    }
+                }
+
+                // TODO: هنا يمكنك حفظ الإجابات في قاعدة البيانات
+                // SaveQuizAnswers(quizId, answers);
+
+                // حفظ البيانات في TempData للاستخدام في GET request
+                TempData["QuizCompleted"] = true;
+                TempData["QuizId"] = quizId;
+                TempData["SubmissionTime"] = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                TempData["AnswersCount"] = answers.Count.ToString();
+                TempData["SuccessMessage"] = "The quiz is submitted successfully!";
+
+                // حفظ الإجابات كـ JSON في TempData (اختياري للعرض)
+                TempData["StudentAnswers"] = System.Text.Json.JsonSerializer.Serialize(answers);
+
+                return RedirectToAction("QuizResult", new { id = quizId });
+            }
+            catch (Exception ex)
+            {
+                // تسجيل الخطأ
+                // _logger.LogError(ex, "Error processing quiz submission");
+
+                TempData["ErrorMessage"] = "Error while submitting the quiz, please try again.";
+                return RedirectToAction("Index", "Home");
+            }
         }
-        //[HttpPost("/Student/Home/add-quiz")]
-        //public async Task<IActionResult> AddQuiz(string id/*[FromBody] Quiz quiz*/)
-        //{
-        //    _logger.LogInformation("=== AddQuiz ACTION CALLED ===");
-        //    _logger.LogInformation("Request Headers: {Headers}", Request.Headers.ToString());
-        //    _logger.LogInformation("Content-Type: {ContentType}", Request.ContentType);
-        //    //_logger.LogInformation("Quiz object is null: {IsNull}", quiz == null);
 
-        //    //if (quiz != null)
-        //    //{
-        //    //    _logger.LogInformation("Quiz data: {@Quiz}", quiz);
-        //    //}
-        //    Quiz quiz = new Quiz
-        //    {
-        //        Id = id,
-        //        VideoId = "ferf",
-        //        Description = "tyki",
-        //        TimeHours = 0,
-        //        TimeMinutes = 30,
-        //        LectureId = "LectureId", // Replace with actual lecture ID
-        //        Questions = new List<Question>() // Initialize with an empty list or add questions as needed
-        //    };
-        //    //try
-        //    //{
-        //    //    // Your existing code here...
-        //    await _quizService.CreateQuizAsync(quiz);
+        [HttpGet]
+        public IActionResult QuizResult(string id)
+        {
+            try
+            {
+                // التحقق من وجود بيانات الاختبار المكتمل
+                var quizCompleted = TempData.Peek("QuizCompleted") as bool? ?? false;
+                var errorMessage = TempData.Peek("ErrorMessage")?.ToString();
 
-        //    //    _logger.LogInformation("Quiz created successfully");
-        //        return Ok(new { success = true, message = "Quiz added successfully." });
-        //    //}
-        //    //catch (Exception ex)
-        //    //{
-        //    //    _logger.LogError(ex, "Error in AddQuiz action");
-        //    //    return BadRequest(new { success = false, message = ex.Message });
-        //    //}
-        //}
+                // إذا كان هناك خطأ، عرضه
+                if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    var errorModel = new QuizResultViewModel
+                    {
+                        QuizId = id ?? "Unknown",
+                        Message = errorMessage,
+                        IsSuccess = false,
+                        SubmissionTime = DateTime.Now
+                    };
 
+                    // مسح TempData بعد الاستخدام
+                    TempData.Clear();
+                    return View(errorModel);
+                }
 
+                // إذا لم يتم إكمال الاختبار بشكل صحيح
+                if (!quizCompleted)
+                {
+                    return RedirectToAction("Index", "Home");
+                }
+
+                // استرجاع البيانات من TempData
+                var quizId = TempData["QuizId"]?.ToString() ?? id;
+                var submissionTimeStr = TempData["SubmissionTime"]?.ToString();
+                var answersCountStr = TempData["AnswersCount"]?.ToString();
+                var successMessage = TempData["SuccessMessage"]?.ToString();
+                var studentAnswersJson = TempData["StudentAnswers"]?.ToString();
+
+                // تحويل البيانات
+                DateTime.TryParse(submissionTimeStr, out var submissionTime);
+                int.TryParse(answersCountStr, out var answersCount);
+
+                var studentAnswers = new Dictionary<string, string>();
+                if (!string.IsNullOrEmpty(studentAnswersJson))
+                {
+                    try
+                    {
+                        studentAnswers = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(studentAnswersJson)
+                            ?? new Dictionary<string, string>();
+                    }
+                    catch
+                    {
+                        // في حالة فشل تحويل JSON، استخدم قاموس فارغ
+                        studentAnswers = new Dictionary<string, string>();
+                    }
+                }
+
+                // TODO: هنا يمكنك استرجاع معلومات إضافية من قاعدة البيانات
+                // var quizInfo = GetQuizInfo(quizId);
+
+                // إنشاء الـ ViewModel
+                var model = new QuizResultViewModel
+                {
+                    QuizId = quizId,
+                    QuizName = "Quiz " + quizId, // TODO: استرجع الاسم الحقيقي من قاعدة البيانات
+                    SubmissionTime = submissionTime == default ? DateTime.Now : submissionTime,
+                    AnsweredQuestions = answersCount,
+                    TotalQuestions = answersCount, // TODO: استرجع العدد الحقيقي من قاعدة البيانات
+                    Message = successMessage ?? "The quiz is submitted successfully!",
+                    IsSuccess = true,
+                    StudentAnswers = studentAnswers
+                };
+
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                // تسجيل الخطأ
+                // _logger.LogError(ex, "Error displaying quiz results");
+
+                var errorModel = new QuizResultViewModel
+                {
+                    QuizId = id ?? "Unknown",
+                    Message = "حدث خطأ أثناء عرض النتائج",
+                    IsSuccess = false,
+                    SubmissionTime = DateTime.Now
+                };
+
+                return View(errorModel);
+            }
+        }
     }
-}  
+}

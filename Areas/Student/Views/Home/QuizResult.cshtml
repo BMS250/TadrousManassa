@@ -1,6 +1,11 @@
-﻿@model string
+﻿@model TadrousManassa.Areas.Student.Models.QuizResultViewModel
 <p>wejgioejiogejfj;s</p>
 
-<h1>@Model</h1>
+@foreach (var item in Model.StudentAnswers)
+{
+    <h5>@item.Key</h5>
+    <h5>@item.Value</h5>
+    <h5>*****************</h5>
+}
 
 <p>ergfwer</p>
