@@ -104,15 +104,15 @@
                 }
 
                 // Send the ID to the server (if not already in cookies)
-                if (!document.cookie.includes('DeviceId=')) {
-                    fetch('/api/device/sync', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-Device-Id': deviceId
-                        }
-                    });
-                }
+                // if (!document.cookie.includes('DeviceId=')) {
+                //     fetch('/api/device/sync', {
+                //         method: 'POST',
+                //         headers: {
+                //             'Content-Type': 'application/json',
+                //             'X-Device-Id': deviceId
+                //         }
+                //     });
+                // }
 
                 resolve(deviceId);
             });

@@ -1,9 +1,11 @@
+using Amazon.Runtime.Internal.Util;
 using AspNetCoreGeneratedDocument;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using System.Threading.Tasks;
 using TadrousManassa.Areas.Student.Models;
 using TadrousManassa.Models;
@@ -23,6 +25,7 @@ namespace TadrousManassa.Areas.Student.Controllers
         private readonly IStudentService _studentService;
         private readonly IStudentQuizService _studentQuizService;
         private readonly IQuizService _quizService;
+        private readonly IMemoryCache _cache;
 
         public HomeController(
             ILogger<HomeController> logger,
@@ -32,7 +35,8 @@ namespace TadrousManassa.Areas.Student.Controllers
             IStudentLectureService studentLectureService,
             IStudentService studentService,
             IStudentQuizService studentQuizService,
-            IQuizService quizService)
+            IQuizService quizService,
+            IMemoryCache cache)
         {
             _logger = logger;
             _webHostEnvironment = webHostEnvironment;
@@ -42,6 +46,7 @@ namespace TadrousManassa.Areas.Student.Controllers
             _studentService = studentService;
             _studentQuizService = studentQuizService;
             _quizService = quizService;
+            _cache = cache;
         }
 
         public async Task<IActionResult> Index()
@@ -252,6 +257,54 @@ namespace TadrousManassa.Areas.Student.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
+                // Get current user ID
+                string currentUserId = User.Identity.Name;
+                string cacheKey = $"quiz_session_{currentUserId}_{quizId}";
+
+                // Check if there's an existing quiz session in cache
+                var existingStartTime = _cache.Get<DateTime?>(cacheKey);
+
+                DateTime quizStartTime;
+
+                if (existingStartTime.HasValue)
+                {
+                    // Use existing start time from cache
+                    quizStartTime = existingStartTime.Value;
+
+                    // Check if quiz time has expired
+                    var totalMinutes = quiz.TimeHours * 60 + quiz.TimeMinutes;
+                    var elapsedTime = DateTime.UtcNow - quizStartTime;
+
+                    if (elapsedTime.TotalMinutes >= totalMinutes)
+                    {
+                        // Quiz has expired, remove from cache and show expired message
+                        _cache.Remove(cacheKey);
+                        TempData["error"] = "Quiz time has expired.";
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
+                else
+                {
+                    // Create new quiz session in cache
+                    quizStartTime = DateTime.UtcNow;
+                    var totalMinutes = quiz.TimeHours * 60 + quiz.TimeMinutes;
+
+                    // Set cache with expiration slightly longer than quiz duration
+                    var cacheOptions = new MemoryCacheEntryOptions
+                    {
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(totalMinutes + 5),
+                        Priority = CacheItemPriority.High
+                    };
+
+                    _cache.Set(cacheKey, quizStartTime, cacheOptions);
+                }
+
+                // Pass the start time to the view
+                ViewBag.QuizStartTime = quizStartTime.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
+                ViewBag.TotalMinutes = quiz.TimeHours * 60 + quiz.TimeMinutes;
+                ViewBag.QuizStartTimeDebug = quizStartTime.ToString("yyyy-MM-dd HH:mm:ss.fff");
+                ViewBag.QuizStartTimeUnix = ((DateTimeOffset)quizStartTime).ToUnixTimeSeconds();
+
                 return View("SolveQuiz", quiz);
             }
             catch (Exception ex)
@@ -264,18 +317,29 @@ namespace TadrousManassa.Areas.Student.Controllers
 
         // Controller Actions
         [HttpPost]
-        public IActionResult QuizResult()
+        public async Task<IActionResult> QuizResult()
         {
             try
             {
-                // قراءة معرف الاختبار
-                var quizId = Request.Form["quizId"].ToString();
+                var quizId = Request.Form["QuizId"].ToString();
 
                 if (string.IsNullOrEmpty(quizId))
                 {
-                    TempData["ErrorMessage"] = "Quiz Id doesn't exist";
-                    return RedirectToAction("Index", "Home");
+                    _logger.LogWarning("Quiz submission attempted without QuizId");
+                    return Json(new { success = false, message = "Quiz Id doesn't exist" });
                 }
+
+                // Remove quiz session from cache since it's completed
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    _logger.LogWarning("Current user not found during quiz submission");
+                    return Json(new { success = false, message = "User not found" });
+                }
+                
+                string cacheKey = $"quiz_session_{currentUser.Id}_{quizId}";
+                _cache.Remove(cacheKey);
+                _logger.LogInformation("Removed quiz session from cache for user {UserId} and quiz {QuizId}", currentUser.Id, quizId);
 
                 // قراءة إجابات الطالب من الفورم
                 var answers = new Dictionary<string, string>();
@@ -293,6 +357,9 @@ namespace TadrousManassa.Areas.Student.Controllers
                     }
                 }
 
+                _logger.LogInformation("Quiz submission received {AnswerCount} answers for quiz {QuizId} from user {UserId}", 
+                    answers.Count, quizId, currentUser.Id);
+
                 // TODO: هنا يمكنك حفظ الإجابات في قاعدة البيانات
                 // SaveQuizAnswers(quizId, answers);
 
@@ -301,20 +368,20 @@ namespace TadrousManassa.Areas.Student.Controllers
                 TempData["QuizId"] = quizId;
                 TempData["SubmissionTime"] = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                 TempData["AnswersCount"] = answers.Count.ToString();
-                TempData["SuccessMessage"] = "The quiz is submitted successfully!";
+                TempData["SuccessMessage"] = "تم إرسال الاختبار بنجاح!";
 
                 // حفظ الإجابات كـ JSON في TempData (اختياري للعرض)
                 TempData["StudentAnswers"] = System.Text.Json.JsonSerializer.Serialize(answers);
 
-                return RedirectToAction("QuizResult", new { id = quizId });
+                _logger.LogInformation("Quiz submitted successfully for quiz {QuizId}", quizId);
+                return Json(new { success = true, message = "تم إرسال الاختبار بنجاح!" });
             }
             catch (Exception ex)
             {
                 // تسجيل الخطأ
-                // _logger.LogError(ex, "Error processing quiz submission");
+                _logger.LogError(ex, "Error processing quiz submission");
 
-                TempData["ErrorMessage"] = "Error while submitting the quiz, please try again.";
-                return RedirectToAction("Index", "Home");
+                return Json(new { success = false, message = "حدث خطأ أثناء إرسال الاختبار، يرجى المحاولة مرة أخرى." });
             }
         }
 
@@ -334,7 +401,7 @@ namespace TadrousManassa.Areas.Student.Controllers
                     {
                         QuizId = id ?? "Unknown",
                         Message = errorMessage,
-                        IsSuccess = false,
+                        //IsSuccess = false,
                         SubmissionTime = DateTime.Now
                     };
 
@@ -346,6 +413,7 @@ namespace TadrousManassa.Areas.Student.Controllers
                 // إذا لم يتم إكمال الاختبار بشكل صحيح
                 if (!quizCompleted)
                 {
+                    _logger.LogWarning("QuizResult accessed without proper completion data");
                     return RedirectToAction("Index", "Home");
                 }
 
@@ -368,8 +436,9 @@ namespace TadrousManassa.Areas.Student.Controllers
                         studentAnswers = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(studentAnswersJson)
                             ?? new Dictionary<string, string>();
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        _logger.LogError(ex, "Error deserializing student answers JSON");
                         // في حالة فشل تحويل JSON، استخدم قاموس فارغ
                         studentAnswers = new Dictionary<string, string>();
                     }
@@ -384,25 +453,29 @@ namespace TadrousManassa.Areas.Student.Controllers
                     QuizId = quizId,
                     QuizName = "Quiz " + quizId, // TODO: استرجع الاسم الحقيقي من قاعدة البيانات
                     SubmissionTime = submissionTime == default ? DateTime.Now : submissionTime,
-                    AnsweredQuestions = answersCount,
+                    CorrectAnswers = answersCount,
                     TotalQuestions = answersCount, // TODO: استرجع العدد الحقيقي من قاعدة البيانات
-                    Message = successMessage ?? "The quiz is submitted successfully!",
-                    IsSuccess = true,
+                    Message = successMessage ?? "تم إرسال الاختبار بنجاح!",
+                    //IsSuccess = true,
                     StudentAnswers = studentAnswers
                 };
 
+                // مسح TempData بعد الاستخدام
+                TempData.Clear();
+
+                _logger.LogInformation("QuizResult displayed successfully for quiz {QuizId}", quizId);
                 return View(model);
             }
             catch (Exception ex)
             {
                 // تسجيل الخطأ
-                // _logger.LogError(ex, "Error displaying quiz results");
+                _logger.LogError(ex, "Error displaying quiz results");
 
                 var errorModel = new QuizResultViewModel
                 {
                     QuizId = id ?? "Unknown",
                     Message = "حدث خطأ أثناء عرض النتائج",
-                    IsSuccess = false,
+                    //IsSuccess = false,
                     SubmissionTime = DateTime.Now
                 };
 

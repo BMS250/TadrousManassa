@@ -6,9 +6,9 @@
         public string QuizName { get; set; }
         public DateTime SubmissionTime { get; set; }
         public int TotalQuestions { get; set; }
-        public int AnsweredQuestions { get; set; }
+        public int? CorrectAnswers { get; set; }
         public string Message { get; set; }
-        public bool IsSuccess { get; set; } = true;
+        public bool IsSuccess => (CorrectAnswers ?? 0) >= 0.5 * TotalQuestions;
         public Dictionary<string, string> StudentAnswers { get; set; } = new Dictionary<string, string>();
     }
 }

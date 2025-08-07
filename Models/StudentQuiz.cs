@@ -22,11 +22,20 @@ namespace TadrousManassa.Models
 
         [Required]
         public float Score1 { get; set; } = -1;
-        
+
+        [Required]
+        public DateTime SubmissionTimeAttempt1 { get; set; }
+
         [Required]
         public float Score2 { get; set; } = -1;
+        
+        [Required]
+        public DateTime SubmissionTimeAttempt2 { get; set; }
 
         [Required]
         public int NumOfRemainingAttempts { get; set; } = 2;
+
+        [Required]
+        public bool IsSuccess { get; set; }
     }
 }

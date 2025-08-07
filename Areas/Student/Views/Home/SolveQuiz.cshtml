@@ -13,7 +13,7 @@
     <h2 class="text-center mb-4">@Model.Name</h2>
 
     <form id="quizForm" method="post">
-        <input type="hidden" name="quizId" value="@Model.Id" />
+        <input type="hidden" name="QuizId" value="@Model.Id" />
         <div id="questions-container">
             <!-- Questions will be loaded here by JavaScript -->
             <div class="text-center">
@@ -35,6 +35,7 @@
         // --- Get data from server with debugging ---
         const questionsData = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Questions));
         const totalSeconds = @totalSeconds;
+        const quizStartTime = @Html.Raw(Json.Serialize(ViewBag.QuizStartTime ?? DateTime.Now));
         let timerInterval;
         let timeLeft = totalSeconds;
 
@@ -88,11 +89,11 @@
                 shuffledQuestions.forEach((question, index) => {
                     console.log(`Processing question ${index + 1}:`, question);
 
-                    // Handle both PascalCase and camelCase property names
-                    const questionId = question.id || question.Id;
-                    const questionText = question.text || question.Text;
-                    const questionImage = question.image || question.Image;
-                    const questionChoices = question.choices || question.Choices;
+                    const questionId = question.Id;
+                    const questionText = question.Text;
+                    const questionImage = question.Image;
+                    const questionChoices = question.Choices;
+
 
                     if (!questionId) {
                         console.error(`Question ${index + 1} missing ID:`, question);
@@ -114,13 +115,13 @@
 
                     // Build question HTML
                     let questionHtml = `<div class='card mb-4 question-block' id='question-block-${questionId}'>`;
-                    questionHtml += `<div class='card-header fw-bold'>سؤال ${index + 1}:</div>`;
+                    questionHtml += `<div class='card-header fw-bold'>Question ${index + 1}:</div>`;
                     questionHtml += `<div class='card-body'>`;
                     questionHtml += `<p class='fs-5 mb-3'>${questionText}</p>`;
 
                     // Add image if exists
                     if (questionImage) {
-                        questionHtml += `<img src='${questionImage}' alt='صورة السؤال' class='img-fluid mb-3' style='max-width:300px;' />`;
+                        questionHtml += `<img src='${questionImage}' alt='Question Image' class='img-fluid mb-3' style='max-width:300px;' />`;
                     }
 
                     questionHtml += `<div class='choices-list'>`;
@@ -145,7 +146,7 @@
                         }
 
                         if (choiceImage) {
-                            questionHtml += `<br><img src='${choiceImage}' alt='صورة الاختيار' class='img-fluid mt-2' style='max-width:200px;' />`;
+                            questionHtml += `<br><img src='${choiceImage}' alt='Choice Image' class='img-fluid mt-2' style='max-width:200px;' />`;
                         }
 
                         questionHtml += `</label></div>`;
@@ -196,16 +197,37 @@
             });
         }
 
+        // --- Calculate remaining time based on start time ---
+        function calculateRemainingTime() {
+            const now = new Date();
+            const startTime = new Date(quizStartTime);
+            const elapsedSeconds = Math.floor((now - startTime) / 1000);
+            const remaining = totalSeconds - elapsedSeconds;
+
+            console.log('Quiz start time:', startTime);
+            console.log('Current time:', now);
+            console.log('Elapsed seconds:', elapsedSeconds);
+            console.log('Remaining seconds:', remaining);
+
+            return Math.max(0, remaining);
+        }
+
         // --- Timer functions ---
         function startTimer() {
-            if (totalSeconds <= 0) {
-                console.error('Invalid timer duration');
+            // Calculate remaining time based on quiz start time
+            timeLeft = calculateRemainingTime();
+
+            if (timeLeft <= 0) {
+                console.log('Quiz time has already expired');
+                autoSubmitQuiz();
                 return;
             }
 
+            console.log(`Starting timer with ${timeLeft} seconds remaining`);
             updateTimerDisplay();
+
             timerInterval = setInterval(() => {
-                timeLeft--;
+                timeLeft = calculateRemainingTime();
                 updateTimerDisplay();
 
                 if (timeLeft <= 0) {
@@ -284,49 +306,6 @@
         }
 
         // --- Actually send the form ---
-        // function sendQuizForm() {
-        //     console.log('Sending quiz form...');
-        //     clearInterval(timerInterval);
-
-        //     const form = document.getElementById('quizForm');
-        //     if (!form) {
-        //         console.error('Quiz form not found');
-        //         return;
-        //     }
-
-        //     const formData = new FormData(form);
-
-        //     Show loading
-        //     Swal.fire({
-        //         title: 'Submitting...',
-        //         text: 'Please wait while we process your answers',
-        //         allowOutsideClick: false,
-        //         didOpen: () => {
-        //             Swal.showLoading();
-        //         }
-        //     });
-
-        //     fetch('@Url.Action("QuizResult", "Home")', {
-        //         method: 'POST',
-        //         body: formData
-        //     })
-        //     .then(response => {
-        //         if (response.ok) {
-        //             window.location.href = '@Url.Action("QuizResult", "Home")';
-        //         } else {
-        //             throw new Error('Network response was not ok');
-        //         }
-        //     })
-        //     .catch(error => {
-        //         console.error('*****************************************************Error submitting quiz:', error);
-        //         Swal.fire({
-        //             icon: 'error',
-        //             title: 'Submission Error',
-        //             text: 'There was an error submitting your quiz. Please try again.'
-        //         });
-        //     });
-        // }
-                // --- Actually send the form ---
         function sendQuizForm() {
             console.log('Sending quiz form...');
             clearInterval(timerInterval);
@@ -337,50 +316,46 @@
                 return;
             }
 
-            // Disable submit button to prevent double submission
-            const submitBtn = document.getElementById('submitBtn');
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>جاري الإرسال...';
-            }
+            const formData = new FormData(form);
 
-            // Show loading message
+            // Show loading
             Swal.fire({
-                title: 'جاري الإرسال...',
-                text: 'يرجى الانتظار أثناء معالجة إجاباتك',
+                title: 'Submitting...',
+                text: 'Please wait while we process your answers',
                 allowOutsideClick: false,
-                allowEscapeKey: false,
-                showConfirmButton: false,
                 didOpen: () => {
                     Swal.showLoading();
                 }
             });
 
-            // Set form action and method
-            form.action = '@Url.Action("QuizResult", "Home")';
-            form.method = 'POST';
-
-            // Add a small delay to show the loading message, then submit
-            setTimeout(() => {
-                try {
-                    form.submit();
-                } catch (error) {
-                    console.error('Error submitting form:', error);
-
-                    // Re-enable submit button
-                    if (submitBtn) {
-                        submitBtn.disabled = false;
-                        submitBtn.innerHTML = 'إرسال';
-                    }
-
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'خطأ في الإرسال',
-                        text: 'حدث خطأ أثناء إرسال الاختبار. يرجى المحاولة مرة أخرى.',
-                        confirmButtonText: 'موافق'
-                    });
+            fetch('@Url.Action("QuizResult", "Home")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Network response was not ok');
                 }
-            }, 1000);
+            })
+            .then(data => {
+                if (data.success) {
+                    console.log('Quiz submitted successfully, redirecting...');
+                    // التوجيه إلى صفحة النتائج
+                    window.location.href = '@Url.Action("QuizResult", "Home")';
+                } else {
+                    throw new Error(data.message || 'Submission failed');
+                }
+            })
+            .catch(error => {
+                console.error('Error submitting quiz:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Submission Error',
+                    text: error.message || 'There was an error submitting your quiz. Please try again.'
+                });
+            });
         }
 
         // --- Auto submit when time runs out ---
@@ -388,17 +363,16 @@
             console.log('Time up - auto submitting...');
 
             Swal.fire({
-                icon: 'warning',
-                title: 'انتهى الوقت!',
-                text: 'سيتم إرسال إجاباتك تلقائياً',
+                icon: 'info',
+                title: 'Time Out!',
+                text: 'Your solutions have been submitted automatically',
                 showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true
+                timer: 2000
             });
 
             setTimeout(() => {
                 sendQuizForm();
-            }, 3000);
+            }, 2000);
         }
 
         // --- Initialize page ---
@@ -443,7 +417,7 @@
         }
 
     .choices-list .form-check {
-        direction: rtl;
+        direction: ltr;
         padding: 12px;
         border-radius: 8px;
         transition: all 0.2s ease;
