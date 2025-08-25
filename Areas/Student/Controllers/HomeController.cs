@@ -26,6 +26,7 @@ namespace TadrousManassa.Areas.Student.Controllers
         private readonly IStudentQuizService _studentQuizService;
         private readonly IQuizService _quizService;
         private readonly IMemoryCache _cache;
+        private Task<ApplicationUser?> currentUser;
 
         public HomeController(
             ILogger<HomeController> logger,
@@ -93,15 +94,13 @@ namespace TadrousManassa.Areas.Student.Controllers
             {
                 if (string.IsNullOrWhiteSpace(lectureId) || string.IsNullOrWhiteSpace(code))
                 {
-                    TempData["error"] = "Data are incorrect";
-                    return RedirectToAction(nameof(Index));
+                    return View("ErrorView", "Data are incorrect");
                 }
 
                 var currentUser = await _userManager.GetUserAsync(User);
                 if (currentUser == null)
                 {
-                    TempData["error"] = "You must login first.";
-                    return RedirectToAction("Login", "Account", new { area = "Identity" });
+                    return View("ErrorView", "You must login first");
                 }
 
                 var buyResult = _studentLectureService.BuyCode(currentUser.Id, lectureId, code);
@@ -111,7 +110,7 @@ namespace TadrousManassa.Areas.Student.Controllers
                 }
                 else
                 {
-                    TempData["error"] = buyResult.Message;
+                    return View("ErrorView", buyResult.Message);
                 }
 
                 return RedirectToAction(nameof(Index));
@@ -120,7 +119,7 @@ namespace TadrousManassa.Areas.Student.Controllers
             {
                 _logger.LogError(ex, "Error in LecturePurchasing action");
                 TempData["error"] = "Error in LecturePurchasing action.";
-                return RedirectToAction(nameof(Index));
+                return View("ErrorView", TempData["error"]);
             }
         }
 
@@ -132,7 +131,7 @@ namespace TadrousManassa.Areas.Student.Controllers
                 if (string.IsNullOrWhiteSpace(lectureId))
                 {
                     TempData["error"] = "You must login first.";
-                    return RedirectToAction(nameof(Index));
+                    return View("ErrorView", TempData["error"]);;
                 }
 
                 var currentUser = await _userManager.GetUserAsync(User);
@@ -146,27 +145,15 @@ namespace TadrousManassa.Areas.Student.Controllers
                 if (!isPurchased.Success || !isPurchased.Data)
                 {
                     TempData["error"] = "You must buy the lecture first.";
-                    return RedirectToAction(nameof(Index));
+                    return View("ErrorView", TempData["error"]);;
                 }
 
-                //var lecture = _lectureService.GetLecture(lectureId);
-                //if (!lecture.Success)
-                //{
-                //    TempData["error"] = "The lecture is not found";
-                //    return RedirectToAction(nameof(Index));
-                //}
-                //// TODO make the index by order
-                //TempData["VideoPath"] = lecture.Data.Videos?[0] ?? new Video();
-
-                //return View("lectureDetails", lecture.Data);
                 var videoDetailsDTO = _lectureService.GetVideoDetails(lectureId, order);
                 if (!videoDetailsDTO.Success)
                 {
                     TempData["error"] = "The lecture is not found";
-                    return RedirectToAction(nameof(Index));
+                    return View("ErrorView", TempData["error"]);;
                 }
-                // TODO make the index by order
-                //TempData["VideoPath"] = videoDetailsDTO.Data?.Path ?? "";
 
                 return View("lectureDetails", videoDetailsDTO.Data);
             }
@@ -174,7 +161,7 @@ namespace TadrousManassa.Areas.Student.Controllers
             {
                 _logger.LogError(ex, "Error in LectureDetails action");
                 TempData["error"] = "Error in LectureDetails action";
-                return RedirectToAction(nameof(Index));
+                return View("ErrorView", TempData["error"]);;
             }
         }
 
@@ -188,55 +175,63 @@ namespace TadrousManassa.Areas.Student.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> QuizDetails(string videoId)
+        public async Task<IActionResult> QuizDetails(string? videoId, string? qId)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(videoId))
+                if (string.IsNullOrWhiteSpace(videoId) && string.IsNullOrWhiteSpace(qId))
                 {
-                    TempData["error"] = "Video ID is required.";
-                    return RedirectToAction(nameof(Index));
+                    TempData["error"] = "Video ID or Quiz ID is required.";
+                    return View("ErrorView", TempData["error"]);;
                 }
 
-                // Check if the quiz is already solved
+                string? quizId = qId ?? await _quizService.GetQuizIdByVideoIdAsync(videoId);
+
+                // check if the student has bought the lecture
+                var lectureIdResult = await _quizService.GetLectureIdByQuizId(quizId!);
+                if (!lectureIdResult.Success || string.IsNullOrWhiteSpace(lectureIdResult.Data))
+                {
+                    TempData["error"] = "Lecture not found for this quiz.";
+                    return View("ErrorView", TempData["error"]); ;
+                }
+
+                // Get current user ID
                 var currentUser = await _userManager.GetUserAsync(User);
                 if (currentUser == null)
                 {
-                    TempData["error"] = "You must login first.";
-                    return RedirectToAction("Login", "Account", new { area = "Identity" });
-                }
-                string? quizId = await _quizService.GetQuizIdByVideoIdAsync(videoId);
-                if (string.IsNullOrWhiteSpace(quizId))
-                {
-                    // TODO check if there is other video, if yes go to it, otherwise display finishing the lecture message
-                    TempData["error"] = "Quiz not found for this video.";
-                    return RedirectToAction(nameof(Index));
-                }
-                int remainingAttempts = _studentQuizService.GetRemainingAttemptsAsync(currentUser.Id, videoId).Result;
-
-                if (remainingAttempts == 0)
-                {
-                    // TODO Display the quiz result with score
-                    TempData["error"] = "You have already solved this quiz.";
-                    return RedirectToAction(nameof(Index));
-                }
-                else if (remainingAttempts == 1)
-                {
-                    // TODO Display the quiz result without score
-                    TempData["error"] = "You have already solved this quiz.";
-                    return RedirectToAction(nameof(Index));
+                    _logger.LogWarning("Current user not found during quiz submission");
+                    return Json(new { success = false, message = "User not found" });
                 }
 
-                // Display the quiz details
-                var quizDetails = await _quizService.GetQuizDetailsAsync(quizId);
-                quizDetails.NumOfRemainingAttempts = remainingAttempts;
-                return View("QuizDetails", quizDetails);
+                var isPurchasedResult = _studentLectureService.IsLecturePurchased(currentUser.Id, lectureIdResult.Data);
+
+                if (!isPurchasedResult.Success || !isPurchasedResult.Data)
+                {
+                    TempData["error"] = "You must buy the lecture first.";
+                    return View("ErrorView", TempData["error"]); ;
+                }
+
+                // TODO check if there is other video, if yes go to it, otherwise display finishing the lecture message
+
+                int remainingAttempts = _studentQuizService.GetRemainingAttemptsByQuizIdAsync(currentUser.Id, quizId!).Result;
+
+                if (remainingAttempts == 2)
+                {
+                    // Display the quiz details
+                    var quizDetails = await _quizService.GetQuizDetailsAsync(quizId);
+                    quizDetails.NumOfRemainingAttempts = remainingAttempts;
+                    return View(quizDetails);
+                }
+
+                // Display the quiz result with or without score
+                return RedirectToAction(nameof(QuizResult), new { qId = quizId, remainingAttempts });
+                // TODO redirect then this to the view of quiz details in the quiz result in case of remaining attempts = 1
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in SolveQuiz action");
                 TempData["error"] = "Error in SolveQuiz action";
-                return RedirectToAction(nameof(Index));
+                return View("ErrorView", TempData["error"]);;
             }
         }
 
@@ -247,19 +242,41 @@ namespace TadrousManassa.Areas.Student.Controllers
                 if (string.IsNullOrWhiteSpace(quizId))
                 {
                     TempData["error"] = "Quiz ID is required.";
-                    return RedirectToAction(nameof(Index));
+                    return View("ErrorView", TempData["error"]);;
+                }
+
+                // check if the student has bought the lecture
+                var lectureIdResult = await _quizService.GetLectureIdByQuizId(quizId);
+                if (!lectureIdResult.Success || string.IsNullOrWhiteSpace(lectureIdResult.Data))
+                {
+                    TempData["error"] = "Lecture not found for this quiz.";
+                    return View("ErrorView", TempData["error"]);;
+                }
+
+                // Get current user ID
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    _logger.LogWarning("Current user not found during quiz submission");
+                    return Json(new { success = false, message = "User not found" });
+                }
+
+                var isPurchasedResult = _studentLectureService.IsLecturePurchased(currentUser.Id, lectureIdResult.Data);
+
+                if (!isPurchasedResult.Success || !isPurchasedResult.Data)
+                {
+                    TempData["error"] = "You must buy the lecture first.";
+                    return View("ErrorView", TempData["error"]);;
                 }
 
                 Quiz? quiz = await _quizService.GetQuizByIdAsync(quizId);
                 if (quiz == null)
                 {
                     TempData["error"] = "Quiz not found.";
-                    return RedirectToAction(nameof(Index));
+                    return View("ErrorView", TempData["error"]);;
                 }
 
-                // Get current user ID
-                string currentUserId = User.Identity.Name;
-                string cacheKey = $"quiz_session_{currentUserId}_{quizId}";
+                string cacheKey = $"quiz_session_{currentUser.Id}_{quizId}";
 
                 // Check if there's an existing quiz session in cache
                 var existingStartTime = _cache.Get<DateTime?>(cacheKey);
@@ -280,7 +297,7 @@ namespace TadrousManassa.Areas.Student.Controllers
                         // Quiz has expired, remove from cache and show expired message
                         _cache.Remove(cacheKey);
                         TempData["error"] = "Quiz time has expired.";
-                        return RedirectToAction(nameof(Index));
+                        return View("ErrorView", TempData["error"]);;
                     }
                 }
                 else
@@ -301,9 +318,6 @@ namespace TadrousManassa.Areas.Student.Controllers
 
                 // Pass the start time to the view
                 ViewBag.QuizStartTime = quizStartTime.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
-                ViewBag.TotalMinutes = quiz.TimeHours * 60 + quiz.TimeMinutes;
-                ViewBag.QuizStartTimeDebug = quizStartTime.ToString("yyyy-MM-dd HH:mm:ss.fff");
-                ViewBag.QuizStartTimeUnix = ((DateTimeOffset)quizStartTime).ToUnixTimeSeconds();
 
                 return View("SolveQuiz", quiz);
             }
@@ -311,13 +325,12 @@ namespace TadrousManassa.Areas.Student.Controllers
             {
                 _logger.LogError(ex, "Error in SolveQuiz action");
                 TempData["error"] = "Error in SolveQuiz action";
-                return RedirectToAction(nameof(Index));
+                return View("ErrorView", TempData["error"]);;
             }
         }
 
-        // Controller Actions
         [HttpPost]
-        public async Task<IActionResult> QuizResult()
+        public async Task<IActionResult> SolveQuiz()
         {
             try
             {
@@ -336,10 +349,9 @@ namespace TadrousManassa.Areas.Student.Controllers
                     _logger.LogWarning("Current user not found during quiz submission");
                     return Json(new { success = false, message = "User not found" });
                 }
-                
+
                 string cacheKey = $"quiz_session_{currentUser.Id}_{quizId}";
                 _cache.Remove(cacheKey);
-                _logger.LogInformation("Removed quiz session from cache for user {UserId} and quiz {QuizId}", currentUser.Id, quizId);
 
                 // قراءة إجابات الطالب من الفورم
                 var answers = new Dictionary<string, string>();
@@ -357,11 +369,13 @@ namespace TadrousManassa.Areas.Student.Controllers
                     }
                 }
 
-                _logger.LogInformation("Quiz submission received {AnswerCount} answers for quiz {QuizId} from user {UserId}", 
+                _logger.LogInformation("Quiz submission received {AnswerCount} answers for quiz {QuizId} from user {UserId}",
                     answers.Count, quizId, currentUser.Id);
 
-                // TODO: هنا يمكنك حفظ الإجابات في قاعدة البيانات
-                // SaveQuizAnswers(quizId, answers);
+                // // TODO: هنا يمكنك حفظ الإجابات في قاعدة البيانات
+                // حساب المحاولات المتبقية
+                int remainingAttempts = await _studentQuizService.GetRemainingAttemptsByQuizIdAsync(currentUser.Id, quizId);
+                remainingAttempts--; // تقليل المحاولة الحالية
 
                 // حفظ البيانات في TempData للاستخدام في GET request
                 TempData["QuizCompleted"] = true;
@@ -369,46 +383,101 @@ namespace TadrousManassa.Areas.Student.Controllers
                 TempData["SubmissionTime"] = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                 TempData["AnswersCount"] = answers.Count.ToString();
                 TempData["SuccessMessage"] = "تم إرسال الاختبار بنجاح!";
-
-                // حفظ الإجابات كـ JSON في TempData (اختياري للعرض)
                 TempData["StudentAnswers"] = System.Text.Json.JsonSerializer.Serialize(answers);
 
+                // إنشاء رابط التحويل مع المعاملات المطلوبة
+                var redirectUrl = Url.Action("QuizResult", "Home", new
+                {
+                    qId = quizId,
+                    remainingAttempts = remainingAttempts,
+                    area = "Student"
+                });
+
                 _logger.LogInformation("Quiz submitted successfully for quiz {QuizId}", quizId);
-                return Json(new { success = true, message = "تم إرسال الاختبار بنجاح!" });
+
+                // إرجاع رابط التحويل للواجهة الأمامية
+                return Json(new
+                {
+                    success = true,
+                    message = "تم إرسال الاختبار بنجاح!",
+                    redirectUrl = redirectUrl
+                });
             }
             catch (Exception ex)
             {
-                // تسجيل الخطأ
                 _logger.LogError(ex, "Error processing quiz submission");
-
                 return Json(new { success = false, message = "حدث خطأ أثناء إرسال الاختبار، يرجى المحاولة مرة أخرى." });
             }
         }
 
         [HttpGet]
-        public IActionResult QuizResult(string id)
+        public async Task<IActionResult> QuizResult(string? qId, int? remainingAttempts)
         {
             try
             {
+                //if (remainingAttempts == 1)
+                //{
+                //    // TODO display the result of the first attempt
+                //    // TODO suggest to the user to solve the quiz again
+                //    return View(nameof(QuizDetails), );
+                //}
+
                 // التحقق من وجود بيانات الاختبار المكتمل
                 var quizCompleted = TempData.Peek("QuizCompleted") as bool? ?? false;
                 var errorMessage = TempData.Peek("ErrorMessage")?.ToString();
+                var quizId = qId ?? TempData["QuizId"]?.ToString();
+
+                var submissionTimeStr = TempData["SubmissionTime"]?.ToString();
+                var answersCountStr = TempData["AnswersCount"]?.ToString();
+                var successMessage = TempData["SuccessMessage"]?.ToString();
+                var studentAnswersJson = TempData["StudentAnswers"]?.ToString();
+
 
                 // إذا كان هناك خطأ، عرضه
                 if (!string.IsNullOrEmpty(errorMessage))
                 {
-                    var errorModel = new QuizResultViewModel
+                    var errorModel = new QuizResultVM
                     {
-                        QuizId = id ?? "Unknown",
+                        QuizId = quizId ?? "Unknown",
                         Message = errorMessage,
                         //IsSuccess = false,
                         SubmissionTime = DateTime.Now
                     };
 
-                    // مسح TempData بعد الاستخدام
                     TempData.Clear();
                     return View(errorModel);
                 }
+
+                if (string.IsNullOrWhiteSpace(quizId))
+                {
+                    TempData["error"] = "Quiz ID is required.";
+                    return View("ErrorView", TempData["error"]); ;
+                }
+
+                // check if the student has bought the lecture
+                var lectureIdResult = await _quizService.GetLectureIdByQuizId(quizId);
+                if (!lectureIdResult.Success || string.IsNullOrWhiteSpace(lectureIdResult.Data))
+                {
+                    TempData["error"] = "Lecture not found for this quiz.";
+                    return View("ErrorView", TempData["error"]); ;
+                }
+
+                // Get current user ID
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    _logger.LogWarning("Current user not found during quiz submission");
+                    return Json(new { success = false, message = "User not found" });
+                }
+
+                var isPurchasedResult = _studentLectureService.IsLecturePurchased(currentUser.Id, lectureIdResult.Data);
+
+                if (!isPurchasedResult.Success || !isPurchasedResult.Data)
+                {
+                    TempData["error"] = "You must buy the lecture first.";
+                    return View("ErrorView", TempData["error"]); ;
+                }
+
 
                 // إذا لم يتم إكمال الاختبار بشكل صحيح
                 if (!quizCompleted)
@@ -416,13 +485,6 @@ namespace TadrousManassa.Areas.Student.Controllers
                     _logger.LogWarning("QuizResult accessed without proper completion data");
                     return RedirectToAction("Index", "Home");
                 }
-
-                // استرجاع البيانات من TempData
-                var quizId = TempData["QuizId"]?.ToString() ?? id;
-                var submissionTimeStr = TempData["SubmissionTime"]?.ToString();
-                var answersCountStr = TempData["AnswersCount"]?.ToString();
-                var successMessage = TempData["SuccessMessage"]?.ToString();
-                var studentAnswersJson = TempData["StudentAnswers"]?.ToString();
 
                 // تحويل البيانات
                 DateTime.TryParse(submissionTimeStr, out var submissionTime);
@@ -444,11 +506,7 @@ namespace TadrousManassa.Areas.Student.Controllers
                     }
                 }
 
-                // TODO: هنا يمكنك استرجاع معلومات إضافية من قاعدة البيانات
-                // var quizInfo = GetQuizInfo(quizId);
-
-                // إنشاء الـ ViewModel
-                var model = new QuizResultViewModel
+                var model = new QuizResultVM
                 {
                     QuizId = quizId,
                     QuizName = "Quiz " + quizId, // TODO: استرجع الاسم الحقيقي من قاعدة البيانات
@@ -471,9 +529,9 @@ namespace TadrousManassa.Areas.Student.Controllers
                 // تسجيل الخطأ
                 _logger.LogError(ex, "Error displaying quiz results");
 
-                var errorModel = new QuizResultViewModel
+                var errorModel = new QuizResultVM
                 {
-                    QuizId = id ?? "Unknown",
+                    QuizId = TempData["QuizId"]?.ToString() ?? "Unknown",
                     Message = "حدث خطأ أثناء عرض النتائج",
                     //IsSuccess = false,
                     SubmissionTime = DateTime.Now

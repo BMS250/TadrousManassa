@@ -20,22 +20,17 @@ namespace TadrousManassa.Models
         [ForeignKey("QuizId")]
         public Quiz Quiz { get; set; }
 
-        [Required]
-        public float Score1 { get; set; } = -1;
+        public float? Score1 { get; set; } = null;
 
-        [Required]
-        public DateTime SubmissionTimeAttempt1 { get; set; }
+        public DateTime? SubmissionTimeAttempt1 { get; set; } = null;
 
-        [Required]
-        public float Score2 { get; set; } = -1;
+        public float? Score2 { get; set; } = null;
         
-        [Required]
-        public DateTime SubmissionTimeAttempt2 { get; set; }
+        public DateTime? SubmissionTimeAttempt2 { get; set; } = null;
 
         [Required]
         public int NumOfRemainingAttempts { get; set; } = 2;
 
-        [Required]
-        public bool IsSuccess { get; set; }
+        public bool? IsSuccess { get; set; } = null;
     }
 }

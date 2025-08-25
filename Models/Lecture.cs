@@ -45,6 +45,6 @@ namespace TadrousManassa.Models
 
         public virtual List<Video> Videos { get; set; }
 
-        public virtual ICollection<Quiz> Quizzes { get; set; }
+        public virtual List<Quiz> Quizzes { get; set; }
     }
 }

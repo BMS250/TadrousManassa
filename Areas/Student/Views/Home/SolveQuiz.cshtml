@@ -328,7 +328,7 @@
                 }
             });
 
-            fetch('@Url.Action("QuizResult", "Home")', {
+            fetch('@Url.Action("SolveQuiz", "Home")', {
                 method: 'POST',
                 body: formData
             })
@@ -342,11 +342,12 @@
             .then(data => {
                 if (data.success) {
                     console.log('Quiz submitted successfully, redirecting...');
-                    // التوجيه إلى صفحة النتائج
-                    window.location.href = '@Url.Action("QuizResult", "Home")';
+                    // using the sended url from the server
+                    window.location.href = data.redirectUrl;
                 } else {
                     throw new Error(data.message || 'Submission failed');
                 }
+
             })
             .catch(error => {
                 console.error('Error submitting quiz:', error);

@@ -1,0 +1,226 @@
+@model string
+
+@{
+    ViewData["Title"] = "Sorry!";
+    Layout = "_Layout";
+}
+
+<div class="error-container">
+    <div class="error-card">
+        <div class="error-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        
+        <div class="error-content">
+            <h1 class="error-title">@ViewData["Title"]</h1>
+            <p class="error-message">@Model</p>
+            
+            <div class="error-actions">
+                <a href="@Url.Action("Index", "Home")" class="btn btn-primary">
+                    <i class="fas fa-home me-2"></i>
+                    Go to Homepage
+                </a>
+                <button onclick="history.back()" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-right me-2"></i>
+                    Go to Previous Page
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .error-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .error-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        padding: 40px;
+        text-align: center;
+        max-width: 500px;
+        width: 100%;
+        animation: slideInUp 0.6s ease-out;
+    }
+
+    @@keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .error-icon {
+        margin-bottom: 30px;
+        animation: pulse 2s infinite;
+    }
+
+    .error-icon i {
+        font-size: 4rem;
+        color: #dc3545;
+    }
+
+    @@keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    .error-title {
+        color: #dc3545;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        text-shadow: 2px 2px 4px rgba(220, 53, 69, 0.1);
+    }
+
+    .error-message {
+        color: #6c757d;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 30px;
+        padding: 0 20px;
+    }
+
+    .error-actions {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        padding: 12px 24px;
+        border-radius: 50px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 140px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(45deg, #007bff, #0056b3);
+        color: white;
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(45deg, #0056b3, #004085);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-outline-secondary {
+        background: transparent;
+        color: #6c757d;
+        border: 2px solid #6c757d;
+    }
+
+    .btn-outline-secondary:hover {
+        background: #6c757d;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .error-container {
+            padding: 10px;
+        }
+        
+        .error-card {
+            padding: 30px 20px;
+        }
+        
+        .error-title {
+            font-size: 2rem;
+        }
+        
+        .error-message {
+            font-size: 1rem;
+            padding: 0 10px;
+        }
+        
+        .error-actions {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .btn {
+            width: 100%;
+            max-width: 250px;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .error-card {
+            padding: 25px 15px;
+        }
+        
+        .error-title {
+            font-size: 1.8rem;
+        }
+        
+        .error-icon i {
+            font-size: 3rem;
+        }
+    }
+
+    /* Dark mode support */
+    @@media (prefers-color-scheme: dark) {
+        .error-card {
+            background: #2d3748;
+            color: #e2e8f0;
+        }
+        
+        .error-message {
+            color: #a0aec0;
+        }
+        
+        .btn-outline-secondary {
+            color: #a0aec0;
+            border-color: #a0aec0;
+        }
+        
+        .btn-outline-secondary:hover {
+            background: #a0aec0;
+            color: #2d3748;
+        }
+    }
+
+    /* RTL Support */
+    [dir="rtl"] .error-actions {
+        flex-direction: row-reverse;
+    }
+
+    [dir="rtl"] .btn i {
+        margin-left: 0.5rem;
+        margin-right: 0;
+    }
+</style>

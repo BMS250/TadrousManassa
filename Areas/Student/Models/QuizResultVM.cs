@@ -1,6 +1,6 @@
 ﻿namespace TadrousManassa.Areas.Student.Models
 {
-    public class QuizResultViewModel
+    public class QuizResultVM
     {
         public string QuizId { get; set; }
         public string QuizName { get; set; }

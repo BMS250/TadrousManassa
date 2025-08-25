@@ -30,6 +30,11 @@ namespace TadrousManassa.Services
             return await _quizRepository.GetQuizDetailsAsync(id);
         }
 
+        public Task<OperationResult<string>> GetLectureIdByQuizId(string id)
+        {
+            return _quizRepository.GetLectureIdByQuizId(id);
+        }
+
         public async Task<List<Quiz>> GetQuizzesByLectureIdAsync(string lectureId)
         {
             return await _quizRepository.GetQuizzesByLectureIdAsync(lectureId);

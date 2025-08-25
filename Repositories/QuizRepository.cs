@@ -26,7 +26,21 @@ namespace TadrousManassa.Repositories
                     .ThenInclude(q => q.Choices)
                 .FirstOrDefaultAsync(q => q.Id == id);
         }
-        
+
+        public async Task<OperationResult<string>> GetLectureIdByQuizId(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                return OperationResult<string>.Fail("Quiz ID cannot be null or empty.");
+            var lectureId = await _context.Quizzes
+                .AsNoTracking()
+                .Where(q => q.Id == id)
+                .Select(q => q.LectureId)
+                .FirstOrDefaultAsync();
+            if (lectureId == null)
+                return OperationResult<string>.Fail("Quiz not found.");
+            return OperationResult<string>.Ok(lectureId, "Lecture ID retrieved successfully.");
+        }
+
         public async Task<QuizDetailsDTO?> GetQuizDetailsAsync(string id)
         {
             return await _context.Quizzes

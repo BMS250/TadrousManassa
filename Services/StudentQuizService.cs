@@ -19,9 +19,14 @@ namespace TadrousManassa.Services
             return _studentQuizRepository.GetFullQuizzesByStudentIdAsync(studentId);
         }
 
-        public Task<int> GetRemainingAttemptsAsync(string studentId, string videoId)
+        public Task<int> GetRemainingAttemptsByQuizIdAsync(string studentId, string quizId)
         {
-            return _studentQuizRepository.GetRemainingAttemptsAsync(studentId, videoId);
+            return _studentQuizRepository.GetRemainingAttemptsByQuizIdAsync(studentId, quizId);
+        }
+        
+        public Task<int> GetRemainingAttemptsByVideoIdAsync(string studentId, string videoId)
+        {
+            return _studentQuizRepository.GetRemainingAttemptsByVideoIdAsync(studentId, videoId);
         }
 
         public bool IsQuizSolved(string studentId, string videoId)
