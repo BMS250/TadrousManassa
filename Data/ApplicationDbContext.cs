@@ -83,6 +83,16 @@ namespace TadrousManassa.Data
                 .WithOne(q => q.Video)
                 .HasForeignKey<Quiz>(q => q.VideoId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<StudentChoice>()
+                .HasOne(sc => sc.Student)
+                .WithMany(s => s.StudentChoices)
+                .HasForeignKey(sc => sc.StudentId);
+
+            modelBuilder.Entity<StudentChoice>()
+                .HasOne(sc => sc.Choice)
+                .WithMany(s => s.StudentChoices)
+                .HasForeignKey(sc => sc.ChoiceId);
         }
         public virtual DbSet<Student> Students { get; set; }
         public virtual DbSet<Lecture> Lectures { get; set; }
@@ -93,5 +103,6 @@ namespace TadrousManassa.Data
         public virtual DbSet<Question> Questions { get; set; }
         public virtual DbSet<Choice> Choices { get; set; }
         public virtual DbSet<StudentQuiz> StudentQuizzes { get; set; }
+        public virtual DbSet<StudentChoice> StudentChoices { get; set; }
     }
 }

@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TadrousManassa", "TadrousMa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeGenerator", "..\CodeGenerator\CodeGenerator.csproj", "{70D55476-9306-476E-924C-61D9C5C5F299}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Testing", "..\Testing\Testing.csproj", "{1CD0511C-2D48-470E-A2AA-3C079085F7BA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{70D55476-9306-476E-924C-61D9C5C5F299}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{70D55476-9306-476E-924C-61D9C5C5F299}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{70D55476-9306-476E-924C-61D9C5C5F299}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1CD0511C-2D48-470E-A2AA-3C079085F7BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1CD0511C-2D48-470E-A2AA-3C079085F7BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1CD0511C-2D48-470E-A2AA-3C079085F7BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1CD0511C-2D48-470E-A2AA-3C079085F7BA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

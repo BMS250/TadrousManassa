@@ -25,6 +25,7 @@ namespace TadrousManassa.Areas.Student.Controllers
         private readonly IStudentService _studentService;
         private readonly IStudentQuizService _studentQuizService;
         private readonly IQuizService _quizService;
+        private readonly IVideoService _videoService;
         private readonly IMemoryCache _cache;
         private Task<ApplicationUser?> currentUser;
 
@@ -37,6 +38,7 @@ namespace TadrousManassa.Areas.Student.Controllers
             IStudentService studentService,
             IStudentQuizService studentQuizService,
             IQuizService quizService,
+            IVideoService videoService,
             IMemoryCache cache)
         {
             _logger = logger;
@@ -47,6 +49,7 @@ namespace TadrousManassa.Areas.Student.Controllers
             _studentService = studentService;
             _studentQuizService = studentQuizService;
             _quizService = quizService;
+            _videoService = videoService;
             _cache = cache;
         }
 
@@ -165,7 +168,7 @@ namespace TadrousManassa.Areas.Student.Controllers
             }
         }
 
-        public IActionResult DownloadSheet(string path)
+        internal IActionResult DownloadSheet(string path)
         {
             // Ensure it's a valid URL to prevent open redirects
             if (!Uri.IsWellFormedUriString(path, UriKind.Absolute))
@@ -175,17 +178,22 @@ namespace TadrousManassa.Areas.Student.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> QuizDetails(string? videoId, string? qId)
+        public async Task<IActionResult> QuizDetails(string? vId, string? qId)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(videoId) && string.IsNullOrWhiteSpace(qId))
+                if (string.IsNullOrWhiteSpace(vId) && string.IsNullOrWhiteSpace(qId))
                 {
                     TempData["error"] = "Video ID or Quiz ID is required.";
                     return View("ErrorView", TempData["error"]);;
                 }
 
-                string? quizId = qId ?? await _quizService.GetQuizIdByVideoIdAsync(videoId);
+                string? quizId = qId ?? await _videoService.GetQuizIdByVideoIdAsync(vId);
+                if (string.IsNullOrWhiteSpace(quizId))
+                {
+                    TempData["error"] = "Quiz not found for the provided video.";
+                    return View("ErrorView", TempData["error"]); ;
+                }
 
                 // check if the student has bought the lecture
                 var lectureIdResult = await _quizService.GetLectureIdByQuizId(quizId!);
@@ -194,6 +202,7 @@ namespace TadrousManassa.Areas.Student.Controllers
                     TempData["error"] = "Lecture not found for this quiz.";
                     return View("ErrorView", TempData["error"]); ;
                 }
+                string lectureId = lectureIdResult.Data;
 
                 // Get current user ID
                 var currentUser = await _userManager.GetUserAsync(User);
@@ -203,17 +212,20 @@ namespace TadrousManassa.Areas.Student.Controllers
                     return Json(new { success = false, message = "User not found" });
                 }
 
-                var isPurchasedResult = _studentLectureService.IsLecturePurchased(currentUser.Id, lectureIdResult.Data);
+                var isPurchasedResult = _studentLectureService.IsLecturePurchased(currentUser.Id, lectureId);
 
                 if (!isPurchasedResult.Success || !isPurchasedResult.Data)
                 {
                     TempData["error"] = "You must buy the lecture first.";
-                    return View("ErrorView", TempData["error"]); ;
+                    return View("ErrorView", TempData["error"]);
                 }
 
-                // TODO check if there is other video, if yes go to it, otherwise display finishing the lecture message
+                int remainingAttempts = _studentQuizService.GetRemainingAttemptsByQuizIdAsync(currentUser.Id, quizId).Result;
 
-                int remainingAttempts = _studentQuizService.GetRemainingAttemptsByQuizIdAsync(currentUser.Id, quizId!).Result;
+                if (remainingAttempts == 0)
+                {
+
+                }
 
                 if (remainingAttempts == 2)
                 {
@@ -461,6 +473,7 @@ namespace TadrousManassa.Areas.Student.Controllers
                     TempData["error"] = "Lecture not found for this quiz.";
                     return View("ErrorView", TempData["error"]); ;
                 }
+                string lectureId = lectureIdResult.Data;
 
                 // Get current user ID
                 var currentUser = await _userManager.GetUserAsync(User);
@@ -522,6 +535,18 @@ namespace TadrousManassa.Areas.Student.Controllers
                 TempData.Clear();
 
                 _logger.LogInformation("QuizResult displayed successfully for quiz {QuizId}", quizId);
+
+
+
+                // TODO check if there is other video, if yes go to it, otherwise display finishing the lecture message
+                var nextVideoOrderResult = await _videoService.GetNextVideoOrderByQuizIdAsync(lectureId, quizId);
+                if (!nextVideoOrderResult.Success)
+                {
+                    TempData["error"] = nextVideoOrderResult.Message;
+                    return View("ErrorView", TempData["error"]);
+                }
+
+
                 return View(model);
             }
             catch (Exception ex)

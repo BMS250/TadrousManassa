@@ -15,11 +15,6 @@ namespace TadrousManassa.Services
             _quizRepository = quizRepository;
         }
 
-        public Task<string?> GetQuizIdByVideoIdAsync(string videoId)
-        {
-            return _quizRepository.GetQuizIdByVideoIdAsync(videoId);
-        }
-
         public async Task<Quiz?> GetQuizByIdAsync(string id)
         {
             return await _quizRepository.GetQuizByIdAsync(id);

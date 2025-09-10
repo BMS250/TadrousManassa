@@ -11,14 +11,6 @@ namespace TadrousManassa.Repositories
         private readonly ApplicationDbContext _context = context;
 
 
-        public Task<string?> GetQuizIdByVideoIdAsync(string videoId)
-        {
-            return _context.Videos
-                .AsNoTracking()
-                .Where(v => v.Id == videoId)
-                .Select(v => v.QuizId)
-                .FirstOrDefaultAsync();
-        }
         public async Task<Quiz?> GetQuizByIdAsync(string id)
         {
             return await _context.Quizzes

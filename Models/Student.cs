@@ -49,5 +49,7 @@ namespace TadrousManassa.Models
         public virtual ICollection<StudentLecture> StudentLectures { get; set; }
 
         public virtual ICollection<StudentQuiz> StudentQuizzes { get; set; }
+
+        public virtual ICollection<StudentChoice> StudentChoices { get; set; }
     }
 }

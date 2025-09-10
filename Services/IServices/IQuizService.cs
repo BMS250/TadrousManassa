@@ -5,7 +5,7 @@ namespace TadrousManassa.Services.IServices
 {
     public interface IQuizService
     {
-        public Task<string?> GetQuizIdByVideoIdAsync(string videoId);
+        //public Task<string?> GetQuizIdByVideoIdAsync(string videoId);
         public Task<Quiz?> GetQuizByIdAsync(string id);
         public Task<QuizDetailsDTO?> GetQuizDetailsAsync(string id);
         public Task<OperationResult<string>> GetLectureIdByQuizId(string id);
