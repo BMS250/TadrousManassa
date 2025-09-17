@@ -25,6 +25,34 @@ namespace TadrousManassa.Repositories
                 .ToListAsync();
         }
 
+        public async Task SaveQuizSubmissionAsync(string studentId, string quizId, Dictionary<string, string> answers)
+        {
+            // find student quiz entry
+            var studentQuiz = await _context.StudentQuizzes
+                .FirstOrDefaultAsync(sq => sq.StudentId == studentId && sq.QuizId == quizId);
+
+            if (studentQuiz == null)
+            {
+                throw new InvalidOperationException("Student has not purchased this quiz.");
+            }
+
+            // create submission entity
+            //var submission = new QuizSubmission
+            //{
+            //    StudentId = studentId,
+            //    QuizId = quizId,
+            //    SubmittedAt = DateTime.Now,
+            //    AnswersJson = System.Text.Json.JsonSerializer.Serialize(answers)
+            //};
+
+            //_context.QuizSubmissions.Add(submission);
+
+            // decrease attempt count YOU DID IT IN SERVICE
+            ////studentQuiz.NumOfRemainingAttempts--;
+
+            await _context.SaveChangesAsync();
+        }
+
         public Task<int> GetRemainingAttemptsByQuizIdAsync(string studentId, string quizId)
         {
             return _context.StudentQuizzes
@@ -58,6 +86,11 @@ namespace TadrousManassa.Repositories
         {
             return await _context.StudentQuizzes
                 .FirstOrDefaultAsync(sq => sq.StudentId == studentId && sq.QuizId == quizId);
+        }
+
+        public async Task AddStudentQuizAsync(StudentQuiz studentQuiz)
+        {
+            await _context.StudentQuizzes.AddAsync(studentQuiz);
         }
 
         public async Task SaveChangesAsync()

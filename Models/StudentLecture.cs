@@ -24,7 +24,7 @@ namespace TadrousManassa.Models
         [ForeignKey("StudentId")]
         public Student? Student { get; set; }
 
-        public bool IsWatched { get; set; } = false;
+        //public bool IsWatched { get; set; } = false;
 
         public int ViewsCount { get; set; } = 0;
 

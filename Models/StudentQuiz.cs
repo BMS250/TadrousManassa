@@ -31,6 +31,9 @@ namespace TadrousManassa.Models
         [Required]
         public int NumOfRemainingAttempts { get; set; } = 2;
 
+        [Required]
+        public DateTime StartTime { get; set; }
+
         public bool? IsSuccess { get; set; } = null;
     }
 }

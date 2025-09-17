@@ -100,7 +100,7 @@ namespace TadrousManassa.Repositories
             foreach (var lectureId in lectureIDs)
             {
                 noWatcheres[lectureId] = _context.StudentLectures.AsNoTracking().Count(sl => sl.LectureId == lectureId
-                                                                                        && sl.IsWatched);
+                                                                                        && /*sl.IsWatched*/ sl.ViewsCount > 0);
             }
             return noWatcheres;
         }
@@ -114,7 +114,7 @@ namespace TadrousManassa.Repositories
             var studentLecture = _context.StudentLectures.FirstOrDefault(sl => sl.StudentId == studentId && sl.LectureId == lectureId);
             if (studentLecture == null)
                 return OperationResult<object>.Fail("Student lecture not found.");
-            studentLecture.IsWatched = true;
+            //studentLecture.IsWatched = true;
             studentLecture.ViewsCount++;
             try
             {

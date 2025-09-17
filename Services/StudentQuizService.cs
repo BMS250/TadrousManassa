@@ -59,5 +59,31 @@ namespace TadrousManassa.Services
                 return OperationResult<bool>.Fail("Something happened while registering your attempt, please try again");
             }
         }
+
+        public async Task<DateTime> GetOrCreateQuizStartTimeAsync(string studentId, string quizId)
+        {
+            var studentQuiz = await _studentQuizRepository.GetStudentQuizAsync(studentId, quizId);
+
+            if (studentQuiz is null)
+            {
+                studentQuiz = new StudentQuiz
+                {
+                    StudentId = studentId,
+                    QuizId = quizId,
+                    StartTime = DateTime.Now,
+                    NumOfRemainingAttempts = 2
+                };
+
+                await _studentQuizRepository.AddStudentQuizAsync(studentQuiz);
+                await _studentQuizRepository.SaveChangesAsync();
+            }
+            else if (studentQuiz.StartTime == null)
+            {
+                studentQuiz.StartTime = DateTime.Now;
+                await _studentQuizRepository.SaveChangesAsync();
+            }
+
+            return studentQuiz.StartTime;
+        }
     }
 }
