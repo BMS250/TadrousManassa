@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using TadrousManassa.Areas.Student.Models;
 using TadrousManassa.Models;
@@ -222,11 +223,6 @@ namespace TadrousManassa.Areas.Student.Controllers
 
                 int remainingAttempts = _studentQuizService.GetRemainingAttemptsByQuizIdAsync(currentUser.Id, quizId).Result;
 
-                if (remainingAttempts == 0)
-                {
-
-                }
-
                 if (remainingAttempts == 2)
                 {
                     // Display the quiz details
@@ -254,7 +250,7 @@ namespace TadrousManassa.Areas.Student.Controllers
                 if (string.IsNullOrWhiteSpace(quizId))
                 {
                     TempData["error"] = "Quiz ID is required.";
-                    return View("ErrorView", TempData["error"]);;
+                    return View("ErrorView", TempData["error"]);
                 }
 
                 // check if the student has bought the lecture
@@ -262,7 +258,7 @@ namespace TadrousManassa.Areas.Student.Controllers
                 if (!lectureIdResult.Success || string.IsNullOrWhiteSpace(lectureIdResult.Data))
                 {
                     TempData["error"] = "Lecture not found for this quiz.";
-                    return View("ErrorView", TempData["error"]);;
+                    return View("ErrorView", TempData["error"]);
                 }
 
                 // Get current user ID
@@ -387,7 +383,7 @@ namespace TadrousManassa.Areas.Student.Controllers
                 // // TODO: هنا يمكنك حفظ الإجابات في قاعدة البيانات
                 // حساب المحاولات المتبقية
                 int remainingAttempts = await _studentQuizService.GetRemainingAttemptsByQuizIdAsync(currentUser.Id, quizId);
-                remainingAttempts--; // تقليل المحاولة الحالية
+                //remainingAttempts--; // تقليل المحاولة الحالية
 
                 // حفظ البيانات في TempData للاستخدام في GET request
                 TempData["QuizCompleted"] = true;
@@ -401,7 +397,7 @@ namespace TadrousManassa.Areas.Student.Controllers
                 var redirectUrl = Url.Action("QuizResult", "Home", new
                 {
                     qId = quizId,
-                    remainingAttempts = remainingAttempts,
+                    remainingAttempts,
                     area = "Student"
                 });
 
@@ -412,7 +408,7 @@ namespace TadrousManassa.Areas.Student.Controllers
                 {
                     success = true,
                     message = "تم إرسال الاختبار بنجاح!",
-                    redirectUrl = redirectUrl
+                    redirectUrl
                 });
             }
             catch (Exception ex)
@@ -427,13 +423,6 @@ namespace TadrousManassa.Areas.Student.Controllers
         {
             try
             {
-                //if (remainingAttempts == 1)
-                //{
-                //    // TODO display the result of the first attempt
-                //    // TODO suggest to the user to solve the quiz again
-                //    return View(nameof(QuizDetails), );
-                //}
-
                 // التحقق من وجود بيانات الاختبار المكتمل
                 var quizCompleted = TempData.Peek("QuizCompleted") as bool? ?? false;
                 var errorMessage = TempData.Peek("ErrorMessage")?.ToString();
@@ -445,7 +434,6 @@ namespace TadrousManassa.Areas.Student.Controllers
                 var studentAnswersJson = TempData["StudentAnswers"]?.ToString();
 
 
-                // إذا كان هناك خطأ، عرضه
                 if (!string.IsNullOrEmpty(errorMessage))
                 {
                     var errorModel = new QuizResultVM
@@ -483,7 +471,7 @@ namespace TadrousManassa.Areas.Student.Controllers
                     return Json(new { success = false, message = "User not found" });
                 }
 
-                var isPurchasedResult = _studentLectureService.IsLecturePurchased(currentUser.Id, lectureIdResult.Data);
+                var isPurchasedResult = _studentLectureService.IsLecturePurchased(currentUser.Id, lectureId);
 
                 if (!isPurchasedResult.Success || !isPurchasedResult.Data)
                 {
@@ -491,6 +479,23 @@ namespace TadrousManassa.Areas.Student.Controllers
                     return View("ErrorView", TempData["error"]); ;
                 }
 
+                // Ensure that all these conditions are mandatory (meaning that remaning attempts must be 0 or 1)
+                if (string.IsNullOrWhiteSpace(studentAnswersJson) && string.IsNullOrWhiteSpace(answersCountStr) && string.IsNullOrWhiteSpace(submissionTimeStr))
+                {
+                    // display the user's solutions, if they are correct or not and the score
+
+                    // TODO display the result of the first attempt
+                    // TODO suggest to the user to solve the quiz again if the score is not the full mark
+
+                    var quizResult = await _quizService.GetQuizResultAsync(currentUser.Id, quizId, remainingAttempts ?? 0);
+                    if (quizResult is null)
+                    {
+                        TempData["error"] = $"Failed to get quiz result for user {currentUser.Id} and quiz {quizId}";
+                        _logger.LogError(TempData["error"]!.ToString());
+                        return View("ErrorView", TempData["error"]);
+                    }
+                    return View(quizResult);
+                }
 
                 // إذا لم يتم إكمال الاختبار بشكل صحيح
                 if (!quizCompleted)
@@ -533,10 +538,9 @@ namespace TadrousManassa.Areas.Student.Controllers
 
                 // مسح TempData بعد الاستخدام
                 TempData.Clear();
-
                 _logger.LogInformation("QuizResult displayed successfully for quiz {QuizId}", quizId);
 
-
+                await _studentQuizService.DecreaseNumOfRemainingAttemptsAsync(currentUser.Id, quizId);
 
                 // TODO check if there is other video, if yes go to it, otherwise display finishing the lecture message
                 var nextVideoOrderResult = await _videoService.GetNextVideoOrderByQuizIdAsync(lectureId, quizId);

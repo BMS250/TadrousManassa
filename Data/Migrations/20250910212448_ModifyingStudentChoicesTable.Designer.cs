@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TadrousManassa.Data;
 
@@ -11,9 +12,11 @@ using TadrousManassa.Data;
 namespace TadrousManassa.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250910212448_ModifyingStudentChoicesTable")]
+    partial class ModifyingStudentChoicesTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -249,6 +252,7 @@ namespace TadrousManassa.Data.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("QuestionId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Text")
@@ -317,7 +321,6 @@ namespace TadrousManassa.Data.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("AnswerId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Image")
@@ -437,10 +440,6 @@ namespace TadrousManassa.Data.Migrations
                     b.Property<string>("ChoiceId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<bool?>("IsCorrect")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("bit");
 
                     b.Property<string>("StudentId")
                         .IsRequired()
@@ -627,7 +626,8 @@ namespace TadrousManassa.Data.Migrations
                     b.HasOne("TadrousManassa.Models.Question", "Question")
                         .WithMany("Choices")
                         .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Question");
                 });
@@ -636,9 +636,7 @@ namespace TadrousManassa.Data.Migrations
                 {
                     b.HasOne("TadrousManassa.Models.Choice", "Answer")
                         .WithMany()
-                        .HasForeignKey("AnswerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("AnswerId");
 
                     b.HasOne("TadrousManassa.Models.Quiz", "Quiz")
                         .WithMany("Questions")
@@ -662,7 +660,7 @@ namespace TadrousManassa.Data.Migrations
                     b.HasOne("TadrousManassa.Models.Video", "Video")
                         .WithOne("Quiz")
                         .HasForeignKey("TadrousManassa.Models.Quiz", "VideoId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Lecture");

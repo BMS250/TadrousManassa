@@ -14,15 +14,11 @@ namespace TadrousManassa.Models
         [ForeignKey("StudentId")]
         public Student Student { get; set; }
 
-        [Required]
-        public string QuestionId { get; set; }
-        
-        [ForeignKey("QuestionId")]
-        public Question Question { get; set; }
-
         public string ChoiceId { get; set; }
 
         [ForeignKey("ChoiceId")]
         public Choice Choice { get; set; }
+
+        public bool? IsCorrect { get; private set; }
     }
 }

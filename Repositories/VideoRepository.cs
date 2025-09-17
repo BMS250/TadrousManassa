@@ -29,11 +29,11 @@ namespace TadrousManassa.Repositories
             if (currentOrder == null)
                 return await Task.FromResult(OperationResult<int?>.Fail("Quiz not found."));
 
-            bool hasNext = _context.Videos?
-                .AsNoTracking()?
-                .Any(v => v.LectureId == lectureId && v.Order == currentOrder + 1) ?? false;
+            bool hasNext = await _context.Videos
+                .AsNoTracking()
+                .AnyAsync(v => v.LectureId == lectureId && v.Order == currentOrder + 1);
 
-            if (hasNext)
+            if (!hasNext)
             {
                 return await Task.FromResult(OperationResult<int?>.Fail("This is the last video in the lecture."));
             }

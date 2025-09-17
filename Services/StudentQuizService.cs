@@ -29,9 +29,35 @@ namespace TadrousManassa.Services
             return _studentQuizRepository.GetRemainingAttemptsByVideoIdAsync(studentId, videoId);
         }
 
-        public bool IsQuizSolved(string studentId, string videoId)
+        public Task<bool> IsQuizSolved(string studentId, string videoId)
         {
             return _studentQuizRepository.IsQuizSolved(studentId, videoId);
+        }
+
+        public async Task<OperationResult<bool>> DecreaseNumOfRemainingAttemptsAsync(string studentId, string quizId)
+        {
+            var studentQuiz = await _studentQuizRepository.GetStudentQuizAsync(studentId, quizId);
+
+            if (studentQuiz is null)
+            {
+                return OperationResult<bool>.Fail("This user has not bought this lecture");
+            }
+
+            if (studentQuiz.NumOfRemainingAttempts <= 0)
+            {
+                return OperationResult<bool>.Fail("No attempts remaining");
+            }
+
+            try
+            {
+                studentQuiz.NumOfRemainingAttempts--;
+                await _studentQuizRepository.SaveChangesAsync();
+                return OperationResult<bool>.Ok(true);
+            }
+            catch (Exception)
+            {
+                return OperationResult<bool>.Fail("Something happened while registering your attempt, please try again");
+            }
         }
     }
 }

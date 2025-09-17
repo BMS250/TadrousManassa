@@ -15,13 +15,12 @@ namespace TadrousManassa.Models
         [MaxLength(500)]
         public string? Image { get; set; }
 
-        [Required]
-        public string QuestionId { get; set; }
+        public string? QuestionId { get; set; }
 
         [ForeignKey("QuestionId")]
         [JsonIgnore]
         public Question Question { get; set; }
-
+        
         public virtual ICollection<StudentChoice> StudentChoices { get; set; }
     }
 }

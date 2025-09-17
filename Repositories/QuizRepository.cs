@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using TadrousManassa.Areas.Student.Models;
 using TadrousManassa.Data;
 using TadrousManassa.Models;
@@ -55,6 +56,49 @@ namespace TadrousManassa.Repositories
                 .Include(q => q.Questions)
                     .ThenInclude(q => q.Choices)
                 .ToListAsync();
+        }
+
+        public Task<QuizResultDTO?> GetQuizResultAsync(string studentId, string quizId, int remainingAttempts)
+        {
+            return _context.Quizzes
+                .Where(q => q.Id == quizId)
+                .Select(q => new QuizResultDTO
+                {
+                    QuizId = q.Id,
+                    QuizTitle = q.Name,
+                    Questions = q.Questions.Select(ques => new QuestionResultDTO
+                    {
+                        QuestionId = ques.Id,
+                        QuestionText = ques.Text,
+                        QuestionImage = ques.Image,
+                        Score = ques.Score,
+
+                        Choices = ques.Choices
+                        .Select(c => new ChoiceResultDTO
+                        {
+                            ChoiceId = c.Id,
+                            ChoiceText = c.Text,
+                            ChoiceImage = c.Image
+                        }).ToList(),
+
+                        SelectedChoiceId = ques.Choices
+                            .SelectMany(c => c.StudentChoices)
+                            .Where(sc => sc.StudentId == studentId)
+                            .Select(sc => sc.ChoiceId)
+                            .FirstOrDefault(),
+
+                        IsCorrect = ques.Choices
+                            .SelectMany(c => c.StudentChoices)
+                            .Where(sc => sc.StudentId == studentId)
+                            .Select(sc => sc.IsCorrect)
+                            .FirstOrDefault(),
+
+                        CorrectAnswerId = remainingAttempts == 1 ? ques.AnswerId : null,
+                        CorrectAnswerText = remainingAttempts == 1 ? ques.Answer.Text : null
+                    }).ToList(),
+                    RemainingAttempts = remainingAttempts
+                })
+                .FirstOrDefaultAsync();
         }
 
         public async Task CreateQuizAsync(Quiz quiz)

@@ -15,14 +15,14 @@ namespace TadrousManassa.Services
             _quizRepository = quizRepository;
         }
 
-        public async Task<Quiz?> GetQuizByIdAsync(string id)
+        public Task<Quiz?> GetQuizByIdAsync(string id)
         {
-            return await _quizRepository.GetQuizByIdAsync(id);
+            return _quizRepository.GetQuizByIdAsync(id);
         }
 
-        public async Task<QuizDetailsDTO?> GetQuizDetailsAsync(string id)
+        public Task<QuizDetailsDTO?> GetQuizDetailsAsync(string id)
         {
-            return await _quizRepository.GetQuizDetailsAsync(id);
+            return _quizRepository.GetQuizDetailsAsync(id);
         }
 
         public Task<OperationResult<string>> GetLectureIdByQuizId(string id)
@@ -30,24 +30,29 @@ namespace TadrousManassa.Services
             return _quizRepository.GetLectureIdByQuizId(id);
         }
 
-        public async Task<List<Quiz>> GetQuizzesByLectureIdAsync(string lectureId)
+        public Task<List<Quiz>> GetQuizzesByLectureIdAsync(string lectureId)
         {
-            return await _quizRepository.GetQuizzesByLectureIdAsync(lectureId);
+            return _quizRepository.GetQuizzesByLectureIdAsync(lectureId);
         }
 
-        public async Task CreateQuizAsync(Quiz quiz)
+        public Task<QuizResultDTO?> GetQuizResultAsync(string studentId, string quizId, int remainingAttempts)
         {
-            await _quizRepository.CreateQuizAsync(quiz);
+            return _quizRepository.GetQuizResultAsync(studentId, quizId, remainingAttempts);
         }
 
-        public async Task UpdateQuizAsync(Quiz quiz)
+        public Task CreateQuizAsync(Quiz quiz)
         {
-            await _quizRepository.UpdateQuizAsync(quiz);
+            return _quizRepository.CreateQuizAsync(quiz);
         }
 
-        public async Task DeleteQuizAsync(string id)
+        public Task UpdateQuizAsync(Quiz quiz)
         {
-            await _quizRepository.DeleteQuizAsync(id);
+            return _quizRepository.UpdateQuizAsync(quiz);
+        }
+
+        public Task DeleteQuizAsync(string id)
+        {
+            return _quizRepository.DeleteQuizAsync(id);
         }
 
     }

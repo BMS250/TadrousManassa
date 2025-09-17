@@ -64,21 +64,25 @@ namespace TadrousManassa
             });
 
 
-            builder.Services.AddScoped<IStudentRepository, StudentRepository>();
-            builder.Services.AddScoped<IStudentService, StudentService>();
-            builder.Services.AddScoped<ILectureRepository, LectureRepository>();
-            builder.Services.AddScoped<ILectureService, LectureService>();
+            builder.Services.AddScoped<IAppSettingsRepository, AppSettingsRepository>();
             builder.Services.AddScoped<ICodeRepository, CodeRepository>();
             builder.Services.AddScoped<ICodeService, CodeService>();
-            builder.Services.AddScoped<IAppSettingsRepository, AppSettingsRepository>();
-            builder.Services.AddScoped<IStudentLectureRepository, StudentLectureRepository>();
-            builder.Services.AddScoped<IStudentLectureService, StudentLectureService>();
-            builder.Services.AddScoped<IQuizRepository, QuizRepository>();
-            builder.Services.AddScoped<IQuizService, QuizService>();
+            builder.Services.AddScoped<ILectureRepository, LectureRepository>();
+            builder.Services.AddScoped<ILectureService, LectureService>();
             builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
             builder.Services.AddScoped<IQuestionService, QuestionService>();
+            builder.Services.AddScoped<IQuizRepository, QuizRepository>();
+            builder.Services.AddScoped<IQuizService, QuizService>();
+            builder.Services.AddScoped<IStudentChoiceRepository, StudentChoiceRepository>();
+            builder.Services.AddScoped<IStudentChoiceService, StudentChoiceService>();
+            builder.Services.AddScoped<IStudentLectureRepository, StudentLectureRepository>();
+            builder.Services.AddScoped<IStudentLectureService, StudentLectureService>();
             builder.Services.AddScoped<IStudentQuizRepository, StudentQuizRepository>();
             builder.Services.AddScoped<IStudentQuizService, StudentQuizService>();
+            builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+            builder.Services.AddScoped<IStudentService, StudentService>();
+            builder.Services.AddScoped<IVideoRepository, VideoRepository>();
+            builder.Services.AddScoped<IVideoService, VideoService>();
 
             // Email Service
             builder.Services.AddScoped<IEmailSender, EmailSender>();

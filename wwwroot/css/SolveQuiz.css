@@ -1,0 +1,59 @@
+﻿#quiz-timer {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    font-size: 1.5rem;
+}
+
+.question-block {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+    .question-block:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+.choices-list .form-check {
+    direction: ltr;
+    padding: 12px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    margin-bottom: 8px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    user-select: none;
+}
+
+.choices-list .form-check-input {
+    display: none;
+}
+
+.choices-list .form-check:hover {
+    background-color: #e3f2fd;
+    border-color: #bbdefb;
+    transform: translateX(-2px);
+}
+
+.choices-list .form-check:has(input:checked) {
+    background-color: #e8f5e8;
+    border-color: #4caf50;
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
+}
+
+.choices-list .form-check-input:checked + .form-check-label {
+    color: #2e7d32;
+    font-weight: 600;
+}
+
+#submit-section {
+    margin-top: 2rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.spinner-border {
+    color: #0d6efd;
+}

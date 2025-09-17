@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TadrousManassa.Areas.Student.Models;
 using TadrousManassa.Data;
 using TadrousManassa.Models;
 using TadrousManassa.Repositories.IRepositories;
@@ -12,15 +13,6 @@ namespace TadrousManassa.Repositories
         {
             _context = context;
         }
-
-        // The Problem here is because that this method is async where there is not ToHashSetAsync method in EF Core
-        //public async Task<HashSet<string>> GetQuizIdsByStudentIdAsync(string studentId)
-        //{
-        //    return await _context.StudentQuizzes
-        //        .Where(sq => sq.StudentId == studentId)
-        //        .Select(sq => sq.QuizId)
-        //        .ToHashSet();
-        //}
 
         public async Task<List<Quiz>> GetFullQuizzesByStudentIdAsync(string studentId)
         {
@@ -52,15 +44,25 @@ namespace TadrousManassa.Repositories
             return GetRemainingAttemptsByQuizIdAsync(studentId, quizId!);
         }
 
-        public bool IsQuizSolved(string studentId, string videoId)
+        public async Task<bool> IsQuizSolved(string studentId, string videoId)
         {
-            var quizId = _context.Quizzes
+            var quizId = await _context.Quizzes
                 .AsNoTracking()
                 .Where(q => q.VideoId == videoId)
                 .Select(q => q.Id)
-                .FirstOrDefault();
-            return _context.StudentQuizzes.Any(sq => sq.StudentId == studentId && sq.QuizId == quizId);
+                .FirstOrDefaultAsync();
+            return await _context.StudentQuizzes.AnyAsync(sq => sq.StudentId == studentId && sq.QuizId == quizId);
         }
 
+        public async Task<StudentQuiz?> GetStudentQuizAsync(string studentId, string quizId)
+        {
+            return await _context.StudentQuizzes
+                .FirstOrDefaultAsync(sq => sq.StudentId == studentId && sq.QuizId == quizId);
+        }
+
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
     }
 }

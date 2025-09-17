@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Humanizer;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using TadrousManassa.Models;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace TadrousManassa.Data
 {
@@ -66,7 +69,7 @@ namespace TadrousManassa.Data
                 .HasMany(qu => qu.Choices)
                 .WithOne(c => c.Question)
                 .HasForeignKey(q => q.QuestionId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<StudentQuiz>()
                 .HasOne(sq => sq.Student)
@@ -82,7 +85,7 @@ namespace TadrousManassa.Data
                 .HasOne(v => v.Quiz)
                 .WithOne(q => q.Video)
                 .HasForeignKey<Quiz>(q => q.VideoId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<StudentChoice>()
                 .HasOne(sc => sc.Student)
@@ -92,7 +95,14 @@ namespace TadrousManassa.Data
             modelBuilder.Entity<StudentChoice>()
                 .HasOne(sc => sc.Choice)
                 .WithMany(s => s.StudentChoices)
-                .HasForeignKey(sc => sc.ChoiceId);
+            .HasForeignKey(sc => sc.ChoiceId);
+
+            //Don’t try to insert/ update IsCorrect.
+            //Just read it from the database when materializing.
+            modelBuilder.Entity<StudentChoice>()
+                .Property(sc => sc.IsCorrect)
+                .ValueGeneratedOnAddOrUpdate()
+                .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
         }
         public virtual DbSet<Student> Students { get; set; }
         public virtual DbSet<Lecture> Lectures { get; set; }
