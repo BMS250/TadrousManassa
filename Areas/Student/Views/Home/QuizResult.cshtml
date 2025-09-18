@@ -1,4 +1,4 @@
-﻿@model TadrousManassa.Areas.Student.Models.QuizResultVM
+﻿@model TadrousManassa.Areas.Student.Models.QuizResultDTO
 
 <div class="container mt-4">
     @if (Model.IsSuccess)
@@ -16,26 +16,30 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <h5><strong>اسم الاختبار:</strong></h5>
-                                <p class="text-muted">@Model.QuizName</p>
+                                <p class="text-muted">@Model.QuizTitle</p>
                             </div>
-                            <div class="col-md-6">
+                            @* <div class="col-md-6">
                                 <h5><strong>وقت الإرسال:</strong></h5>
                                 <p class="text-muted">@Model.SubmissionTime.ToString("yyyy-MM-dd HH:mm:ss")</p>
-                            </div>
+                            </div> *@
                         </div>
                         
                         <div class="row mt-3">
                             <div class="col-md-6">
-                                <h5><strong>عدد الأسئلة المجاب عنها:</strong></h5>
-                                <p class="text-muted">@Model.CorrectAnswers من @Model.TotalQuestions</p>
+                                <h5><strong>الدرجة:</strong></h5>
+                                <p class="text-muted">@Model.Score من @Model.TotalScore</p>
                             </div>
                             <div class="col-md-6">
                                 <h5><strong>حالة الاختبار:</strong></h5>
                                 <span class="badge bg-success">مكتمل</span>
                             </div>
+                            <div class="col-md-6">
+                                <h5><strong>التقدير:</strong></h5>
+                                <span class="badge bg-success">@Model.IsSuccess ? "ناجح" : "راسب"</span>
+                            </div>
                         </div>
 
-                        @if (Model.StudentAnswers.Any())
+                        @if (Model.Questions.Any())
                         {
                             <div class="mt-4">
                                 <h5><strong>تفاصيل الإجابات:</strong></h5>
@@ -48,11 +52,13 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @foreach (var answer in Model.StudentAnswers)
+                                            @foreach (var answer in Model.Questions)
                                             {
                                                 <tr>
-                                                    <td>@answer.Key</td>
-                                                    <td>@answer.Value</td>
+                                                    <td>@answer.QuestionText</td>
+                                                    <td>@answer.SelectedChoiceId</td>
+                                                    <td>@answer.IsCorrect</td>
+                                                    <td>@answer.CorrectAnswerText</td>
                                                 </tr>
                                             }
                                         </tbody>
@@ -84,10 +90,10 @@
                         </h3>
                     </div>
                     <div class="card-body">
-                        <div class="alert alert-danger">
+                        @* <div class="alert alert-danger">
                             <h5><strong>الرسالة:</strong></h5>
                             <p>@Model.Message</p>
-                        </div>
+                        </div> *@
                         
                         <div class="text-center mt-4">
                             <a href="@Url.Action("Index", "Home")" class="btn btn-primary">

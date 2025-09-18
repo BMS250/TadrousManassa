@@ -1,4 +1,4 @@
-﻿@model TadrousManassa.Models.Quiz
+﻿@model TadrousManassa.Areas.Student.Models.SolveQuizVM
 @{
     ViewData["Title"] = "Solve Quiz";
     var totalSeconds = (Model.TimeHours * 60 + Model.TimeMinutes) * 60;
@@ -10,10 +10,10 @@
 </div>
 
 <div class="container mt-4 mb-5">
-    <h2 class="text-center mb-4">@Model.Name</h2>
+    <h2 class="text-center mb-4">@Model.QuizName</h2>
 
     <form id="quizForm" method="post">
-        <input type="hidden" name="QuizId" value="@Model.Id" />
+        <input type="hidden" name="QuizId" value="@Model.QuizId" />
         <div id="questions-container">
             <!-- Questions will be loaded here by JavaScript -->
             <div class="text-center">
@@ -253,7 +253,7 @@
             }
 
             for (const question of questionsData) {
-                const questionId = question.id || question.Id;
+                const questionId = question.Id;
                 const radios = document.getElementsByName(`answers[${questionId}]`);
                 let answered = false;
 

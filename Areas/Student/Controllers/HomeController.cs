@@ -233,7 +233,6 @@ namespace TadrousManassa.Areas.Student.Controllers
 
                 // Display the quiz result with or without score
                 return RedirectToAction(nameof(QuizResult), new { qId = quizId, remainingAttempts });
-                // TODO redirect then this to the view of quiz details in the quiz result in case of remaining attempts = 1
             }
             catch (Exception ex)
             {
@@ -270,21 +269,32 @@ namespace TadrousManassa.Areas.Student.Controllers
                     return View("ErrorView", "Quiz not found.");
 
                 // Load or create quiz start time
-                var quizStartTime = await _studentQuizService.GetOrCreateQuizStartTimeAsync(currentUser.Id, quiz.Id);
+                //var quizStartTime = await _studentQuizService.GetOrCreateQuizStartTimeAsync(currentUser.Id, quiz.Id);
+
+                // save Start time in cache for 2 hours
+                var cacheKey = $"QuizStartTime_{currentUser.Id}_{quiz.Id}";
+                if (!_cache.TryGetValue(cacheKey, out DateTime quizStartTime))
+                {
+                    quizStartTime = DateTime.Now;
+                    var cacheEntryOptions = new MemoryCacheEntryOptions()
+                        .SetSlidingExpiration(TimeSpan.FromHours(2));
+                    _cache.Set(cacheKey, quizStartTime, cacheEntryOptions);
+                }
 
                 // Build ViewModel
-                var vm = new QuizSolveVM
+                var vm = new SolveQuizVM
                 {
                     QuizId = quiz.Id,
                     QuizName = quiz.Name,
                     TimeHours = quiz.TimeHours,
                     TimeMinutes = quiz.TimeMinutes,
-                    QuizStartTime = quizStartTime,
+                    QuizStartTime = DateTime.Now,
                     Questions = quiz.Questions.Select(q => new QuestionVM
                     {
                         Id = q.Id,
                         Text = q.Text,
                         Image = q.Image,
+                        Score = q.Score,
                         Choices = q.Choices.Select(c => new ChoiceVM
                         {
                             Id = c.Id,
@@ -294,7 +304,7 @@ namespace TadrousManassa.Areas.Student.Controllers
                     }).ToList()
                 };
 
-                return View("SolveQuiz", vm);
+                return View(vm);
             }
             catch (Exception ex)
             {
@@ -332,11 +342,22 @@ namespace TadrousManassa.Areas.Student.Controllers
                 _logger.LogInformation("Quiz submission received {AnswerCount} answers for quiz {QuizId} from user {UserId}",
                     answers.Count, quizId, currentUser.Id);
 
-                // Save answers in DB (instead of TempData)
-                //await _studentQuizService.SaveQuizSubmissionAsync(currentUser.Id, quizId, answers);
+                var cacheKey = $"QuizStartTime_{currentUser.Id}_{quizId}";
 
-                // Get remaining attempts after save
-                int remainingAttempts = await _studentQuizService.GetRemainingAttemptsByQuizIdAsync(currentUser.Id, quizId);
+                if (_cache.TryGetValue(cacheKey, out DateTime quizStartTime))
+                {
+                    // Found in cache → quizStartTime is the original DateTime
+                    _logger.LogInformation("Quiz started at: {quizStartTime}", quizStartTime);
+                }
+                else
+                {
+                    // Not found → maybe expired or never set
+                    _logger.LogWarning("Quiz start time not found in cache.");
+                    quizStartTime = DateTime.Now; // Default to now if not found
+                }
+                _cache.Remove(cacheKey);
+                // Save answers in DB (instead of TempData) and return remaining attempts
+                int remainingAttempts = await _studentQuizService.SaveQuizSubmissionAsync(currentUser.Id, quizId, quizStartTime, answers);
 
                 var redirectUrl = Url.Action("QuizResult", "Home", new
                 {
@@ -377,16 +398,16 @@ namespace TadrousManassa.Areas.Student.Controllers
 
                 if (!string.IsNullOrEmpty(errorMessage))
                 {
-                    var errorModel = new QuizResultVM
-                    {
-                        QuizId = quizId ?? "Unknown",
-                        Message = errorMessage,
-                        //IsSuccess = false,
-                        SubmissionTime = DateTime.Now
-                    };
+                    //var errorModel = new QuizResultVM
+                    //{
+                    //    QuizId = quizId ?? "Unknown",
+                    //    Message = errorMessage,
+                    //    //IsSuccess = false,
+                    //    SubmissionTime = DateTime.Now
+                    //};
 
                     TempData.Clear();
-                    return View(errorModel);
+                    return View(/*errorModel*/);
                 }
 
                 if (string.IsNullOrWhiteSpace(quizId))
@@ -465,17 +486,17 @@ namespace TadrousManassa.Areas.Student.Controllers
                     }
                 }
 
-                var model = new QuizResultVM
-                {
-                    QuizId = quizId,
-                    QuizName = "Quiz " + quizId, // TODO: استرجع الاسم الحقيقي من قاعدة البيانات
-                    SubmissionTime = submissionTime == default ? DateTime.Now : submissionTime,
-                    CorrectAnswers = answersCount,
-                    TotalQuestions = answersCount, // TODO: استرجع العدد الحقيقي من قاعدة البيانات
-                    Message = successMessage ?? "تم إرسال الاختبار بنجاح!",
-                    //IsSuccess = true,
-                    StudentAnswers = studentAnswers
-                };
+                //var model = new QuizResultVM
+                //{
+                //    QuizId = quizId,
+                //    QuizName = "Quiz " + quizId, // TODO: استرجع الاسم الحقيقي من قاعدة البيانات
+                //    SubmissionTime = submissionTime == default ? DateTime.Now : submissionTime,
+                //    CorrectAnswers = answersCount,
+                //    TotalQuestions = answersCount, // TODO: استرجع العدد الحقيقي من قاعدة البيانات
+                //    Message = successMessage ?? "تم إرسال الاختبار بنجاح!",
+                //    //IsSuccess = true,
+                //    StudentAnswers = studentAnswers
+                //};
 
                 // مسح TempData بعد الاستخدام
                 TempData.Clear();
@@ -492,22 +513,22 @@ namespace TadrousManassa.Areas.Student.Controllers
                 }
 
 
-                return View(model);
+                return View(/*model*/);
             }
             catch (Exception ex)
             {
                 // تسجيل الخطأ
                 _logger.LogError(ex, "Error displaying quiz results");
 
-                var errorModel = new QuizResultVM
-                {
-                    QuizId = TempData["QuizId"]?.ToString() ?? "Unknown",
-                    Message = "حدث خطأ أثناء عرض النتائج",
-                    //IsSuccess = false,
-                    SubmissionTime = DateTime.Now
-                };
+                //var errorModel = new QuizResultVM
+                //{
+                //    QuizId = TempData["QuizId"]?.ToString() ?? "Unknown",
+                //    Message = "حدث خطأ أثناء عرض النتائج",
+                //    //IsSuccess = false,
+                //    SubmissionTime = DateTime.Now
+                //};
 
-                return View(errorModel);
+                return View(/*errorModel*/);
             }
         }
     }

@@ -10,7 +10,7 @@ namespace TadrousManassa.Repositories.IRepositories
         public Task<int> GetRemainingAttemptsByVideoIdAsync(string studentId, string videoId);
         public Task<bool> IsQuizSolved(string studentId, string quizId);
         //public Task<OperationResult<bool>> DecreaseNumOfRemainingAttemptsAsync(string studentId, string quizId);
-        public Task<StudentQuiz?> GetStudentQuizAsync(string studentId, string quizId);
+        public Task<StudentQuiz?> GetStudentQuizAsync(string studentId, string quizId, bool includeQuiz = false);
         public Task AddStudentQuizAsync(StudentQuiz studentQuiz);
         public Task SaveChangesAsync();
     }

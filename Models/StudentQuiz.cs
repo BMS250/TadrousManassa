@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using TadrousManassa.Models.ViewModels;
 
 namespace TadrousManassa.Models
 {
@@ -20,20 +21,13 @@ namespace TadrousManassa.Models
         [ForeignKey("QuizId")]
         public Quiz Quiz { get; set; }
 
-        public float? Score1 { get; set; } = null;
-
-        public DateTime? SubmissionTimeAttempt1 { get; set; } = null;
-
-        public float? Score2 { get; set; } = null;
-        
-        public DateTime? SubmissionTimeAttempt2 { get; set; } = null;
-
         [Required]
         public int NumOfRemainingAttempts { get; set; } = 2;
 
-        [Required]
-        public DateTime StartTime { get; set; }
-
         public bool? IsSuccess { get; set; } = null;
+        public float? BestScore { get; set; } = null;
+
+        // Navigation
+        public ICollection<QuizSubmission> Submissions { get; set; } = new List<QuizSubmission>();
     }
 }

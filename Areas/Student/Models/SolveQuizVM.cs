@@ -2,7 +2,7 @@
 
 namespace TadrousManassa.Areas.Student.Models
 {
-    public class QuizSolveVM
+    public class SolveQuizVM
     {
         public string QuizId { get; set; }
         public string QuizName { get; set; }

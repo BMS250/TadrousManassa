@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using TadrousManassa.Models;
+using TadrousManassa.Models.ViewModels;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace TadrousManassa.Data
@@ -103,6 +104,12 @@ namespace TadrousManassa.Data
                 .Property(sc => sc.IsCorrect)
                 .ValueGeneratedOnAddOrUpdate()
                 .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
+
+            modelBuilder.Entity<QuizSubmission>()
+                .HasOne(sq => sq.StudentQuiz)
+                .WithMany(s => s.Submissions)
+                .HasForeignKey(s => s.StudentQuizId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
         public virtual DbSet<Student> Students { get; set; }
         public virtual DbSet<Lecture> Lectures { get; set; }
@@ -113,6 +120,7 @@ namespace TadrousManassa.Data
         public virtual DbSet<Question> Questions { get; set; }
         public virtual DbSet<Choice> Choices { get; set; }
         public virtual DbSet<StudentQuiz> StudentQuizzes { get; set; }
+        public virtual DbSet<QuizSubmission> QuizSubmissions { get; set; }
         public virtual DbSet<StudentChoice> StudentChoices { get; set; }
     }
 }

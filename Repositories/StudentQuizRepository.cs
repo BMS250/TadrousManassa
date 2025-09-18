@@ -82,10 +82,19 @@ namespace TadrousManassa.Repositories
             return await _context.StudentQuizzes.AnyAsync(sq => sq.StudentId == studentId && sq.QuizId == quizId);
         }
 
-        public async Task<StudentQuiz?> GetStudentQuizAsync(string studentId, string quizId)
+        public async Task<StudentQuiz?> GetStudentQuizAsync(string studentId, string quizId, bool includeQuiz = false)
         {
-            return await _context.StudentQuizzes
-                .FirstOrDefaultAsync(sq => sq.StudentId == studentId && sq.QuizId == quizId);
+            IQueryable<StudentQuiz> query = _context.StudentQuizzes;
+
+            if (includeQuiz)
+            {
+                query = query
+                    .Include(sq => sq.Quiz)
+                    .AsNoTracking();
+            }
+
+            return await query.FirstOrDefaultAsync(
+                sq => sq.StudentId == studentId && sq.QuizId == quizId);
         }
 
         public async Task AddStudentQuizAsync(StudentQuiz studentQuiz)

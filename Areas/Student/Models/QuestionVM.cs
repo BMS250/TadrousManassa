@@ -7,6 +7,7 @@ namespace TadrousManassa.Areas.Student.Models
         public string Id { get; set; }
         public string Text { get; set; }
         public string? Image { get; set; }
+        public float Score { get; set; }
         public List<ChoiceVM> Choices { get; set; } = new();
     }
 }

@@ -18,7 +18,10 @@ namespace TadrousManassa.Models
 
         public int TimeMinutes { get; set; } = 0;
 
+        [Required]
         public int NumOfQuestions { get; set; }
+
+        public float TotalScore { get; set; }
 
         [Required]
         public required string LectureId { get; set; }
