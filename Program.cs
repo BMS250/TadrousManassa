@@ -83,6 +83,7 @@ namespace TadrousManassa
             builder.Services.AddScoped<IStudentService, StudentService>();
             builder.Services.AddScoped<IVideoRepository, VideoRepository>();
             builder.Services.AddScoped<IVideoService, VideoService>();
+            builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
 
             // Email Service
             builder.Services.AddScoped<IEmailSender, EmailSender>();

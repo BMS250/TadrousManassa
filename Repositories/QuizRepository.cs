@@ -11,6 +11,10 @@ namespace TadrousManassa.Repositories
     {
         private readonly ApplicationDbContext _context = context;
 
+        public async Task<bool> IsQuizIdExists(string id)
+        {
+            return await _context.Quizzes.AnyAsync(q => q.Id == id);
+        }
 
         public async Task<Quiz?> GetQuizByIdAsync(string id)
         {

@@ -221,7 +221,12 @@ namespace TadrousManassa.Areas.Student.Controllers
                     return View("ErrorView", TempData["error"]);
                 }
 
-                int remainingAttempts = _studentQuizService.GetRemainingAttemptsByQuizIdAsync(currentUser.Id, quizId).Result;
+                var result = _studentQuizService.GetRemainingAttemptsByQuizIdAsync(currentUser.Id, quizId).Result;
+                if (!result.Success)
+                {
+                    return View("ErrorView", result.Message);
+                }
+                int remainingAttempts = result.Data;
 
                 if (remainingAttempts == 2)
                 {
@@ -357,7 +362,12 @@ namespace TadrousManassa.Areas.Student.Controllers
                 }
                 _cache.Remove(cacheKey);
                 // Save answers in DB (instead of TempData) and return remaining attempts
-                int remainingAttempts = await _studentQuizService.SaveQuizSubmissionAsync(currentUser.Id, quizId, quizStartTime, answers);
+                var result = await _studentQuizService.SaveQuizSubmissionAsync(currentUser.Id, quizId, quizStartTime, answers);
+                if (!result.Success)
+                {
+                    return View("ErrorView", result.Message);
+                }
+                int remainingAttempts = result.Data;
 
                 var redirectUrl = Url.Action("QuizResult", "Home", new
                 {

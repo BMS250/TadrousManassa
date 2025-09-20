@@ -5,6 +5,7 @@ namespace TadrousManassa.Repositories.IRepositories
 {
     public interface IQuizRepository
     {
+        public Task<bool> IsQuizIdExists(string id);
         public Task<Quiz?> GetQuizByIdAsync(string id);
         public Task<QuizDetailsDTO?> GetQuizDetailsAsync(string id);
         public Task<OperationResult<string>> GetLectureIdByQuizId(string id);

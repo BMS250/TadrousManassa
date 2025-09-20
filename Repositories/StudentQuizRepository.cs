@@ -85,7 +85,6 @@ namespace TadrousManassa.Repositories
         public async Task<StudentQuiz?> GetStudentQuizAsync(string studentId, string quizId, bool includeQuiz = false)
         {
             IQueryable<StudentQuiz> query = _context.StudentQuizzes;
-
             if (includeQuiz)
             {
                 query = query
