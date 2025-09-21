@@ -35,6 +35,8 @@ namespace TadrousManassa.Models
         [ForeignKey("VideoId")]
         public Video Video { get; set; }
 
+        public int TotalNumOfAttempts { get; set; } = 2;
+
         public ICollection<Question> Questions { get; set; } = [];
 
         public virtual ICollection<StudentQuiz> StudentQuizzes { get; set; }

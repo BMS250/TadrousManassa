@@ -8,6 +8,6 @@
         public string Path { get; set; }
         public string Unit { get; set; }
         public string SheetPath { get; set; }
-        public int Order { get; set; } = 0;
+        public int Order { get; set; }
     }
 }

@@ -19,7 +19,7 @@ namespace TadrousManassa.Services
             return _studentChoiceRepository.GetStudentChoiceByIdAsync(id);
         }
 
-        public Task<Dictionary<string, bool?>> GetCorrectnessAsync(string studentId, string quizId)
+        public Task<Dictionary<string, bool>> GetCorrectnessAsync(string studentId, string quizId)
         {
             return _studentChoiceRepository.GetCorrectnessAsync(studentId, quizId);
         }
@@ -29,9 +29,10 @@ namespace TadrousManassa.Services
             return _studentChoiceRepository.GetCorrectnessAndRightAnswersAsync(studentId, quizId);
         }
 
-        public Task AddStudentChoiceAsync(string studentId, string quizId, List<string> questionIdsWithAnswerIds)
+        public async Task AddStudentChoicesAsync(string studentId, string quizId, List<string> answerIds)
         {
-            return _studentChoiceRepository.AddStudentChoiceAsync(studentId, quizId, questionIdsWithAnswerIds);
+            await _studentChoiceRepository.AddStudentChoicesAsync(studentId, quizId, answerIds);
+            await _studentChoiceRepository.SaveChangesAsync();
         }
 
     }

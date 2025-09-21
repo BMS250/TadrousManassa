@@ -339,16 +339,67 @@
                     throw new Error('Network response was not ok');
                 }
             })
-            .then(data => {
-                if (data.success) {
-                    console.log('Quiz submitted successfully, redirecting...');
-                    // using the sended url from the server
-                    window.location.href = data.redirectUrl;
-                } else {
-                    throw new Error(data.message || 'Submission failed');
+                    // Replace the existing .then(data => { ... }) block in your sendQuizForm function with this:
+
+        .then(data => {
+            if (data.success) {
+                console.log('Quiz submitted successfully, redirecting...');
+                Swal.close();
+
+                // Create a form and submit it with POST data
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '@Url.Action("QuizResult", "Home")';
+                form.style.display = 'none'; // Hide the form
+
+                // Add anti-forgery token if you're using it
+                const antiForgeryToken = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (antiForgeryToken) {
+                    const tokenInput = document.createElement('input');
+                    tokenInput.type = 'hidden';
+                    tokenInput.name = '__RequestVerificationToken';
+                    tokenInput.value = antiForgeryToken.value;
+                    form.appendChild(tokenInput);
                 }
 
-            })
+                // Add form data
+                const postData = data.postData;
+
+                // Add basic fields
+                const quizIdInput = document.createElement('input');
+                quizIdInput.type = 'hidden';
+                quizIdInput.name = 'QuizId';
+                quizIdInput.value = postData.quizId;
+                form.appendChild(quizIdInput);
+
+                const scoreInput = document.createElement('input');
+                scoreInput.type = 'hidden';
+                scoreInput.name = 'CurrentScore';
+                scoreInput.value = postData.currentScore;
+                form.appendChild(scoreInput);
+
+                const attemptsInput = document.createElement('input');
+                attemptsInput.type = 'hidden';
+                attemptsInput.name = 'RemainingAttempts';
+                attemptsInput.value = postData.remainingAttempts;
+                form.appendChild(attemptsInput);
+
+                // Add answers dictionary
+                for (const [questionId, choiceId] of Object.entries(postData.answers)) {
+                    const answerInput = document.createElement('input');
+                    answerInput.type = 'hidden';
+                    answerInput.name = `Answers[${questionId}]`;
+                    answerInput.value = choiceId;
+                    form.appendChild(answerInput);
+                }
+
+                // Append form to body and submit
+                document.body.appendChild(form);
+                form.submit();
+            } else {
+                throw new Error(data.message || 'Submission failed');
+            }
+        })
             .catch(error => {
                 console.error('Error submitting quiz:', error);
                 Swal.fire({

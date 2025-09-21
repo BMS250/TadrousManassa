@@ -19,6 +19,6 @@ namespace TadrousManassa.Models
         [ForeignKey("ChoiceId")]
         public Choice Choice { get; set; }
 
-        public bool? IsCorrect { get; private set; }
+        public bool IsCorrect { get; set; }
     }
 }

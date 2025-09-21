@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace TadrousManassa.Models.ViewModels
+namespace TadrousManassa.Models
 {
-    public class QuizSubmission
+    public class Submission
     {
         [Key]
         public string Id { get; set; }
@@ -17,5 +17,6 @@ namespace TadrousManassa.Models.ViewModels
         public DateTime StartTime { get; set; }
         public DateTime SubmissionTime { get; set; }
         public float Score { get; set; }
+        public int OrderOfSubmission { get; set; }
     }
 }

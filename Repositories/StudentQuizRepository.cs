@@ -2,6 +2,7 @@
 using TadrousManassa.Areas.Student.Models;
 using TadrousManassa.Data;
 using TadrousManassa.Models;
+using TadrousManassa.Models.ViewModels;
 using TadrousManassa.Repositories.IRepositories;
 
 namespace TadrousManassa.Repositories
@@ -25,7 +26,7 @@ namespace TadrousManassa.Repositories
                 .ToListAsync();
         }
 
-        public async Task SaveQuizSubmissionAsync(string studentId, string quizId, Dictionary<string, string> answers)
+        public async Task SaveSubmissionAsync(string studentId, string quizId, Dictionary<string, string> answers)
         {
             // find student quiz entry
             var studentQuiz = await _context.StudentQuizzes
@@ -37,7 +38,7 @@ namespace TadrousManassa.Repositories
             }
 
             // create submission entity
-            //var submission = new QuizSubmission
+            //var submission = new Submission
             //{
             //    StudentId = studentId,
             //    QuizId = quizId,
@@ -45,7 +46,7 @@ namespace TadrousManassa.Repositories
             //    AnswersJson = System.Text.Json.JsonSerializer.Serialize(answers)
             //};
 
-            //_context.QuizSubmissions.Add(submission);
+            //_context.Submissions.Add(submission);
 
             // decrease attempt count YOU DID IT IN SERVICE
             ////studentQuiz.NumOfRemainingAttempts--;
@@ -89,11 +90,30 @@ namespace TadrousManassa.Repositories
             {
                 query = query
                     .Include(sq => sq.Quiz)
-                    .AsNoTracking();
+                    .Include(sq => sq.Submissions);
             }
 
             return await query.FirstOrDefaultAsync(
                 sq => sq.StudentId == studentId && sq.QuizId == quizId);
+        }
+
+        public async Task<StudentQuizScoresDTO?> GetStudentQuizScoresAsync(string studentId, string quizId)
+        {
+            return await _context.StudentQuizzes
+                .AsNoTracking()
+                .Include(sq => sq.Quiz)
+                .Where(sq => sq.StudentId == studentId && sq.QuizId == quizId)
+                .Select(sq => new StudentQuizScoresDTO { Score = sq.BestScore ?? 0, TotalScore = sq.Quiz.TotalScore })
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<float> GetStudentScoreAsync(string studentId, string quizId)
+        {
+            var studentQuiz = await _context.StudentQuizzes
+                .AsNoTracking()
+                .FirstOrDefaultAsync(sq => sq.StudentId == studentId && sq.QuizId == quizId);
+
+            return studentQuiz?.BestScore ?? 0;
         }
 
         public async Task AddStudentQuizAsync(StudentQuiz studentQuiz)

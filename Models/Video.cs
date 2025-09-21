@@ -30,7 +30,7 @@ namespace TadrousManassa.Models
         [ForeignKey("LectureId")]
         public virtual Lecture Lecture { get; set; }
 
-        public int Order { get; set; } = 0;
+        public int Order { get; set; }
 
         public int ViewsCount { get; set; } = 0;
     }

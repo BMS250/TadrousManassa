@@ -4,7 +4,6 @@ using System.Security.Cryptography;
 using System.Text;
 using TadrousManassa.Data;
 using TadrousManassa.Models;
-using TadrousManassa.Models.ViewModels;
 using TadrousManassa.Repositories.IRepositories;
 
 namespace TadrousManassa.Repositories
@@ -18,9 +17,9 @@ namespace TadrousManassa.Repositories
             _context = context;
         }
 
-        public async Task AddSubmissionAsync(QuizSubmission quizSubmission)
+        public async Task AddSubmissionAsync(Submission quizSubmission)
         {
-           await _context.QuizSubmissions.AddAsync(quizSubmission);
+           await _context.Submissions.AddAsync(quizSubmission);
         }
 
     }

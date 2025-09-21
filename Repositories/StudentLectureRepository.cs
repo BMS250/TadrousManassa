@@ -63,7 +63,7 @@ namespace TadrousManassa.Repositories
 
         public List<Student> GetStudentsByLecture(string lectureId)
         {
-            return _context.StudentLectures.AsNoTracking().Where(sl => sl.LectureId == lectureId).Select(sl => sl.Student).ToList();
+            return [.. _context.StudentLectures.AsNoTracking().Where(sl => sl.LectureId == lectureId).Select(sl => sl.Student)];
         }
 
         public Dictionary<string, Dictionary<string, int>> GetViewsCountForStudents()

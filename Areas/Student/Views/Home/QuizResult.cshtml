@@ -1,7 +1,7 @@
 ﻿@model TadrousManassa.Areas.Student.Models.QuizResultDTO
 
 <div class="container mt-4">
-    @if (Model.IsSuccess)
+    @try
     {
         <div class="row justify-content-center">
             <div class="col-md-8">
@@ -27,7 +27,11 @@
                         <div class="row mt-3">
                             <div class="col-md-6">
                                 <h5><strong>الدرجة:</strong></h5>
-                                <p class="text-muted">@Model.Score من @Model.TotalScore</p>
+                                <p class="text-muted">@Model.CurrentScore من @Model.TotalScore</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h5><strong>الدرجة الافضل:</strong></h5>
+                                <p class="text-muted">@Model.BestScore من @Model.TotalScore</p>
                             </div>
                             <div class="col-md-6">
                                 <h5><strong>حالة الاختبار:</strong></h5>
@@ -78,7 +82,7 @@
             </div>
         </div>
     }
-    else
+    catch
     {
         <div class="row justify-content-center">
             <div class="col-md-8">

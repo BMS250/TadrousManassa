@@ -7,7 +7,9 @@
         public List<QuestionResultDTO> Questions { get; set; }
         public int RemainingAttempts { get; set; }
         public float TotalScore { get; set; }
-        public float Score { get; set; }
-        public bool IsSuccess => Score >= 0.5 * TotalScore;
+        public float? CurrentScore { get; set; }
+        public float? BestScore { get; set; }
+        public bool IsSuccess => BestScore >= 0.5 * TotalScore;
+        public int OrderOfSubmission { get; set; }
     }
 }

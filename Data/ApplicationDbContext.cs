@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using TadrousManassa.Models;
-using TadrousManassa.Models.ViewModels;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace TadrousManassa.Data
@@ -98,18 +97,21 @@ namespace TadrousManassa.Data
                 .WithMany(s => s.StudentChoices)
             .HasForeignKey(sc => sc.ChoiceId);
 
-            //Don’t try to insert/ update IsCorrect.
-            //Just read it from the database when materializing.
-            modelBuilder.Entity<StudentChoice>()
-                .Property(sc => sc.IsCorrect)
-                .ValueGeneratedOnAddOrUpdate()
-                .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
+            ////Don’t try to insert/ update IsCorrect.
+            ////Just read it from the database when materializing.
+            //modelBuilder.Entity<StudentChoice>()
+            //    .Property(sc => sc.IsCorrect)
+            //    .ValueGeneratedOnAddOrUpdate()
+            //    .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
 
-            modelBuilder.Entity<QuizSubmission>()
+            modelBuilder.Entity<Submission>()
                 .HasOne(sq => sq.StudentQuiz)
                 .WithMany(s => s.Submissions)
                 .HasForeignKey(s => s.StudentQuizId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Submission>()
+                .HasIndex(s => s.OrderOfSubmission);
         }
         public virtual DbSet<Student> Students { get; set; }
         public virtual DbSet<Lecture> Lectures { get; set; }
@@ -120,7 +122,7 @@ namespace TadrousManassa.Data
         public virtual DbSet<Question> Questions { get; set; }
         public virtual DbSet<Choice> Choices { get; set; }
         public virtual DbSet<StudentQuiz> StudentQuizzes { get; set; }
-        public virtual DbSet<QuizSubmission> QuizSubmissions { get; set; }
+        public virtual DbSet<Submission> Submissions { get; set; }
         public virtual DbSet<StudentChoice> StudentChoices { get; set; }
     }
 }

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TadrousManassa.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class AddQuizSubmissionsTable : Migration
+    public partial class AddSubmissionsTable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -33,7 +33,7 @@ namespace TadrousManassa.Data.Migrations
                 newName: "BestScore");
 
             migrationBuilder.CreateTable(
-                name: "QuizSubmissions",
+                name: "Submissions",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
@@ -44,17 +44,17 @@ namespace TadrousManassa.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_QuizSubmissions", x => x.Id);
+                    table.PrimaryKey("PK_Submissions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_QuizSubmissions_StudentQuizzes_StudentQuizId",
+                        name: "FK_Submissions_StudentQuizzes_StudentQuizId",
                         column: x => x.StudentQuizId,
                         principalTable: "StudentQuizzes",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_QuizSubmissions_StudentQuizId",
-                table: "QuizSubmissions",
+                name: "IX_Submissions_StudentQuizId",
+                table: "Submissions",
                 column: "StudentQuizId");
         }
 
@@ -62,7 +62,7 @@ namespace TadrousManassa.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "QuizSubmissions");
+                name: "Submissions");
 
             migrationBuilder.RenameColumn(
                 name: "BestScore",

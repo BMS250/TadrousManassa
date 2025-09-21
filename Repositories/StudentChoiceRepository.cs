@@ -21,7 +21,7 @@ namespace TadrousManassa.Repositories
                 .FirstOrDefaultAsync(sc => sc.Id == id);
         }
 
-        public Task<Dictionary<string, bool?>> GetCorrectnessAsync(string studentId, string quizId)
+        public Task<Dictionary<string, bool>> GetCorrectnessAsync(string studentId, string quizId)
         {
             return _context.StudentChoices
                 .Include(sc => sc.Choice)
@@ -29,10 +29,10 @@ namespace TadrousManassa.Repositories
                 .Where(sc => sc.StudentId == studentId && sc.Choice.Question.QuizId == quizId)
                 .Select(sc => new
                 {
-                    QuestionId = sc.Choice.QuestionId,
-                    IsCorrect = sc.IsCorrect
+                    sc.Choice.QuestionId,
+                    sc.IsCorrect
                 })
-                .ToDictionaryAsync(x => x.QuestionId, x => x.IsCorrect);
+                .ToDictionaryAsync(x => x.QuestionId!, x => x.IsCorrect);
         }
 
         public Task<Dictionary<string, KeyValuePair<bool?, string>>> GetCorrectnessAndRightAnswersAsync(string studentId, string quizId)
@@ -47,54 +47,39 @@ namespace TadrousManassa.Repositories
                     sc.IsCorrect,
                     RightAnswerId = sc.Choice.Question.AnswerId
                 })
-                .ToDictionaryAsync(x => x.QuestionId, x => new KeyValuePair<bool?, string> (x.IsCorrect, x.RightAnswerId));
+                .ToDictionaryAsync(x => x.QuestionId!, x => new KeyValuePair<bool?, string> (x.IsCorrect, x.RightAnswerId));
         }
 
-        public Task<Dictionary<string, KeyValuePair<string, bool?>>> GetCorrectnessAsyncX(string studentId, string quizId)
+        public async Task AddStudentChoicesAsync(string studentId, string quizId, List<string> answerIds)
         {
-            //return _context.StudentChoices
-            //    .Include(sc => sc.Choice)
-            //    .ThenInclude(c => c.Question)
-            //    .Where(sc => sc.StudentId == studentId && sc.Choice.Question.QuizId == quizId)
-            //    .Select(sc => new
-            //    {
-            //        Question = sc.Choice.Question.Text,
-            //        QuestionImage = sc.Choice.Question.Image,
-            //        Choice = sc.Choice.Text,
-            //        ChoiceImage = sc.Choice.Image,
-            //        sc.IsCorrect
-            //    })
-            //    .ToDictionaryAsync(x => x.QuestionId, x => x.IsCorrect);
-            return null!;
+            // Fetch all relevant choices + their questions in one roundtrip
+            var choices = await _context.Choices
+                .Where(c => answerIds.Contains(c.Id))
+                .Select(c => new { c.Id, c.Question.AnswerId })
+                .ToListAsync();
+
+            var studentChoices = choices.Select(c => new StudentChoice
+            {
+                Id = Guid.NewGuid().ToString(),
+                StudentId = studentId,
+                ChoiceId = c.Id,
+                IsCorrect = c.AnswerId == c.Id
+            }).ToList();
+
+            await _context.StudentChoices.AddRangeAsync(studentChoices);
         }
 
-        public Task<Dictionary<string, KeyValuePair<KeyValuePair<string, bool?>, string>>> GetCorrectnessAndRightAnswersAsyncX(string studentId, string quizId)
+        public async Task<int> SaveChangesAsync()
         {
-            //return _context.StudentChoices
-            //    .Include(sc => sc.Choice)
-            //    .ThenInclude(c => c.Question)
-            //    .Where(sc => sc.StudentId == studentId && sc.Choice.Question.QuizId == quizId)
-            //    .Select(sc => new
-            //    {
-            //        sc.Choice.QuestionId,
-            //        sc.IsCorrect,
-            //        RightAnswerId = sc.Choice.Question.AnswerId
-            //    })
-            //    .ToDictionaryAsync(x => x.QuestionId, x => new KeyValuePair<bool?, string> (x.IsCorrect, x.RightAnswerId));
-            return null!;
-        }
+            try
+            {
+                return await _context.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
 
-        public async Task AddStudentChoiceAsync(string studentId, string quizId, List<string> questionIdsWithAnswerIds)
-        {
-            await _context.StudentChoices.AddRangeAsync(
-                questionIdsWithAnswerIds.Select(qa => new StudentChoice
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    StudentId = studentId,
-                    ChoiceId = qa
-                })
-            );
-            await _context.SaveChangesAsync();
+                throw;
+            }
         }
     }
 }

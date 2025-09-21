@@ -8,7 +8,7 @@ namespace TadrousManassa.Services.IServices
         public Task<OperationResult<int>> GetRemainingAttemptsByQuizIdAsync(string studentId, string quizId);
         public Task<OperationResult<int>> GetRemainingAttemptsByVideoIdAsync(string studentId, string videoId);
         public Task<OperationResult<bool>> IsQuizSolved(string studentId, string videoId);
-        public Task<OperationResult<bool>> DecreaseNumOfRemainingAttemptsAsync(string studentId, string quizId);
-        public Task<OperationResult<int>> SaveQuizSubmissionAsync(string studentId, string quizId, DateTime quizStartTime, Dictionary<string, string> answers);
+        public Task<OperationResult<int>> DecreaseNumOfRemainingAttemptsAsync(string studentId, string quizId);
+        public Task<OperationResult<float>> SaveSubmissionAsync(string studentId, string quizId, DateTime quizStartTime, Dictionary<string, string> answers);
     }
 }

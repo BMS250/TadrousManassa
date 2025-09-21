@@ -76,29 +76,29 @@ namespace TadrousManassa.Services
             }
         }
 
-        public async Task<OperationResult<bool>> DecreaseNumOfRemainingAttemptsAsync(string studentId, string quizId)
+        public async Task<OperationResult<int>> DecreaseNumOfRemainingAttemptsAsync(string studentId, string quizId)
         {
             var studentQuiz = await _studentQuizRepository.GetStudentQuizAsync(studentId, quizId);
 
             if (studentQuiz is null)
-                return OperationResult<bool>.Fail("This user has not bought this lecture");
+                return OperationResult<int>.Fail("This user has not bought this lecture");
 
             if (studentQuiz.NumOfRemainingAttempts <= 0)
-                return OperationResult<bool>.Fail("No attempts remaining");
+                return OperationResult<int>.Fail("No attempts remaining");
 
             try
             {
                 studentQuiz.NumOfRemainingAttempts--;
                 await _studentQuizRepository.SaveChangesAsync();
-                return OperationResult<bool>.Ok(true, "Attempt decreased successfully");
+                return OperationResult<int>.Ok(studentQuiz.NumOfRemainingAttempts, "Attempt decreased successfully");
             }
             catch (Exception)
             {
-                return OperationResult<bool>.Fail("Something happened while registering your attempt, please try again");
+                return OperationResult<int>.Fail("Something happened while registering your attempt, please try again");
             }
         }
 
-        public async Task<OperationResult<int>> SaveQuizSubmissionAsync(
+        public async Task<OperationResult<float>> SaveSubmissionAsync(
             string studentId,
             string quizId,
             DateTime quizStartTime,
@@ -106,17 +106,23 @@ namespace TadrousManassa.Services
         {
             if (string.IsNullOrWhiteSpace(studentId) || string.IsNullOrWhiteSpace(quizId))
             {
-                return OperationResult<int>.Fail("Student ID and Quiz ID are required");
+                return OperationResult<float>.Fail("Student ID and Quiz ID are required");
             }
             try
             {
+                bool isFirstSubmission = false;
                 var studentQuiz = await _studentQuizRepository.GetStudentQuizAsync(studentId, quizId, true);
+                // TODO: Should I check if there any submissions before or these two conditions enough?
+                if (studentQuiz is null || studentQuiz.BestScore is null)
+                {
+                    isFirstSubmission = true;
+                }
                 var quiz = await _quizRepository.GetQuizByIdAsync(quizId);
                 if (quiz is null)
                 {
-                    return OperationResult<int>.Fail("Quiz not found");
+                    return OperationResult<float>.Fail("Quiz not found");
                 }
-                Tuple<float, float> scores;
+                StudentQuizScoresDTO scores;
                 if (studentQuiz is null)
                 {
                     
@@ -126,46 +132,50 @@ namespace TadrousManassa.Services
                         StudentId = studentId,
                         QuizId = quizId,
                         Quiz = quiz,
-                        Submissions = new List<QuizSubmission>(),
-                        NumOfRemainingAttempts = 2,
+                        Submissions = new List<Submission>(),
+                        NumOfRemainingAttempts = quiz.TotalNumOfAttempts
                     };
 
                     scores = CalculateStudentAndTotalScoresAsync(quiz, answers);
-                    studentQuiz.BestScore = scores.Item1;
-                    studentQuiz.IsSuccess = (scores.Item1 / scores.Item2) >= 0.5f;
+                    studentQuiz.BestScore = scores.Score;
+                    studentQuiz.IsSuccess = (scores.Score / scores.TotalScore) >= 0.5f;
 
                     await _studentQuizRepository.AddStudentQuizAsync(studentQuiz);
                 }
                 else
                 {
                     scores = CalculateStudentAndTotalScoresAsync(quiz, answers);
-                    studentQuiz.BestScore = Math.Max(studentQuiz.BestScore ?? 0, scores.Item1);
-                    studentQuiz.IsSuccess = (scores.Item1 / scores.Item2) >= 0.5f;
+                    studentQuiz.BestScore = Math.Max(studentQuiz.BestScore ?? 0, scores.Score);
+                    studentQuiz.IsSuccess = studentQuiz?.IsSuccess == true
+                        || (scores.Score / scores.TotalScore) >= 0.5f;
                 }
 
-                    // new StudentQuiz creation logic would go here if necessary
-                    var submission = new QuizSubmission
+                // new StudentQuiz creation logic would go here if necessary
+                var submission = new Submission
                     {
                         Id = Guid.NewGuid().ToString(),
                         StartTime = quizStartTime,
                         StudentQuizId = studentQuiz.Id,
                         StudentQuiz = studentQuiz,
                         SubmissionTime = DateTime.Now,
-                        Score = scores.Item1
-                    };
+                        Score = scores.Score,
+                        OrderOfSubmission = isFirstSubmission ? 1 : (studentQuiz.Submissions
+                                                                        .Where(s => s.StudentQuizId == studentQuiz.Id)
+                                                                        .Max(s => s.OrderOfSubmission) + 1)
+                };
                 studentQuiz.Submissions.Add(submission);
                 //await _submissionRepository.AddSubmissionAsync(submission);
                 await _studentQuizRepository.SaveChangesAsync();
 
-                return OperationResult<int>.Ok(studentQuiz.NumOfRemainingAttempts, "Submission saved successfully");
+                return OperationResult<float>.Ok(scores.Score, "Submission saved successfully");
             }
             catch (Exception ex)
             {
-                return OperationResult<int>.Fail($"Error saving quiz submission: {ex.Message}");
+                return OperationResult<float>.Fail($"Error saving quiz submission: {ex.Message}");
             }
         }
 
-        private Tuple<float, float> CalculateStudentAndTotalScoresAsync(Quiz quiz, Dictionary<string, string> answers)
+        private StudentQuizScoresDTO CalculateStudentAndTotalScoresAsync(Quiz quiz, Dictionary<string, string> answers)
         {
             float totalQuestions = 0;
             float correctAnswers = 0;
@@ -183,7 +193,7 @@ namespace TadrousManassa.Services
                 }
             }
 
-            return new(correctAnswers, totalQuestions);
+            return new StudentQuizScoresDTO{ Score = correctAnswers, TotalScore = totalQuestions };
         }
     }
 }

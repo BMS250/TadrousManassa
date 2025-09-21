@@ -62,13 +62,14 @@ namespace TadrousManassa.Repositories
                 .ToListAsync();
         }
 
-        public Task<QuizResultDTO?> GetQuizResultAsync(string studentId, string quizId, int remainingAttempts)
+        public Task<QuizResultDTO?> GetQuizResultAsync(string studentId, string quizId, int remainingAttempts, Dictionary<string, string> answers)
         {
             return _context.Quizzes
                 .Where(q => q.Id == quizId)
                 .Select(q => new QuizResultDTO
                 {
                     QuizId = q.Id,
+                    TotalScore = q.TotalScore,
                     QuizTitle = q.Name,
                     Questions = q.Questions.Select(ques => new QuestionResultDTO
                     {
@@ -76,7 +77,7 @@ namespace TadrousManassa.Repositories
                         QuestionText = ques.Text,
                         QuestionImage = ques.Image,
                         Score = ques.Score,
-
+                        
                         Choices = ques.Choices
                         .Select(c => new ChoiceResultDTO
                         {
@@ -85,20 +86,23 @@ namespace TadrousManassa.Repositories
                             ChoiceImage = c.Image
                         }).ToList(),
 
-                        SelectedChoiceId = ques.Choices
-                            .SelectMany(c => c.StudentChoices)
-                            .Where(sc => sc.StudentId == studentId)
-                            .Select(sc => sc.ChoiceId)
-                            .FirstOrDefault(),
+                        //SummarizedStudentChoice = ques.Choices
+                        //    .SelectMany(c => c.StudentChoices)
+                        //    .Where(sc => sc.StudentId == studentId)
+                        //    .Select(sc => new SummarizedStudentChoice
+                        //    {
+                        //        ChoiceId = sc.ChoiceId,
+                        //        IsCorrect = sc.IsCorrect
+                        //    })
+                        //    .FirstOrDefault(),
+                        // Use the answers dictionary to get the selected choice for this question
+                        SelectedChoiceId = answers.ContainsKey(ques.Id) ? answers[ques.Id] : null,
 
-                        IsCorrect = ques.Choices
-                            .SelectMany(c => c.StudentChoices)
-                            .Where(sc => sc.StudentId == studentId)
-                            .Select(sc => sc.IsCorrect)
-                            .FirstOrDefault(),
+                        // Check if the selected answer is correct by comparing with the correct answer
+                        IsCorrect = answers.ContainsKey(ques.Id) && answers[ques.Id] == ques.AnswerId,
 
-                        CorrectAnswerId = remainingAttempts == 1 ? ques.AnswerId : null,
-                        CorrectAnswerText = remainingAttempts == 1 ? ques.Answer.Text : null
+                        CorrectAnswerId = remainingAttempts < 2 ? ques.AnswerId : null,
+                        CorrectAnswerText = remainingAttempts < 2 ? ques.Answer.Text : null
                     }).ToList(),
                     RemainingAttempts = remainingAttempts
                 })

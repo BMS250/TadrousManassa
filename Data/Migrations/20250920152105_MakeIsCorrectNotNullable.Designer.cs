@@ -12,8 +12,8 @@ using TadrousManassa.Data;
 namespace TadrousManassa.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250917205847_AddSubmissionsTable")]
-    partial class AddSubmissionsTable
+    [Migration("20250920152105_MakeIsCorrectNotNullable")]
+    partial class MakeIsCorrectNotNullable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -370,6 +370,9 @@ namespace TadrousManassa.Data.Migrations
                     b.Property<int>("TimeMinutes")
                         .HasColumnType("int");
 
+                    b.Property<float>("TotalScore")
+                        .HasColumnType("real");
+
                     b.Property<string>("VideoId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -441,7 +444,7 @@ namespace TadrousManassa.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<bool?>("IsCorrect")
+                    b.Property<bool>("IsCorrect")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("bit");
 
@@ -524,6 +527,31 @@ namespace TadrousManassa.Data.Migrations
                     b.ToTable("StudentQuizzes");
                 });
 
+            modelBuilder.Entity("TadrousManassa.Models.Submission", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<float>("Score")
+                        .HasColumnType("real");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("StudentQuizId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("SubmissionTime")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StudentQuizId");
+
+                    b.ToTable("Submissions");
+                });
+
             modelBuilder.Entity("TadrousManassa.Models.Video", b =>
                 {
                     b.Property<string>("Id")
@@ -560,31 +588,6 @@ namespace TadrousManassa.Data.Migrations
                     b.HasIndex("LectureId");
 
                     b.ToTable("Videos");
-                });
-
-            modelBuilder.Entity("TadrousManassa.Models.ViewModels.Submission", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<float>("Score")
-                        .HasColumnType("real");
-
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("StudentQuizId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("SubmissionTime")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StudentQuizId");
-
-                    b.ToTable("Submissions");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -752,6 +755,17 @@ namespace TadrousManassa.Data.Migrations
                     b.Navigation("Student");
                 });
 
+            modelBuilder.Entity("TadrousManassa.Models.Submission", b =>
+                {
+                    b.HasOne("TadrousManassa.Models.StudentQuiz", "StudentQuiz")
+                        .WithMany("Submissions")
+                        .HasForeignKey("StudentQuizId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("StudentQuiz");
+                });
+
             modelBuilder.Entity("TadrousManassa.Models.Video", b =>
                 {
                     b.HasOne("TadrousManassa.Models.Lecture", "Lecture")
@@ -761,17 +775,6 @@ namespace TadrousManassa.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Lecture");
-                });
-
-            modelBuilder.Entity("TadrousManassa.Models.ViewModels.Submission", b =>
-                {
-                    b.HasOne("TadrousManassa.Models.StudentQuiz", "StudentQuiz")
-                        .WithMany("Submissions")
-                        .HasForeignKey("StudentQuizId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("StudentQuiz");
                 });
 
             modelBuilder.Entity("TadrousManassa.Models.ApplicationUser", b =>

@@ -565,7 +565,7 @@ namespace TadrousManassa.Data.Migrations
                     b.ToTable("Videos");
                 });
 
-            modelBuilder.Entity("TadrousManassa.Models.ViewModels.QuizSubmission", b =>
+            modelBuilder.Entity("TadrousManassa.Models.ViewModels.Submission", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -587,7 +587,7 @@ namespace TadrousManassa.Data.Migrations
 
                     b.HasIndex("StudentQuizId");
 
-                    b.ToTable("QuizSubmissions");
+                    b.ToTable("Submissions");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -766,7 +766,7 @@ namespace TadrousManassa.Data.Migrations
                     b.Navigation("Lecture");
                 });
 
-            modelBuilder.Entity("TadrousManassa.Models.ViewModels.QuizSubmission", b =>
+            modelBuilder.Entity("TadrousManassa.Models.ViewModels.Submission", b =>
                 {
                     b.HasOne("TadrousManassa.Models.StudentQuiz", "StudentQuiz")
                         .WithMany("Submissions")

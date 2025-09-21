@@ -24,7 +24,7 @@ namespace TadrousManassa.Repositories
 
         public List<Student> GetStudents()
         {
-            return _context.Students.ToList();
+            return [.. _context.Students];
         }
 
         public Student? GetStudent(string id)
@@ -39,7 +39,7 @@ namespace TadrousManassa.Repositories
 
         public List<Student> GetStudentsByGrade(int grade)
         {
-            return _context.Students.Where(s => s.Grade == grade).ToList();
+            return [.. _context.Students.Where(s => s.Grade == grade)];
         }
 
         public int GetStudentGrade(string id)

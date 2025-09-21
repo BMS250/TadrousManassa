@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using TadrousManassa.Models.ViewModels;
 
 namespace TadrousManassa.Models
 {
@@ -28,6 +27,6 @@ namespace TadrousManassa.Models
         public float? BestScore { get; set; } = null;
 
         // Navigation
-        public ICollection<QuizSubmission> Submissions { get; set; } = new List<QuizSubmission>();
+        public ICollection<Submission> Submissions { get; set; } = new List<Submission>();
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace TadrousManassa.Areas.Student.Models
+﻿using TadrousManassa.Models;
+
+namespace TadrousManassa.Areas.Student.Models
 {
     public class QuestionResultDTO
     {
@@ -10,8 +12,9 @@
         public List<ChoiceResultDTO> Choices { get; set; }
 
         // student info
-        public string? SelectedChoiceId { get; set; }
-        public bool? IsCorrect { get; set; }
+        public SummarizedStudentChoice? SummarizedStudentChoice { get; set; }
+        public string? SelectedChoiceId { get; set; } /* => SummarizedStudentChoice?.ChoiceId;*/
+        public bool? IsCorrect { get; set; }  /*=> SummarizedStudentChoice?.IsCorrect;*/
 
         // correct answer info
         public string? CorrectAnswerId { get; set; }
