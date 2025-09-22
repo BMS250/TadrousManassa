@@ -234,13 +234,17 @@ namespace TadrousManassa.Areas.Student.Controllers
                     return View("ErrorView", result.Message);
                 }
                 int remainingAttempts = result.Data;
+                if (remainingAttempts == 0)
+                {
+                    TempData["GoToQuiz"] = "false";
+                }
                 var maxSubmissionOrderResult = await _submissionService.GetMaxSubmissionOrder(currentUser.Id, quizId);
                 if (!maxSubmissionOrderResult.Success)
                 {
                     return View("ErrorView", maxSubmissionOrderResult.Message);
                 }
-                if (/*TempData.TryGetValue("GoToQuiz", out var goToQuizObj)
-                    && goToQuizObj?.ToString() == "true" || */maxSubmissionOrderResult.Data == 0)
+                if (TempData.TryGetValue("GoToQuiz", out var goToQuizObj)
+                    && goToQuizObj?.ToString() == "true" || maxSubmissionOrderResult.Data == 0)
                 {
                     // Display the quiz details
                     var quizDetailsResult = await _quizService.GetQuizDetailsAsync(quizId);
@@ -483,6 +487,12 @@ namespace TadrousManassa.Areas.Student.Controllers
                 _logger.LogError(TempData["error"]!.ToString());
                 return View("ErrorView", TempData["error"]);
             }
+        }
+        [HttpPost]
+        public IActionResult OnPostRetake(string qId)
+        {
+            TempData["GoToQuiz"] = "true";
+            return RedirectToAction(nameof(QuizDetails), new { vId = (string?)null, qId });
         }
     }
 }
