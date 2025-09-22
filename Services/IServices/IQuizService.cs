@@ -11,6 +11,8 @@ namespace TadrousManassa.Services.IServices
         public Task<OperationResult<string>> GetLectureIdByQuizId(string id);
         public Task<List<Quiz>> GetQuizzesByLectureIdAsync(string lectureId);
         public Task<QuizResultDTO?> GetQuizResultAsync(string studentId, string quizId, int remainingAttempts, Dictionary<string, string> answers);
+        public Task<OperationResult<QuizResultDTO?>> GetQuizResultOfLastSubmissionAsync(string studentId, string quizId, int remainingAttempts);
+
         public Task CreateQuizAsync(Quiz quiz);
         public Task UpdateQuizAsync(Quiz quiz);
         public Task DeleteQuizAsync(string id);

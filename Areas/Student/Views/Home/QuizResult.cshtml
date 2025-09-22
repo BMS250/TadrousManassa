@@ -95,11 +95,17 @@
                                     </button>
                                 </form>
                             }
-                            @* <a href="@Url.Action("RetakeQuiz", "Home", new { quizId = Model.QuizId })" class="btn btn-warning me-2">
-                                <i class="fas fa-redo me-2"></i>
-                                Retake Quiz
-                            </a> *@
 
+                            @if (Model.IsNextVideoExists)
+                            {
+                                <form asp-controller="Home" asp-action="LectureDetails" method="post">
+                                    <input type="hidden" name="lectureId" value="@Model.LectureId" />
+                                    <input type="hidden" name="order" value="@Model.NextVideoOrder" />
+                                    <button type="submit" class="btn btn-warning">
+                                        Go to the next video
+                                    </button>
+                                </form>
+                            }
                             <a href="@Url.Action("NextVideo", "Home", new { quizId = Model.QuizId })" class="btn btn-success">
                                 <i class="fas fa-play me-2"></i>
                                 Next Video

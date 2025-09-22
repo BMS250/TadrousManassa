@@ -5,5 +5,6 @@
         public string ChoiceId { get; set; }
         public string? ChoiceText { get; set; }
         public string? ChoiceImage { get; set; }
+        public bool IsCorrect { get; set; }
     }
 }

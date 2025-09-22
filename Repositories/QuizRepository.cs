@@ -67,6 +67,7 @@ namespace TadrousManassa.Repositories
                 .Where(q => q.Id == quizId)
                 .Select(q => new QuizResultDTO
                 {
+                    LectureId = q.LectureId,
                     QuizId = q.Id,
                     TotalScore = q.TotalScore,
                     QuizTitle = q.Name,
@@ -76,13 +77,14 @@ namespace TadrousManassa.Repositories
                         QuestionText = ques.Text,
                         QuestionImage = ques.Image,
                         Score = ques.Score,
-                        
+
                         Choices = ques.Choices
                         .Select(c => new ChoiceResultDTO
                         {
                             ChoiceId = c.Id,
                             ChoiceText = c.Text,
-                            ChoiceImage = c.Image
+                            ChoiceImage = c.Image,
+                            IsCorrect = c.IsCorrect/*c.Id == ques.AnswerId*/
                         }).ToList(),
 
                         //SummarizedStudentChoice = ques.Choices
@@ -101,7 +103,7 @@ namespace TadrousManassa.Repositories
                         IsCorrect = answers.ContainsKey(ques.Id) && answers[ques.Id] == ques.AnswerId,
 
                         CorrectAnswerId = remainingAttempts == 0 ? ques.AnswerId : null,
-                        CorrectAnswerText = remainingAttempts == 0 ? ques.Answer.Text : null
+                        CorrectAnswerText = remainingAttempts == 0 ? ques.Choices.FirstOrDefault(c => c.Id == ques.AnswerId).Text ?? null : null
                     }).ToList(),
                     RemainingAttempts = remainingAttempts
                 })

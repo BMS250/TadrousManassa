@@ -6,6 +6,6 @@ namespace TadrousManassa.Services.IServices
     public interface IVideoService
     {
         public Task<string?> GetQuizIdByVideoIdAsync(string videoId);
-        public Task<OperationResult<int?>> GetNextVideoOrderByQuizIdAsync(string lectureId, string quizId);
+        public Task<OperationResult<int?>> CheckAndGetNextVideoOrderByQuizIdAsync(string quizId);
     }
 }

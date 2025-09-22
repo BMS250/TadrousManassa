@@ -119,7 +119,7 @@ namespace TadrousManassa.Repositories
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<float> GetStudentScoreAsync(string studentId, string quizId)
+        public async Task<float> GetBestScoreAsync(string studentId, string quizId)
         {
             var studentQuiz = await _context.StudentQuizzes
                 .AsNoTracking()

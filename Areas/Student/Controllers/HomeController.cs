@@ -135,7 +135,7 @@ namespace TadrousManassa.Areas.Student.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> LectureDetails(string lectureId, int order = 0)
+        public async Task<IActionResult> LectureDetails(string lectureId, int order = 1)
         {
             try
             {
@@ -426,7 +426,7 @@ namespace TadrousManassa.Areas.Student.Controllers
         [HttpGet]
         public async Task<IActionResult> QuizResult(string studentId, string quizId, int remainingAttempts)
         {
-            var directQuizResult = await _studentQuizService.GetQuizResultOfLastSubmissionAsync(studentId, quizId, remainingAttempts);
+            var directQuizResult = await _quizService.GetQuizResultOfLastSubmissionAsync(studentId, quizId, remainingAttempts);
             //var directQuizResult = JsonConvert.DeserializeObject<QuizResultDTO>((string)TempData.Peek("QuizResult"));
             if (directQuizResult.Success)
             {

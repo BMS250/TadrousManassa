@@ -20,7 +20,9 @@ namespace TadrousManassa.Models
         [ForeignKey("QuestionId")]
         [JsonIgnore]
         public Question Question { get; set; }
-        
+
+        public bool IsCorrect { get; set; }
+
         public virtual ICollection<StudentChoice> StudentChoices { get; set; }
     }
 }

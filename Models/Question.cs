@@ -26,10 +26,8 @@ namespace TadrousManassa.Models
         [JsonIgnore]
         public Quiz Quiz { get; set; }
 
+        [MaxLength(450)]
         public string AnswerId { get; set; }
-
-        [ForeignKey("AnswerId")]
-        public Choice Answer { get; set; }
 
         public ICollection<Choice> Choices { get; set; } = [];
     }

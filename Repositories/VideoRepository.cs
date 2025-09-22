@@ -20,24 +20,18 @@ namespace TadrousManassa.Repositories
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<OperationResult<int?>> GetNextVideoOrderByQuizIdAsync(string lectureId, string quizId)
+        public Task<Video?> GetVideoByQuizIdAsync(string quizId)
         {
-            int? currentOrder = _context.Videos?
-                .AsNoTracking()?
-                .FirstOrDefault(v => v.QuizId == quizId)?.Order;
-
-            if (currentOrder == null)
-                return await Task.FromResult(OperationResult<int?>.Fail("Quiz not found."));
-
-            bool hasNext = await _context.Videos
+            return _context.Videos
                 .AsNoTracking()
-                .AnyAsync(v => v.LectureId == lectureId && v.Order == currentOrder + 1);
+                .FirstOrDefaultAsync(v => v.QuizId == quizId);
+        }
 
-            if (!hasNext)
-            {
-                return await Task.FromResult(OperationResult<int?>.Fail("This is the last video in the lecture."));
-            }
-            return await Task.FromResult(OperationResult<int?>.Ok(currentOrder + 1, "Next video order retrieved successfully."));
+        public Task<bool> IsNextVideoExistsAsync(Video currentVideo)
+        {
+            return _context.Videos
+                .AsNoTracking()
+                .AnyAsync(v => v.LectureId == currentVideo.LectureId && v.Order == currentVideo.Order + 1);
         }
     }
 }

@@ -21,9 +21,20 @@ namespace TadrousManassa.Services
             return _videoRepository.GetQuizIdByVideoIdAsync(videoId);
         }
 
-        public Task<OperationResult<int?>> GetNextVideoOrderByQuizIdAsync(string lectureId, string quizId)
+        public async Task<OperationResult<int?>> CheckAndGetNextVideoOrderByQuizIdAsync(string quizId)
         {
-            return _videoRepository.GetNextVideoOrderByQuizIdAsync(lectureId, quizId);
+            var currentVideo = await _videoRepository.GetVideoByQuizIdAsync(quizId);
+
+            if (currentVideo == null)
+                return OperationResult<int?>.Fail("Quiz not found.");
+
+            bool hasNext = await _videoRepository.IsNextVideoExistsAsync(currentVideo);
+
+            if (!hasNext)
+            {
+                return await Task.FromResult(OperationResult<int?>.Ok(-1, "This is the last video in the lecture."));
+            }
+            return await Task.FromResult(OperationResult<int?>.Ok(currentVideo.Order + 1, "Next video order retrieved successfully."));
         }
     }
 }

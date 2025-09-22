@@ -12,23 +12,14 @@ namespace TadrousManassa.Services
     public class StudentQuizService : IStudentQuizService
     {
         private readonly IStudentQuizRepository _studentQuizRepository;
-        private readonly ISubmissionRepository _submissionRepository;
         private readonly IQuizRepository _quizRepository;
-        private readonly IStudentChoiceRepository _studentChoiceRepository;
-        private readonly IQuizService _quizService;
 
         public StudentQuizService(
             IStudentQuizRepository studentQuizRepository,
-            ISubmissionRepository submissionRepository,
-            IQuizRepository quizRepository,
-            IStudentChoiceRepository studentChoiceRepository,
-            IQuizService quizService)
+            IQuizRepository quizRepository)
         {
             _studentQuizRepository = studentQuizRepository;
-            _submissionRepository = submissionRepository;
             _quizRepository = quizRepository;
-            _studentChoiceRepository = studentChoiceRepository;
-            _quizService = quizService;
         }
 
         public async Task<OperationResult<List<Quiz>>> GetFullQuizzesByStudentIdAsync(string studentId)
@@ -210,35 +201,9 @@ namespace TadrousManassa.Services
             return new StudentQuizScoresDTO{ Score = correctAnswers, TotalScore = totalQuestions };
         }
 
-        public async Task<OperationResult<QuizResultDTO?>> GetQuizResultOfLastSubmissionAsync(
-            string studentId, string quizId, int remainingAttempts)
+        public Task<float> GetBestScoreAsync(string studentId, string quizId)
         {
-            var studentQuizId = await _studentQuizRepository.GetStudentQuizId(studentId, quizId);
-            if (studentQuizId is null)
-            {
-                return OperationResult<QuizResultDTO?>.Fail("Student has not purchased this quiz.");
-            }
-
-            int? maxOrder = await _submissionRepository.GetMaxSubmissionOrder(studentQuizId);
-            if (maxOrder is null)
-            {
-                return OperationResult<QuizResultDTO?>.Fail("No submissions found for this student quiz.");
-            }
-
-            var lastSubmissionId = await _submissionRepository.GetIdOfLastSubmissionOrder(studentQuizId, (int)maxOrder);
-            if (lastSubmissionId is null)
-            {
-                return OperationResult<QuizResultDTO?>.Fail("Could not find last submission.");
-            }
-
-            var answers = await _studentChoiceRepository.GetAnswersBySubmissionIdAsync(lastSubmissionId);
-            if (answers is null || answers.Count == 0)
-            {
-                return OperationResult<QuizResultDTO?>.Fail("No answers found for the last submission.");
-            }
-
-            var result = await _quizService.GetQuizResultAsync(studentId, quizId, remainingAttempts, answers);
-            return OperationResult<QuizResultDTO?>.Ok(result);
+            return _studentQuizRepository.GetBestScoreAsync(studentId, quizId);
         }
     }
 }

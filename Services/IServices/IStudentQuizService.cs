@@ -11,6 +11,6 @@ namespace TadrousManassa.Services.IServices
         public Task<OperationResult<bool>> IsQuizSolved(string studentId, string videoId);
         public Task<OperationResult<int>> DecreaseNumOfRemainingAttemptsAsync(string studentId, string quizId);
         public Task<OperationResult<SavingSubmissionDTO>> SaveSubmissionAsync(string studentId, string quizId, DateTime quizStartTime, Dictionary<string, string> answers);
-        public Task<OperationResult<QuizResultDTO?>> GetQuizResultOfLastSubmissionAsync(string studentId, string quizId, int remainingAttempts);
+        public Task<float> GetBestScoreAsync(string studentId, string quizId);
     }
 }
