@@ -5,6 +5,7 @@ namespace TadrousManassa.Repositories.IRepositories
 {
     public interface IStudentQuizRepository
     {
+        public Task<string?> GetStudentQuizId(string studentId, string quizId);
         public Task<List<Quiz>> GetFullQuizzesByStudentIdAsync(string studentId);
         public Task SaveSubmissionAsync(string studentId, string quizId, Dictionary<string, string> answers);
         public Task<int> GetRemainingAttemptsByQuizIdAsync(string studentId, string quizId);

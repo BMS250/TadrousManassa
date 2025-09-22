@@ -7,7 +7,7 @@ namespace TadrousManassa.Services.IServices
     {
         //public Task<string?> GetQuizIdByVideoIdAsync(string videoId);
         public Task<Quiz?> GetQuizByIdAsync(string id);
-        public Task<QuizDetailsDTO?> GetQuizDetailsAsync(string id);
+        public Task<OperationResult<QuizDetailsDTO?>> GetQuizDetailsAsync(string id);
         public Task<OperationResult<string>> GetLectureIdByQuizId(string id);
         public Task<List<Quiz>> GetQuizzesByLectureIdAsync(string lectureId);
         public Task<QuizResultDTO?> GetQuizResultAsync(string studentId, string quizId, int remainingAttempts, Dictionary<string, string> answers);

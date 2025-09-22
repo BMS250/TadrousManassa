@@ -38,24 +38,23 @@ namespace TadrousManassa.Repositories
             return OperationResult<string>.Ok(lectureId, "Lecture ID retrieved successfully.");
         }
 
-        public async Task<QuizDetailsDTO?> GetQuizDetailsAsync(string id)
+        public Task<QuizDetailsDTO?> GetQuizDetailsAsync(string id)
         {
-            return await _context.Quizzes
+            return _context.Quizzes
                 .Select(q => new QuizDetailsDTO
                 {
                     Id = q.Id,
-                    Name = q.Name ?? "Quiz",
-                    Description = q.Description ?? string.Empty,
+                    Name = q.Name ?? "",
+                    Description = q.Description ?? "",
                     TimeHours = q.TimeHours,
                     TimeMinutes = q.TimeMinutes
                 })
                 .FirstOrDefaultAsync(q => q.Id == id);
         }
-
         
-        public async Task<List<Quiz>> GetQuizzesByLectureIdAsync(string lectureId)
+        public Task<List<Quiz>> GetQuizzesByLectureIdAsync(string lectureId)
         {
-            return await _context.Quizzes
+            return _context.Quizzes
                 .Where(q => q.LectureId == lectureId)
                 .Include(q => q.Questions)
                     .ThenInclude(q => q.Choices)
@@ -101,12 +100,19 @@ namespace TadrousManassa.Repositories
                         // Check if the selected answer is correct by comparing with the correct answer
                         IsCorrect = answers.ContainsKey(ques.Id) && answers[ques.Id] == ques.AnswerId,
 
-                        CorrectAnswerId = remainingAttempts < 2 ? ques.AnswerId : null,
-                        CorrectAnswerText = remainingAttempts < 2 ? ques.Answer.Text : null
+                        CorrectAnswerId = remainingAttempts == 0 ? ques.AnswerId : null,
+                        CorrectAnswerText = remainingAttempts == 0 ? ques.Answer.Text : null
                     }).ToList(),
                     RemainingAttempts = remainingAttempts
                 })
                 .FirstOrDefaultAsync();
+        }
+
+        public async Task<int> GetTotalNumOfAttemptsAsync(string id)
+        {
+            var quiz = await _context.Quizzes
+                .FirstOrDefaultAsync(q => q.Id == id);
+            return quiz is null ? throw new InvalidOperationException("Quiz not found.") : quiz.TotalNumOfAttempts;
         }
 
         public async Task CreateQuizAsync(Quiz quiz)

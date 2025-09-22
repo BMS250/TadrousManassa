@@ -19,6 +19,10 @@ namespace TadrousManassa.Models
         [ForeignKey("ChoiceId")]
         public Choice Choice { get; set; }
 
+        public string SubmissionId { get; set; }
+
+        [ForeignKey("SubmissionId")]
+        public Submission Submission { get; set; }
         public bool IsCorrect { get; set; }
     }
 }

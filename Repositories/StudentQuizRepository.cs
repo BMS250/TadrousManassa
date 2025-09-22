@@ -15,6 +15,14 @@ namespace TadrousManassa.Repositories
             _context = context;
         }
 
+        public Task<string?> GetStudentQuizId(string studentId, string quizId)
+        {
+            return _context.StudentQuizzes
+                .AsNoTracking()
+                .Where(sq => sq.StudentId == studentId && sq.QuizId == quizId)
+                .Select(sq => sq.Id)
+                .FirstOrDefaultAsync();
+        }
         public async Task<List<Quiz>> GetFullQuizzesByStudentIdAsync(string studentId)
         {
             return await _context.StudentQuizzes
@@ -34,6 +42,7 @@ namespace TadrousManassa.Repositories
 
             if (studentQuiz == null)
             {
+                // TODO: remove thiis exception and handle it in service
                 throw new InvalidOperationException("Student has not purchased this quiz.");
             }
 
@@ -54,13 +63,16 @@ namespace TadrousManassa.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public Task<int> GetRemainingAttemptsByQuizIdAsync(string studentId, string quizId)
+        public async Task<int> GetRemainingAttemptsByQuizIdAsync(string studentId, string quizId)
         {
-            return _context.StudentQuizzes
+            var studentQuiz = await _context.StudentQuizzes
                 .AsNoTracking()
                 .Where(sq => sq.StudentId == studentId && sq.QuizId == quizId)
-                .Select(sq => sq.NumOfRemainingAttempts)
                 .FirstOrDefaultAsync();
+
+            if (studentQuiz == null)
+                return -1; // Default attempts if no record exists
+            return studentQuiz.NumOfRemainingAttempts;
         }
 
         public Task<int> GetRemainingAttemptsByVideoIdAsync(string studentId, string videoId)

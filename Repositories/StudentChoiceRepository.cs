@@ -50,7 +50,21 @@ namespace TadrousManassa.Repositories
                 .ToDictionaryAsync(x => x.QuestionId!, x => new KeyValuePair<bool?, string> (x.IsCorrect, x.RightAnswerId));
         }
 
-        public async Task AddStudentChoicesAsync(string studentId, string quizId, List<string> answerIds)
+        public Task<Dictionary<string, string>> GetAnswersBySubmissionIdAsync(string lastSubmissionId)
+        {
+            return _context.StudentChoices
+                .Include(sc => sc.Choice)
+                .ThenInclude(c => c.Question)
+                .Where(sc => sc.SubmissionId == lastSubmissionId)
+                .Select(sc => new
+                {
+                    sc.Choice.QuestionId,
+                    sc.ChoiceId
+                })
+                .ToDictionaryAsync(x => x.QuestionId!, x => x.ChoiceId);
+        }
+
+        public async Task AddStudentChoicesAsync(string studentId, string quizId, string submissionId, List<string> answerIds)
         {
             // Fetch all relevant choices + their questions in one roundtrip
             var choices = await _context.Choices
@@ -63,7 +77,8 @@ namespace TadrousManassa.Repositories
                 Id = Guid.NewGuid().ToString(),
                 StudentId = studentId,
                 ChoiceId = c.Id,
-                IsCorrect = c.AnswerId == c.Id
+                IsCorrect = c.AnswerId == c.Id,
+                SubmissionId = submissionId
             }).ToList();
 
             await _context.StudentChoices.AddRangeAsync(studentChoices);

@@ -19,8 +19,23 @@ namespace TadrousManassa.Repositories
 
         public async Task AddSubmissionAsync(Submission quizSubmission)
         {
-           await _context.Submissions.AddAsync(quizSubmission);
+            await _context.Submissions.AddAsync(quizSubmission);
         }
 
+        public Task<int?> GetMaxSubmissionOrder(string studentQuizId)
+        {
+            return _context.Submissions
+                .Where(s => s.StudentQuizId == studentQuizId)
+                .MaxAsync(s => (int?)s.OrderOfSubmission);
+        }
+
+        public async Task<string?> GetIdOfLastSubmissionOrder(string studentQuizId, int maxOrder)
+        {
+            var submission = await _context.Submissions
+                .Where(s => s.StudentQuizId == studentQuizId && s.OrderOfSubmission == maxOrder)
+                .FirstOrDefaultAsync();
+
+            return submission?.Id;
+        }
     }
 }

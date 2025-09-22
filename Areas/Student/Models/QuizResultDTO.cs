@@ -10,6 +10,5 @@
         public float? CurrentScore { get; set; }
         public float? BestScore { get; set; }
         public bool IsSuccess => BestScore >= 0.5 * TotalScore;
-        public int OrderOfSubmission { get; set; }
     }
 }

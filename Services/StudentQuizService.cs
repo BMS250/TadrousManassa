@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TadrousManassa.Areas.Student.Models;
 using TadrousManassa.Data;
 using TadrousManassa.Models;
 using TadrousManassa.Models.ViewModels;
@@ -13,15 +14,21 @@ namespace TadrousManassa.Services
         private readonly IStudentQuizRepository _studentQuizRepository;
         private readonly ISubmissionRepository _submissionRepository;
         private readonly IQuizRepository _quizRepository;
+        private readonly IStudentChoiceRepository _studentChoiceRepository;
+        private readonly IQuizService _quizService;
 
         public StudentQuizService(
             IStudentQuizRepository studentQuizRepository,
             ISubmissionRepository submissionRepository,
-            IQuizRepository quizRepository)
+            IQuizRepository quizRepository,
+            IStudentChoiceRepository studentChoiceRepository,
+            IQuizService quizService)
         {
             _studentQuizRepository = studentQuizRepository;
             _submissionRepository = submissionRepository;
             _quizRepository = quizRepository;
+            _studentChoiceRepository = studentChoiceRepository;
+            _quizService = quizService;
         }
 
         public async Task<OperationResult<List<Quiz>>> GetFullQuizzesByStudentIdAsync(string studentId)
@@ -42,6 +49,13 @@ namespace TadrousManassa.Services
             try
             {
                 var attempts = await _studentQuizRepository.GetRemainingAttemptsByQuizIdAsync(studentId, quizId);
+                if (attempts == -1)
+                {
+                    var quiz = await _quizRepository.GetQuizByIdAsync(quizId);
+                    return quiz is not null
+                        ? OperationResult<int>.Ok(quiz.TotalNumOfAttempts, "No attempts recorded, returning total attempts")
+                        : OperationResult<int>.Fail("Quiz not found");
+                }
                 return OperationResult<int>.Ok(attempts);
             }
             catch (Exception ex)
@@ -98,7 +112,7 @@ namespace TadrousManassa.Services
             }
         }
 
-        public async Task<OperationResult<float>> SaveSubmissionAsync(
+        public async Task<OperationResult<SavingSubmissionDTO>> SaveSubmissionAsync(
             string studentId,
             string quizId,
             DateTime quizStartTime,
@@ -106,7 +120,7 @@ namespace TadrousManassa.Services
         {
             if (string.IsNullOrWhiteSpace(studentId) || string.IsNullOrWhiteSpace(quizId))
             {
-                return OperationResult<float>.Fail("Student ID and Quiz ID are required");
+                return OperationResult<SavingSubmissionDTO>.Fail("Student ID and Quiz ID are required");
             }
             try
             {
@@ -120,7 +134,7 @@ namespace TadrousManassa.Services
                 var quiz = await _quizRepository.GetQuizByIdAsync(quizId);
                 if (quiz is null)
                 {
-                    return OperationResult<float>.Fail("Quiz not found");
+                    return OperationResult<SavingSubmissionDTO>.Fail("Quiz not found");
                 }
                 StudentQuizScoresDTO scores;
                 if (studentQuiz is null)
@@ -159,19 +173,19 @@ namespace TadrousManassa.Services
                         StudentQuiz = studentQuiz,
                         SubmissionTime = DateTime.Now,
                         Score = scores.Score,
-                        OrderOfSubmission = isFirstSubmission ? 1 : (studentQuiz.Submissions
+                        OrderOfSubmission = isFirstSubmission || studentQuiz.Submissions.Count == 0 ? 1 : (studentQuiz.Submissions?
                                                                         .Where(s => s.StudentQuizId == studentQuiz.Id)
-                                                                        .Max(s => s.OrderOfSubmission) + 1)
+                                                                        .Max(s => s.OrderOfSubmission) + 1) ?? 1
                 };
                 studentQuiz.Submissions.Add(submission);
                 //await _submissionRepository.AddSubmissionAsync(submission);
                 await _studentQuizRepository.SaveChangesAsync();
 
-                return OperationResult<float>.Ok(scores.Score, "Submission saved successfully");
+                return OperationResult<SavingSubmissionDTO>.Ok(new SavingSubmissionDTO { Score = scores.Score, SubmissionId = submission.Id }, "Submission saved successfully");
             }
             catch (Exception ex)
             {
-                return OperationResult<float>.Fail($"Error saving quiz submission: {ex.Message}");
+                return OperationResult<SavingSubmissionDTO>.Fail($"Error saving quiz submission: {ex.Message}");
             }
         }
 
@@ -194,6 +208,37 @@ namespace TadrousManassa.Services
             }
 
             return new StudentQuizScoresDTO{ Score = correctAnswers, TotalScore = totalQuestions };
+        }
+
+        public async Task<OperationResult<QuizResultDTO?>> GetQuizResultOfLastSubmissionAsync(
+            string studentId, string quizId, int remainingAttempts)
+        {
+            var studentQuizId = await _studentQuizRepository.GetStudentQuizId(studentId, quizId);
+            if (studentQuizId is null)
+            {
+                return OperationResult<QuizResultDTO?>.Fail("Student has not purchased this quiz.");
+            }
+
+            int? maxOrder = await _submissionRepository.GetMaxSubmissionOrder(studentQuizId);
+            if (maxOrder is null)
+            {
+                return OperationResult<QuizResultDTO?>.Fail("No submissions found for this student quiz.");
+            }
+
+            var lastSubmissionId = await _submissionRepository.GetIdOfLastSubmissionOrder(studentQuizId, (int)maxOrder);
+            if (lastSubmissionId is null)
+            {
+                return OperationResult<QuizResultDTO?>.Fail("Could not find last submission.");
+            }
+
+            var answers = await _studentChoiceRepository.GetAnswersBySubmissionIdAsync(lastSubmissionId);
+            if (answers is null || answers.Count == 0)
+            {
+                return OperationResult<QuizResultDTO?>.Fail("No answers found for the last submission.");
+            }
+
+            var result = await _quizService.GetQuizResultAsync(studentId, quizId, remainingAttempts, answers);
+            return OperationResult<QuizResultDTO?>.Ok(result);
         }
     }
 }

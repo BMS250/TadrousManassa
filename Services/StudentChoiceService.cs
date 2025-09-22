@@ -29,9 +29,9 @@ namespace TadrousManassa.Services
             return _studentChoiceRepository.GetCorrectnessAndRightAnswersAsync(studentId, quizId);
         }
 
-        public async Task AddStudentChoicesAsync(string studentId, string quizId, List<string> answerIds)
+        public async Task AddStudentChoicesAsync(string studentId, string quizId, string submissionId, List<string> answerIds)
         {
-            await _studentChoiceRepository.AddStudentChoicesAsync(studentId, quizId, answerIds);
+            await _studentChoiceRepository.AddStudentChoicesAsync(studentId, quizId, submissionId, answerIds);
             await _studentChoiceRepository.SaveChangesAsync();
         }
 

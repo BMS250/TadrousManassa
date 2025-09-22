@@ -23,10 +23,18 @@ namespace TadrousManassa.Services
             return _quizRepository.GetQuizByIdAsync(id);
         }
 
-        public Task<QuizDetailsDTO?> GetQuizDetailsAsync(string id)
+        public async Task<OperationResult<QuizDetailsDTO?>> GetQuizDetailsAsync(string id)
         {
-            return _quizRepository.GetQuizDetailsAsync(id);
+            var quizDetails = await _quizRepository.GetQuizDetailsAsync(id);
+
+            if (quizDetails == null)
+            {
+                return OperationResult<QuizDetailsDTO?>.Fail("Quiz not found");
+            }
+
+            return OperationResult<QuizDetailsDTO?>.Ok(quizDetails);
         }
+
 
         public Task<OperationResult<string>> GetLectureIdByQuizId(string id)
         {

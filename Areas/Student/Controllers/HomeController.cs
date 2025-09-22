@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System.Threading.Tasks;
 using TadrousManassa.Areas.Student.Models;
 using TadrousManassa.Models;
@@ -28,6 +29,7 @@ namespace TadrousManassa.Areas.Student.Controllers
         private readonly IQuizService _quizService;
         private readonly IVideoService _videoService;
         private readonly IStudentChoiceService _studentChoiceService;
+        private readonly ISubmissionService _submissionService;
         private readonly IMemoryCache _cache;
         private Task<ApplicationUser?> currentUser;
 
@@ -42,6 +44,7 @@ namespace TadrousManassa.Areas.Student.Controllers
             IQuizService quizService,
             IVideoService videoService,
             IStudentChoiceService studentChoiceService,
+            ISubmissionService submissionService,
             IMemoryCache cache)
         {
             _logger = logger;
@@ -54,6 +57,7 @@ namespace TadrousManassa.Areas.Student.Controllers
             _quizService = quizService;
             _videoService = videoService;
             _studentChoiceService = studentChoiceService;
+            _submissionService = submissionService;
             _cache = cache;
         }
 
@@ -230,23 +234,36 @@ namespace TadrousManassa.Areas.Student.Controllers
                     return View("ErrorView", result.Message);
                 }
                 int remainingAttempts = result.Data;
-
-                if (remainingAttempts == 2)
+                var maxSubmissionOrderResult = await _submissionService.GetMaxSubmissionOrder(currentUser.Id, quizId);
+                if (!maxSubmissionOrderResult.Success)
+                {
+                    return View("ErrorView", maxSubmissionOrderResult.Message);
+                }
+                if (/*TempData.TryGetValue("GoToQuiz", out var goToQuizObj)
+                    && goToQuizObj?.ToString() == "true" || */maxSubmissionOrderResult.Data == 0)
                 {
                     // Display the quiz details
-                    var quizDetails = await _quizService.GetQuizDetailsAsync(quizId);
-                    quizDetails.NumOfRemainingAttempts = remainingAttempts;
-                    return View(quizDetails);
+                    var quizDetailsResult = await _quizService.GetQuizDetailsAsync(quizId);
+                    if (!quizDetailsResult.Success)
+                    {
+                        return View("ErrorView", result.Message);
+                    }
+                    quizDetailsResult.Data!.NumOfRemainingAttempts = remainingAttempts;
+                    return View(quizDetailsResult.Data);
                 }
-
-                // Display the quiz result with or without score
-                return RedirectToAction(nameof(QuizResult), new { qId = quizId, remainingAttempts });
+                else
+                {
+                    // Display the quiz result with or without score
+                    //var directQuizResult = await _studentQuizService.GetQuizResultOfLastSubmissionAsync(currentUser.Id, quizId, remainingAttempts);
+                    //TempData["QuizResult"] = JsonConvert.SerializeObject(directQuizResult);
+                    return RedirectToAction(nameof(QuizResult), new { studentId = currentUser.Id, quizId, remainingAttempts });
+                }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in SolveQuiz action");
                 TempData["error"] = "Error in SolveQuiz action";
-                return View("ErrorView", TempData["error"]); ;
+                return View("ErrorView", TempData["error"]);
             }
         }
 
@@ -364,7 +381,15 @@ namespace TadrousManassa.Areas.Student.Controllers
                 }
                 _cache.Remove(cacheKey);
 
-                await _studentChoiceService.AddStudentChoicesAsync(studentId, quizId, [.. answers.Values]);
+                var submissionResult = await _studentQuizService.SaveSubmissionAsync(studentId, quizId, quizStartTime, answers);
+                if (!submissionResult.Success)
+                {
+                    return Json(new { success = false, message = submissionResult.Message });
+                }
+                float currentScore = submissionResult.Data!.Score;
+                string submissionId = submissionResult.Data!.SubmissionId;
+
+                await _studentChoiceService.AddStudentChoicesAsync(studentId, quizId, submissionId, [.. answers.Values]);
 
                 var remainingAttemptsResult = await _studentQuizService.DecreaseNumOfRemainingAttemptsAsync(studentId, quizId);
                 if (!remainingAttemptsResult.Success)
@@ -372,13 +397,6 @@ namespace TadrousManassa.Areas.Student.Controllers
                     return Json(new { success = false, message = remainingAttemptsResult.Message });
                 }
                 int remainingAttempts = remainingAttemptsResult.Data;
-
-                var submissionResult = await _studentQuizService.SaveSubmissionAsync(studentId, quizId, quizStartTime, answers);
-                if (!submissionResult.Success)
-                {
-                    return Json(new { success = false, message = submissionResult.Message });
-                }
-                float currentScore = submissionResult.Data;
 
                 // Return data for POST form submission
                 return Json(new
@@ -397,8 +415,22 @@ namespace TadrousManassa.Areas.Student.Controllers
             {
                 string message = "Error processing quiz submission";
                 _logger.LogError(ex, message);
-                return Json(new { success = false, message = message });
+                return Json(new { success = false, message });
             }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> QuizResult(string studentId, string quizId, int remainingAttempts)
+        {
+            var directQuizResult = await _studentQuizService.GetQuizResultOfLastSubmissionAsync(studentId, quizId, remainingAttempts);
+            //var directQuizResult = JsonConvert.DeserializeObject<QuizResultDTO>((string)TempData.Peek("QuizResult"));
+            if (directQuizResult.Success)
+            {
+                return View(directQuizResult.Data);
+            }
+            
+            TempData["error"] = "No quiz result available.";
+            return View("ErrorView", TempData["error"]);
         }
 
         [HttpPost]
@@ -410,7 +442,7 @@ namespace TadrousManassa.Areas.Student.Controllers
                 var answers = request.Answers;
 
                 // Check if the student has bought the lecture
-                var lectureIdResult = await _quizService.GetLectureIdByQuizId(request.QuizId);
+                var lectureIdResult = await _quizService.GetLectureIdByQuizId(request.QuizId!);
                 if (!lectureIdResult.Success || string.IsNullOrWhiteSpace(lectureIdResult.Data))
                 {
                     TempData["error"] = "Lecture not found for this quiz.";
@@ -441,14 +473,15 @@ namespace TadrousManassa.Areas.Student.Controllers
                     _logger.LogError(TempData["error"]!.ToString());
                     return View("ErrorView", TempData["error"]);
                 }
-
                 quizResult.CurrentScore = request.CurrentScore;
+
                 return View(quizResult);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error displaying quiz results");
-                return View();
+                TempData["error"] = "Error displaying quiz results";
+                _logger.LogError(TempData["error"]!.ToString());
+                return View("ErrorView", TempData["error"]);
             }
         }
     }
