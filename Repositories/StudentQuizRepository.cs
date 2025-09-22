@@ -34,35 +34,6 @@ namespace TadrousManassa.Repositories
                 .ToListAsync();
         }
 
-        public async Task SaveSubmissionAsync(string studentId, string quizId, Dictionary<string, string> answers)
-        {
-            // find student quiz entry
-            var studentQuiz = await _context.StudentQuizzes
-                .FirstOrDefaultAsync(sq => sq.StudentId == studentId && sq.QuizId == quizId);
-
-            if (studentQuiz == null)
-            {
-                // TODO: remove thiis exception and handle it in service
-                throw new InvalidOperationException("Student has not purchased this quiz.");
-            }
-
-            // create submission entity
-            //var submission = new Submission
-            //{
-            //    StudentId = studentId,
-            //    QuizId = quizId,
-            //    SubmittedAt = DateTime.Now,
-            //    AnswersJson = System.Text.Json.JsonSerializer.Serialize(answers)
-            //};
-
-            //_context.Submissions.Add(submission);
-
-            // decrease attempt count YOU DID IT IN SERVICE
-            ////studentQuiz.NumOfRemainingAttempts--;
-
-            await _context.SaveChangesAsync();
-        }
-
         public async Task<int> GetRemainingAttemptsByQuizIdAsync(string studentId, string quizId)
         {
             var studentQuiz = await _context.StudentQuizzes
@@ -113,7 +84,6 @@ namespace TadrousManassa.Repositories
         {
             return await _context.StudentQuizzes
                 .AsNoTracking()
-                .Include(sq => sq.Quiz)
                 .Where(sq => sq.StudentId == studentId && sq.QuizId == quizId)
                 .Select(sq => new StudentQuizScoresDTO { Score = sq.BestScore ?? 0, TotalScore = sq.Quiz.TotalScore })
                 .FirstOrDefaultAsync();
@@ -127,6 +97,30 @@ namespace TadrousManassa.Repositories
 
             return studentQuiz?.BestScore ?? 0;
         }
+
+        public Task<List<TopStudentsScores>> GetTopStudentsScoresAsync(string studentId, int topN = 3)
+        {
+            return _context.StudentQuizzes
+                .AsNoTracking()
+                .GroupBy(sq => new
+                {
+                    sq.StudentId,
+                    sq.Student.ApplicationUser.UserName
+                })
+                .Select(g => new TopStudentsScores
+                {
+                    StudentId = g.Key.StudentId, // Add StudentId to the model if not already present
+                    StudentName = g.Key.UserName,
+                    TotalScore = g.Sum(sq => sq.BestScore ?? 0)
+                })
+                .Where(s => s.TotalScore > 0)
+                .OrderByDescending(s => s.TotalScore)
+                .ThenByDescending(s => !string.IsNullOrEmpty(studentId) && s.StudentId == studentId ? 1 : 0)
+                .ThenBy(s => s.StudentName)
+                .Take(topN)
+                .ToListAsync();
+        }
+
 
         public async Task AddStudentQuizAsync(StudentQuiz studentQuiz)
         {

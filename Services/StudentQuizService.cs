@@ -117,7 +117,6 @@ namespace TadrousManassa.Services
             {
                 bool isFirstSubmission = false;
                 var studentQuiz = await _studentQuizRepository.GetStudentQuizAsync(studentId, quizId, true);
-                // TODO: Should I check if there any submissions before or these two conditions enough?
                 if (studentQuiz is null || studentQuiz.BestScore is null)
                 {
                     isFirstSubmission = true;
@@ -204,6 +203,11 @@ namespace TadrousManassa.Services
         public Task<float> GetBestScoreAsync(string studentId, string quizId)
         {
             return _studentQuizRepository.GetBestScoreAsync(studentId, quizId);
+        }
+
+        public Task<List<TopStudentsScores>> GetTopStudentsScoresAsync(string studentId, int topN = 3)
+        {
+            return _studentQuizRepository.GetTopStudentsScoresAsync(studentId, topN);
         }
     }
 }

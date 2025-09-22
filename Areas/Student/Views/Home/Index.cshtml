@@ -9,10 +9,45 @@
 <section class="slider_section ">
     <div id="customCarousel1" class="carousel slide" data-ride="carousel">
         <div class="container">
-            @* <div class="row">
-                <img class="sec1" src="~/images/profile.gif" alt="tad1" />
-            </div> *@
+            @if (Model.TopStudentsScores != null && Model.TopStudentsScores.Any())
+            {
+                <h3 class="text-center mb-4">🏆 Top Students</h3>
+                <table class="table leaderboard-table text-center">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Student</th>
+                            <th>Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.TopStudentsScores.Count; i++)
+                        {
+                            var student = Model.TopStudentsScores[i];
+                            string rowClass = i switch
+                            {
+                                0 => "gold-row",
+                                1 => "silver-row",
+                                2 => "bronze-row",
+                                _ => ""
+                            };
+
+                            <tr class="@rowClass">
+                                <td>@(i + 1)</td>
+                                <td>@student.StudentName</td>
+                                <td>@student.TotalScore</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+            }
+            else
+            {
+                <p class="text-muted text-center">No scores available yet.</p>
+            }
         </div>
+
     </div>
 </section>
 
@@ -24,7 +59,7 @@
             <div class="container ">
                 <div class="heading_container heading_center">
                     <h2>
-                         <span>ليه تشترك معانا؟</span>
+                        <span>Why join us?</span>
                     </h2>
                 </div>
                 <div class="row">
@@ -35,10 +70,10 @@
                             </div>
                             <div class="detail-box">
                                 <h5>
-                                    الامتحانااااااااااااات
+                                    Quizzes
                                 </h5>
                                 <p>
-                                    دايما مع كل حصة بيبقى فى امتحانات عشان تختبر مستواك و تأكد فهمك للدرس
+                                    After every lesson, there’s always a quiz to test your level and make sure you’ve understood the material.
                                 </p>
                             </div>
                         </div>
@@ -50,10 +85,10 @@
                             </div>
                             <div class="detail-box">
                                 <h5>
-                                    الحل الكتير
+                                    Lots of Practice
                                 </h5>
                                 <p>
-                                    هنحل مع بعض كل اسئلة الكتب الخارجية بكل مستويات الصعوبة
+                                    We’ll solve together every question from external books, covering all levels of difficulty.
                                 </p>
                             </div>
                         </div>
@@ -65,10 +100,10 @@
                             </div>
                             <div class="detail-box">
                                 <h5>
-                                    تبسيط المعلومة
+                                    Simplifying Knowledge
                                 </h5>
                                 <p>
-                                    شرح تفصيلى لكل جزئية فى المنهج بشكل بسيط و ممتع
+                                    Detailed explanations for every part of the curriculum in a simple and enjoyable way.
                                 </p>
                             </div>
                         </div>
@@ -79,54 +114,54 @@
     </section>
 </div>
 
-<div class="text-center">
-    <h1 class="display-4">Lectures</h1>
+<div class="text-center mb-4">
+    <h1 class="display-4 text-primary fw-bold">📚 Lectures</h1>
 </div>
 
 <div class="container">
     <!-- Semester Cards Section -->
-    <div class="row">
+    <div class="row g-4">
         @foreach (var semester in Model.LecturesOfSemestersByUnits.Keys)
         {
             var lectureCount = Model.LecturesOfSemestersByUnits[semester].Count;
-            <div class="col-md-12 semester-card" data-semester="@semester">
-                <h4>Term: @semester</h4>
-                <p>@lectureCount lecture@(lectureCount > 1 ? "s" : "")</p>
+            <div class="col-md-4">
+                <div class="semester-card shadow-sm" data-semester="@semester">
+                    <h4 class="semester-title">Term: @semester</h4>
+                    <p class="lecture-count">
+                        <span class="badge bg-info">@lectureCount</span>
+                        lecture@(lectureCount > 1 ? "s" : "")
+                    </p>
+                </div>
             </div>
         }
     </div>
-    
+
     <!-- Lecture List Section -->
-    <div>
+    <div class="mt-4">
         @foreach (var semester in Model.LecturesOfSemestersByUnits.Keys)
         {
             <div class="lecture-group" data-semester="@semester" style="display:none;">
-                @* <h5>Lectures for term @semester: @Model.LecturesOfSemestersByUnits[semester].Count()</h5> *@
                 @foreach (var lecture in Model.LecturesOfSemestersByUnits[semester])
                 {
-                    <!-- Add style="cursor:default" to the row -->
-                    <div class="lecture-row" data-lecture-id="@lecture.Id" style="cursor:default">
+                    <div class="lecture-row shadow-sm" data-lecture-id="@lecture.Id">
                         <div class="lecture-info">
-                            Lecture: @lecture.Name
+                            🎤 <strong>@lecture.Name</strong>
                         </div>
                         <div class="lecture-actions">
                             @if (!lecture.IsPurchased)
                             {
-                                <form method="post" action="@Url.Action("LecturePurchasing", "Home")" style="display:inline;">
+                                <form method="post" action="@Url.Action("LecturePurchasing", "Home")" class="d-inline-flex align-items-center">
                                     <input type="hidden" name="lectureId" value="@lecture.Id" />
-                                    <label for="code-@lecture.Id">Enter the code:</label>
-                                    <input type="text" id="code-@lecture.Id" name="code" class="code-input" />
-                                    <button type="submit" class="btn btn-success buy-btn" data-lecture-id="@lecture.Id">Buy the lecture</button>
+                                    <input type="text" id="code-@lecture.Id" name="code" class="form-control form-control-sm me-2 code-input" placeholder="Enter code..." />
+                                    <button type="submit" class="btn btn-success btn-sm buy-btn" data-lecture-id="@lecture.Id">Buy 🎟</button>
                                 </form>
                             }
                             else
                             {
-                                <!-- Use form POST to avoid URL parameters -->
-                                <form method="get" action="@Url.Action("LectureDetails", "Home")" style="display:inline;">
+                                <form method="get" action="@Url.Action("LectureDetails", "Home")" class="d-inline">
                                     <input type="hidden" name="lectureId" value="@lecture.Id" />
-                                    <button type="submit" class="btn btn-primary go-btn">Go to the lecture</button>
+                                    <button type="submit" class="btn btn-primary btn-sm go-btn">Go 🚀</button>
                                 </form>
-                                @* <a href="@Url.Action("LectureDetails", "Home", new { lectureId = @lecture.Id})" style="display:inline;" class="btn btn-primary go-btn" target="_blank">Go to the lecture</a> *@
                             }
                         </div>
                     </div>
@@ -136,30 +171,43 @@
     </div>
 </div>
 
-<style>
-    .semester-card {
-        background: #f0f0f0;
-        padding: 20px;
-        margin: 10px;
-        cursor: pointer;
-        text-align: center;
-        border-radius: 5px;
-    }
-</style>
 
 @section Scripts {
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
         $(document).ready(function () {
-            // Show lecture groups when semester card is clicked
+
+            // Handle semester card clicks
             $('.semester-card').click(function () {
                 var selectedSemester = $(this).data('semester');
-                $('.lecture-group').hide();
-                $('.lecture-group[data-semester="' + selectedSemester + '"]').show();
+                var targetGroup = $('.lecture-group[data-semester="' + selectedSemester + '"]');
+
+                // Remove active class from all semester cards
+                $('.semester-card').removeClass('active-semester');
+
+                // If the clicked group is already visible -> collapse it
+                if (targetGroup.is(':visible')) {
+                    targetGroup.slideUp(400);
+                } else {
+                    // Hide all groups with animation
+                    $('.lecture-group:visible').slideUp(400);
+
+                    // Add highlight to selected semester card
+                    $(this).addClass('active-semester');
+
+                    // Show selected group with animation
+                    targetGroup.slideDown(400);
+                }
             });
+
         });
     </script>
+    <style>
+        /* Highlight selected semester card */
+        
+    </style>
 }
+
 
 <!-- jQery -->
 <script type="text/javascript" src="~/lib/jquery/dist/jquery.js"></script>

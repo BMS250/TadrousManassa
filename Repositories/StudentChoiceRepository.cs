@@ -38,8 +38,6 @@ namespace TadrousManassa.Repositories
         public Task<Dictionary<string, KeyValuePair<bool?, string>>> GetCorrectnessAndRightAnswersAsync(string studentId, string quizId)
         {
             return _context.StudentChoices
-                .Include(sc => sc.Choice)
-                .ThenInclude(c => c.Question)
                 .Where(sc => sc.StudentId == studentId && sc.Choice.Question.QuizId == quizId)
                 .Select(sc => new
                 {
@@ -53,8 +51,6 @@ namespace TadrousManassa.Repositories
         public Task<Dictionary<string, string>> GetAnswersBySubmissionIdAsync(string lastSubmissionId)
         {
             return _context.StudentChoices
-                .Include(sc => sc.Choice)
-                .ThenInclude(c => c.Question)
                 .Where(sc => sc.SubmissionId == lastSubmissionId)
                 .Select(sc => new
                 {

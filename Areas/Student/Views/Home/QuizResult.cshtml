@@ -1,142 +1,107 @@
 ﻿@model TadrousManassa.Areas.Student.Models.QuizResultDTO
 
-<div class="container mt-4">
-    @try
-    {
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header bg-success text-white">
-                        <h3 class="text-center mb-0">
-                            <i class="fas fa-check-circle me-2"></i>
-                            تم إرسال الاختبار بنجاح
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h5><strong>اسم الاختبار:</strong></h5>
-                                <p class="text-muted">@Model.QuizTitle</p>
-                            </div>
-                            @* <div class="col-md-6">
-                                <h5><strong>وقت الإرسال:</strong></h5>
-                                <p class="text-muted">@Model.SubmissionTime.ToString("yyyy-MM-dd HH:mm:ss")</p>
-                            </div> *@
-                        </div>
-                        
-                        <div class="row mt-3">
-                            @if (Model.CurrentScore is not null)
+<div class="container mt-5">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold text-primary">🎉Quiz Result 🎉</h2>
+
+        @if (Model.CurrentScore is not null || Model.BestScore is not null)
+        {
+            @if (Model.CurrentScore is not null)
+            {
+                <h4 class="score-box bg-info text-white p-3 rounded d-inline-block mx-2">
+                    Current Score: <span class="fw-bold">@Model.CurrentScore</span> / @Model.TotalScore
+                </h4>
+            }
+
+            @if (Model.BestScore is not null)
+            {
+                <h4 class="score-box bg-success text-white p-3 rounded d-inline-block mx-2">
+                    Best Score: <span class="fw-bold">@Model.BestScore</span> / @Model.TotalScore
+                </h4>
+            }
+            // Display IsSuccess
+            if (Model.IsSuccess == true)
+            {
+                <h4 class="score-box bg-success text-white p-3 rounded d-inline-block mx-2">
+                    State: <span class="fw-bold">Successful ✅</span>
+                </h4>
+            }
+            else
+            {
+                <h4 class="score-box bg-danger text-white p-3 rounded d-inline-block mx-2">
+                    State: <span class="fw-bold">Failed ❌</span>
+                </h4>
+            }
+        }
+        
+    </div>
+
+    <div class="mt-4">
+        @foreach (var question in Model.Questions)
+        {
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        @question.QuestionText ❓
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-column gap-2">
+                        @foreach (var choice in question.Choices)
                         {
-                            <div class="col-md-6">
-                                <h5><strong>الدرجة:</strong></h5>
-                                <p class="text-muted">@Model.CurrentScore من @Model.TotalScore</p>
-                            </div>
+                            var isSelected = question.SelectedChoiceId == choice.ChoiceId;
+                            var isCorrectAnswer = choice.IsCorrect;
+                            string btnClass = ""; // default
+
+                            if (isSelected && question.IsCorrect == true)
+                            {
+                                btnClass = "btn-success"; // correct selection
+                            }
+                            else if (isSelected && question.IsCorrect == false)
+                            {
+                                btnClass = "btn-danger"; // wrong selection
+                            }
+                            else if (!isSelected && isCorrectAnswer && question.IsCorrect == false && Model.RemainingAttempts == 0)
+                            {
+                                btnClass = "btn-success"; // show correct answer if wrong
+                            }
+
+                            <label class="@btnClass">
+                                <input type="radio" disabled @(isSelected ? "checked" : "") />
+                                <span class="custom-radio"></span>
+                                @choice.ChoiceText
+                            </label>
                         }
-                            @if (Model.BestScore is not null)
-                            {
-                                <div class="col-md-6">
-                                    <h5><strong>الدرجة الافضل:</strong></h5>
-                                    <p class="text-muted">@Model.BestScore من @Model.TotalScore</p>
-                                </div>
-                            }
-                            <div class="col-md-6">
-                                <h5><strong>حالة الاختبار:</strong></h5>
-                                <span class="badge bg-success">مكتمل</span>
-                            </div>
-                            <div class="col-md-6">
-                                <h5><strong>التقدير:</strong></h5>
-                                @(Model.IsSuccess
-                                    ? Html.Raw("<span class='badge bg-success'>Successful</span>")
-                                    : Html.Raw("<span class='badge bg-danger'>Failed</span>")
-                                )
-                            </div>
-                        </div>
-
-                        @if (Model.Questions.Any())
-                        {
-                            <div class="mt-4">
-                                <h5><strong>تفاصيل الإجابات:</strong></h5>
-                                <div class="table-responsive">
-                                    <table class="table table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>رقم السؤال</th>
-                                                <th>الإجابة المختارة</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var answer in Model.Questions)
-                                            {
-                                                <tr>
-                                                    <td>@answer.QuestionText</td>
-                                                    <td>@answer.SelectedChoiceId</td>
-                                                    <td>@answer.IsCorrect</td>
-                                                    <td>@answer.CorrectAnswerText</td>
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        }
-
-                        <div class="text-center mt-4">
-                            <a href="@Url.Action("Index", "Home")" class="btn btn-primary me-2">
-                                <i class="fas fa-home me-2"></i>
-                                Back to Home
-                            </a>
-
-							@if (Model.RemainingAttempts > 0)
-                            {
-                                <form asp-controller="Home" asp-action="OnPostRetake" method="post">
-                                    <input type="hidden" name="qId" value="@Model.QuizId" />
-                                    <button type="submit" class="btn btn-warning">
-                                        Retake Quiz
-                                    </button>
-                                </form>
-                            }
-
-                            @if (Model.IsNextVideoExists)
-                            {
-                                <form asp-controller="Home" asp-action="LectureDetails" method="get">
-                                    <input type="hidden" name="lectureId" value="@Model.LectureId" />
-                                    <input type="hidden" name="order" value="@Model.NextVideoOrder" />
-                                    <button type="submit" class="btn btn-warning">
-                                        Go to the next video
-                                    </button>
-                                </form>
-                            }
-                            @* <a href="@Url.Action("NextVideo", "Home", new { quizId = Model.QuizId })" class="btn btn-success">
-                                <i class="fas fa-play me-2"></i>
-                                Next Video
-                            </a> *@
-                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    }
-    catch
-    {
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header bg-danger text-white">
-                        <h3 class="text-center mb-0">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            خطأ في إرسال الاختبار
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="text-center mt-4">
-                            <a href="@Url.Action("Index", "Home")" class="btn btn-primary">
-                                <i class="fas fa-home me-2"></i>
-                                العودة للصفحة الرئيسية
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    }
+        }
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="@Url.Action("Index", "Home")" class="btn btn-primary me-2">
+            <i class="fas fa-home me-2"></i> العودة للصفحة الرئيسية
+        </a>
+
+        @if (Model.RemainingAttempts > 0)
+        {
+            <form asp-controller="Home" asp-action="OnPostRetake" method="post" class="d-inline">
+                <input type="hidden" name="qId" value="@Model.QuizId" />
+                <button type="submit" class="btn btn-warning">
+                    🔄 إعادة المحاولة
+                </button>
+            </form>
+        }
+
+        @if (Model.IsNextVideoExists)
+        {
+            <form asp-controller="Home" asp-action="LectureDetails" method="get" class="d-inline">
+                <input type="hidden" name="lectureId" value="@Model.LectureId" />
+                <input type="hidden" name="order" value="@Model.NextVideoOrder" />
+                <button type="submit" class="btn btn-success">
+                    ▶ الانتقال للفيديو التالي
+                </button>
+            </form>
+        }
+    </div>
 </div>

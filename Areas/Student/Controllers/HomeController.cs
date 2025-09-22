@@ -87,7 +87,8 @@ namespace TadrousManassa.Areas.Student.Controllers
                     TempData["error"] = lecturesVM.Message;
                     return View(new LecturesBySemesterVM { LecturesOfSemestersByUnits = new Dictionary<int, List<LectureVM>>() });
                 }
-
+                var topScores = await _studentQuizService.GetTopStudentsScoresAsync(currentUser.Id);
+                lecturesVM.Data!.TopStudentsScores = topScores;
                 return View(lecturesVM.Data);
             }
             catch (Exception ex)

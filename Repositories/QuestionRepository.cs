@@ -18,7 +18,6 @@ namespace TadrousManassa.Repositories
         {
             // Revise Loading
             return await _context.Questions
-                .Include(q => q.Quiz)
                 .Where(q => q.Quiz.LectureId == lectureId)
                 .ToListAsync();
         }
