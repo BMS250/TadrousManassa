@@ -257,9 +257,6 @@ namespace TadrousManassa.Areas.Student.Controllers
                 }
                 else
                 {
-                    // Display the quiz result with or without score
-                    //var directQuizResult = await _studentQuizService.GetQuizResultOfLastSubmissionAsync(currentUser.Id, quizId, remainingAttempts);
-                    //TempData["QuizResult"] = JsonConvert.SerializeObject(directQuizResult);
                     return RedirectToAction(nameof(QuizResult), new { studentId = currentUser.Id, quizId, remainingAttempts });
                 }
             }
@@ -298,8 +295,6 @@ namespace TadrousManassa.Areas.Student.Controllers
                     return View("ErrorView", "Quiz not found.");
 
                 // Load or create quiz start time
-                //var quizStartTime = await _studentQuizService.GetOrCreateQuizStartTimeAsync(currentUser.Id, quiz.Id);
-
                 // save Start time in cache for 2 hours
                 var cacheKey = $"QuizStartTime_{currentUser.Id}_{quiz.Id}";
                 if (!_cache.TryGetValue(cacheKey, out DateTime quizStartTime))
@@ -317,21 +312,24 @@ namespace TadrousManassa.Areas.Student.Controllers
                     QuizName = quiz.Name,
                     TimeHours = quiz.TimeHours,
                     TimeMinutes = quiz.TimeMinutes,
-                    QuizStartTime = DateTime.Now,
+                    QuizStartTime = quizStartTime, // Use the cached start time, not DateTime.Now!
                     Questions = [.. quiz.Questions.Select(q => new QuestionVM
-                    {
-                        Id = q.Id,
-                        Text = q.Text,
-                        Image = q.Image,
-                        Score = q.Score,
-                        Choices = [.. q.Choices.Select(c => new ChoiceVM
-                        {
-                            Id = c.Id,
-                            Text = c.Text,
-                            Image = c.Image
-                        })]
-                    })]
+            {
+                Id = q.Id,
+                Text = q.Text,
+                Image = q.Image,
+                Score = q.Score,
+                Choices = [.. q.Choices.Select(c => new ChoiceVM
+                {
+                    Id = c.Id,
+                    Text = c.Text,
+                    Image = c.Image
+                })]
+            })]
                 };
+
+                // Pass the quiz start time to the view via ViewBag for JavaScript
+                ViewBag.QuizStartTime = quizStartTime;
 
                 return View(vm);
             }
