@@ -98,7 +98,7 @@
 
                             @if (Model.IsNextVideoExists)
                             {
-                                <form asp-controller="Home" asp-action="LectureDetails" method="post">
+                                <form asp-controller="Home" asp-action="LectureDetails" method="get">
                                     <input type="hidden" name="lectureId" value="@Model.LectureId" />
                                     <input type="hidden" name="order" value="@Model.NextVideoOrder" />
                                     <button type="submit" class="btn btn-warning">
@@ -106,10 +106,10 @@
                                     </button>
                                 </form>
                             }
-                            <a href="@Url.Action("NextVideo", "Home", new { quizId = Model.QuizId })" class="btn btn-success">
+                            @* <a href="@Url.Action("NextVideo", "Home", new { quizId = Model.QuizId })" class="btn btn-success">
                                 <i class="fas fa-play me-2"></i>
                                 Next Video
-                            </a>
+                            </a> *@
                         </div>
                     </div>
                 </div>

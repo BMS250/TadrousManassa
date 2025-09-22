@@ -12,6 +12,9 @@ namespace TadrousManassa.Models
         [MaxLength(255)]
         public string Path { get; set; }
 
+        [MaxLength(255)]
+        public string? SheetPath { get; set; }
+
         [MaxLength(100)]
         public string? Name { get; set; }
 

@@ -11,14 +11,35 @@ namespace TadrousManassa.Services
     public class VideoService : IVideoService
     {
         private readonly IVideoRepository _videoRepository;
-        public VideoService(IVideoRepository videoRepository)
+        private readonly ILectureRepository _lectureRepository;
+        public VideoService(IVideoRepository videoRepository, ILectureRepository lectureRepository)
         {
             _videoRepository = videoRepository;
+            _lectureRepository = lectureRepository;
         }
 
         public Task<string?> GetQuizIdByVideoIdAsync(string videoId)
         {
             return _videoRepository.GetQuizIdByVideoIdAsync(videoId);
+        }
+
+        public async Task<OperationResult<VideoDetailsDTO>> GetVideoDetails(string lectureId, int order)
+        {
+            if (string.IsNullOrWhiteSpace(lectureId))
+                return OperationResult<VideoDetailsDTO>.Fail("Lecture ID cannot be null or empty.");
+            if (order < 1)
+                return OperationResult<VideoDetailsDTO>.Fail("Order must be a positive integer.");
+
+            var unit = await _lectureRepository.GetUnit(lectureId);
+            var videoId = await _videoRepository.GetVideoIdByLectureIdAndOrder(lectureId, order);
+            if (videoId == null)
+                return OperationResult<VideoDetailsDTO>.Fail("Video not found.");
+
+            VideoDetailsDTO? videoDetails = await _videoRepository.GetVideoDetailsAsync(videoId, unit);
+            if (videoDetails == null)
+                return OperationResult<VideoDetailsDTO>.Fail("Video not found.");
+
+            return OperationResult<VideoDetailsDTO>.Ok(videoDetails, "Video details retrieved successfully.");
         }
 
         public async Task<OperationResult<int?>> CheckAndGetNextVideoOrderByQuizIdAsync(string quizId)

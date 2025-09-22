@@ -36,9 +36,6 @@ namespace TadrousManassa.Models
         [MaxLength(255)]
         public string? ImagePath { get; set; }
 
-        [MaxLength(255)]
-        public string? SheetPath { get; set; }
-
         public int ViewsCount { get; set; } = 0;
 
         public virtual ICollection<StudentLecture> StudentLectures { get; set; }

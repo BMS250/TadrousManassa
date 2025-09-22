@@ -33,5 +33,41 @@ namespace TadrousManassa.Repositories
                 .AsNoTracking()
                 .AnyAsync(v => v.LectureId == currentVideo.LectureId && v.Order == currentVideo.Order + 1);
         }
+
+        public Task<string?> GetVideoPath(string id)
+        {
+            return _context.Videos
+                .AsNoTracking()
+                .Where(v => v.Id == id)
+                .Select(v => v.Path)
+                .FirstOrDefaultAsync();
+        }
+
+        public Task<VideoDetailsDTO?> GetVideoDetailsAsync(string id, string unit)
+        {
+            return _context.Videos
+                .AsNoTracking()
+                .Where(v => v.Id == id)
+                .Select(v => new VideoDetailsDTO
+                {
+                    Id = v.Id,
+                    Name = v.Name,
+                    Description = v.Description,
+                    Order = v.Order,
+                    Path = v.Path,
+                    SheetPath = v.SheetPath,
+                    Unit = unit
+                })
+                .FirstOrDefaultAsync();
+        }
+
+        public Task<string?> GetVideoIdByLectureIdAndOrder(string lectureId, int order)
+        {
+            return _context.Videos
+                .AsNoTracking()
+                .Where(v => v.LectureId == lectureId && v.Order == order)
+                .Select(v => v.Id)
+                .FirstOrDefaultAsync();
+        }
     }
 }

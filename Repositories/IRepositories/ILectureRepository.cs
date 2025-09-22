@@ -18,7 +18,7 @@ namespace TadrousManassa.Repositories.IRepositories
 
         public OperationResult<Lecture> GetLecture(string id);
 
-        public OperationResult<VideoDetailsDTO> GetVideoDetails(string id, int order);
+        public Task<string?> GetUnit(string id);
 
         public OperationResult<List<Lecture>> GetLecturesByGrade(int grade);
 

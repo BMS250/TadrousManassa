@@ -159,7 +159,7 @@ namespace TadrousManassa.Areas.Student.Controllers
                     return View("ErrorView", TempData["error"]); ;
                 }
 
-                var videoDetailsDTO = _lectureService.GetVideoDetails(lectureId, order);
+                var videoDetailsDTO = await _videoService.GetVideoDetails(lectureId, order);
                 if (!videoDetailsDTO.Success)
                 {
                     TempData["error"] = "The lecture is not found";
@@ -176,7 +176,7 @@ namespace TadrousManassa.Areas.Student.Controllers
             }
         }
 
-        internal IActionResult DownloadSheet(string path)
+        public IActionResult DownloadSheet(string path)
         {
             // Ensure it's a valid URL to prevent open redirects
             if (!Uri.IsWellFormedUriString(path, UriKind.Absolute))

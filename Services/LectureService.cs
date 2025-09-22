@@ -50,11 +50,6 @@ namespace TadrousManassa.Services
             return lectureRepository.GetLecture(id);
         }
 
-        public OperationResult<VideoDetailsDTO> GetVideoDetails(string id, int order)
-        {
-            return lectureRepository.GetVideoDetails(id, order);
-        }
-
         public OperationResult<List<Lecture>> GetLecturesByGrade(int grade)
         {
             return lectureRepository.GetLecturesByGrade(grade);
