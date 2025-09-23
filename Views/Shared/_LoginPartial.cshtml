@@ -6,7 +6,7 @@
 @if (SignInManager.IsSignedIn(User))
 {
     <li class="nav-item">
-            <a class="nav-link text-dark" asp-controller="Home" asp-action="Profile" title="Profile">Profile</a>
+            <a class="nav-link text-dark" asp-controller="Profile" asp-action="Profile" title="Profile">Profile</a>
     </li>
     <li class="nav-item">
             <a class="nav-link text-dark" asp-controller="Home" asp-action="Index" title="Hello">Hello @User.Identity?.Name!</a>

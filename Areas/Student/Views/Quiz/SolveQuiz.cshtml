@@ -328,7 +328,7 @@
                 }
             });
 
-            fetch('@Url.Action("SolveQuiz", "Home")', {
+            fetch('@Url.Action("SolveQuiz", "Quiz")', {
                 method: 'POST',
                 body: formData
             })
@@ -349,7 +349,7 @@
                 // Create a form and submit it with POST data
                 const form = document.createElement('form');
                 form.method = 'POST';
-                form.action = '@Url.Action("QuizResult", "Home")';
+                form.action = '@Url.Action("QuizResult", "Quiz")';
                 form.style.display = 'none'; // Hide the form
 
                 // Add anti-forgery token if you're using it

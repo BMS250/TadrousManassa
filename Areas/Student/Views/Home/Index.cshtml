@@ -150,7 +150,7 @@
                         <div class="lecture-actions">
                             @if (!lecture.IsPurchased)
                             {
-                                <form method="post" action="@Url.Action("LecturePurchasing", "Home")" class="d-inline-flex align-items-center">
+                                <form method="post" action="@Url.Action("LecturePurchasing", "Lecture")" class="d-inline-flex align-items-center">
                                     <input type="hidden" name="lectureId" value="@lecture.Id" />
                                     <input type="text" id="code-@lecture.Id" name="code" class="form-control form-control-sm me-2 code-input" placeholder="Enter code..." />
                                     <button type="submit" class="btn btn-success btn-sm buy-btn" data-lecture-id="@lecture.Id">Buy 🎟</button>
@@ -158,7 +158,7 @@
                             }
                             else
                             {
-                                <form method="get" action="@Url.Action("LectureDetails", "Home")" class="d-inline">
+                                <form method="get" action="@Url.Action("LectureDetails", "Lecture")" class="d-inline">
                                     <input type="hidden" name="lectureId" value="@lecture.Id" />
                                     <button type="submit" class="btn btn-primary btn-sm go-btn">Go 🚀</button>
                                 </form>

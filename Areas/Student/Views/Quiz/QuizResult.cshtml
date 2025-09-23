@@ -85,7 +85,7 @@
 
         @if (Model.RemainingAttempts > 0)
         {
-            <form asp-controller="Home" asp-action="OnPostRetake" method="post" class="d-inline">
+            <form asp-controller="Quiz" asp-action="OnPostRetake" method="post" class="d-inline">
                 <input type="hidden" name="qId" value="@Model.QuizId" />
                 <button type="submit" class="btn btn-warning">
                     🔄 إعادة المحاولة
@@ -95,7 +95,7 @@
 
         @if (Model.IsNextVideoExists)
         {
-            <form asp-controller="Home" asp-action="LectureDetails" method="get" class="d-inline">
+            <form asp-controller="Lecture" asp-action="LectureDetails" method="get" class="d-inline">
                 <input type="hidden" name="lectureId" value="@Model.LectureId" />
                 <input type="hidden" name="order" value="@Model.NextVideoOrder" />
                 <button type="submit" class="btn btn-success">
