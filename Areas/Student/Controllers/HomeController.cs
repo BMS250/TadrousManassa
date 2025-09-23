@@ -516,7 +516,7 @@ namespace TadrousManassa.Areas.Student.Controllers
 
                 var rankResult = await _studentService.GetStudentRank(currentUser.Id);
                 int rank;
-                if (!rankResult.Success)
+                if (rankResult.Success)
                 {
                     rank = rankResult.Data;
                 }
@@ -546,6 +546,7 @@ namespace TadrousManassa.Areas.Student.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> UploadProfileImage(IFormFile image)
         {
             try
@@ -579,6 +580,7 @@ namespace TadrousManassa.Areas.Student.Controllers
                 var imageBytes = memoryStream.ToArray();
 
                 // Update profile image in database
+                _logger.LogInformation("Updating profile image for user {UserId}", currentUser.Id);
                 var updateResult = _studentService.UpdateProfileImage(currentUser.Id, imageBytes);
                 if (!updateResult.Success)
                 {
@@ -594,7 +596,7 @@ namespace TadrousManassa.Areas.Student.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error uploading profile image");
-                return Json(new { success = false, message = "Error uploading image" });
+                return Json(new { success = false, message = "Error uploading image1" });
             }
         }
 

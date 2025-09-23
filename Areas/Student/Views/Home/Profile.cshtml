@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = "Profile";
 }
+@Html.AntiForgeryToken()
 
 <div class="container mt-4">
     <div class="row">
@@ -145,6 +146,10 @@
                 const formData = new FormData();
                 formData.append('image', file);
                 
+                // Add anti-forgery token
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                formData.append('__RequestVerificationToken', token);
+
                 fetch('/Student/Home/UploadProfileImage', {
                     method: 'POST',
                     body: formData
@@ -175,12 +180,12 @@
                         profileImage.src = 'data:image/jpeg;base64,' + data.imageData;
                         showAlert('Image uploaded successfully', 'success');
                     } else {
-                        showAlert(data.message || 'Error uploading image', 'error');
+                        showAlert(data.message || 'Error uploading image2', 'error');
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    showAlert('Error uploading image', 'error');
+                    showAlert('Error uploading image3', 'error');
                 });
             }
         }
