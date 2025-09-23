@@ -209,5 +209,19 @@ namespace TadrousManassa.Services
         {
             return _studentQuizRepository.GetTopStudentsScoresAsync(studentId, topN);
         }
+
+        public async Task<OperationResult<double>> CalculateStudentTotalScore(string studentId)
+        {
+            try
+            {
+                var totalScore = await _studentQuizRepository.CalculateStudentTotalScore(studentId);
+                return OperationResult<double>.Ok(totalScore);
+            }
+            catch (Exception ex)
+            {
+                return OperationResult<double>.Fail($"Error calculating total score: {ex.Message}");
+            }
+        }
+
     }
 }

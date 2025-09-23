@@ -83,6 +83,20 @@ namespace TadrousManassa.Services
             }
         }
 
+        public async Task<OperationResult<int>> GetStudentRank(string id)
+        {
+            try
+            {
+                var rank = await studentRepository.GetStudentRank(id);
+                return OperationResult<int>.Ok(rank);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Error retrieving rank for student with ID {id}");
+                return OperationResult<int>.Fail("Failed to retrieve student rank.");
+            }
+        }
+
         public async Task<OperationResult<bool>> InsertStudentAsync(Student student)
         {
             try
@@ -143,7 +157,28 @@ namespace TadrousManassa.Services
             }
         }
 
-        
+        public OperationResult<bool> UpdateProfileImage(string studentId, byte[] imageBytes)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(studentId))
+                    return OperationResult<bool>.Fail("Student ID cannot be null or empty");
+
+                if (imageBytes == null || imageBytes.Length == 0)
+                    return OperationResult<bool>.Fail("Image data cannot be null or empty");
+
+                var result = studentRepository.UpdateProfileImage(studentId, imageBytes);
+                if (result)
+                    return OperationResult<bool>.Ok(true, "Profile image updated successfully.");
+                
+                return OperationResult<bool>.Fail("Failed to update profile image.");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Error updating profile image for student with ID {studentId}");
+                return OperationResult<bool>.Fail("Failed to update profile image.");
+            }
+        }
     }
 
 }

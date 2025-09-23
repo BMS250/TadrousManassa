@@ -9,10 +9,12 @@ namespace TadrousManassa.Services.IServices
         OperationResult<Student> GetStudentByEmail(string email);
         OperationResult<List<Student>> GetStudentsByGrade(int grade);
         OperationResult<List<Student>> GetStudentsByLecture(string lectureId);
+        Task<OperationResult<int>> GetStudentRank(string id);
         Task<OperationResult<bool>> InsertStudentAsync(Student student);
         Task<OperationResult<bool>> UpdateStudentAsync(string id, Student student, string? newPassword = null);
         Task<OperationResult<bool>> ResetDeviceId(string studentEmail);
         Task<OperationResult<bool>> DeleteStudentAsync(string id);
+        OperationResult<bool> UpdateProfileImage(string studentId, byte[] imageBytes);
     }
 
 }

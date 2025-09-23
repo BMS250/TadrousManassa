@@ -46,6 +46,27 @@ namespace TadrousManassa.Repositories
         {
             return _context.Students.FirstOrDefault(s => s.Id == id).Grade;
         }
+        public async Task<int> GetStudentRank(string id)
+        {
+            // 1. Calculate total score per student
+            var studentScores = await _context.Students
+                .Select(s => new
+                {
+                    StudentId = s.Id,
+                    s.TotalScore
+                })
+                .Distinct()
+                .OrderByDescending(s => s.TotalScore)
+                .ToListAsync();
+
+            // 2. Find the rank
+            var rank = studentScores
+                .Select((s, index) => new { s.StudentId, Rank = index + 1 })
+                .FirstOrDefault(x => x.StudentId == id);
+
+            return rank?.Rank ?? 0;
+        }
+
 
         public void InsertStudent(Student student)
         {
@@ -146,6 +167,31 @@ namespace TadrousManassa.Repositories
             ArgumentNullException.ThrowIfNull(student);
             _context.Students.Remove(student);
             _context.SaveChanges();
+        }
+
+        public bool UpdateProfileImage(string studentId, byte[] imageBytes)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(studentId))
+                    return false;
+
+                if (imageBytes == null || imageBytes.Length == 0)
+                    return false;
+
+                var student = GetStudent(studentId);
+                if (student == null)
+                    return false;
+
+                student.ProfileImage = imageBytes;
+                _context.Entry(student).State = EntityState.Modified;
+                _context.SaveChanges();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
     }
 }

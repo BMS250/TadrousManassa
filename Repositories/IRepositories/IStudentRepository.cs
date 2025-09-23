@@ -13,7 +13,7 @@ namespace TadrousManassa.Repositories.IRepositories
         public List<Student> GetStudentsByGrade(int grade);
 
         public int GetStudentGrade(string id);
-
+        public Task<int> GetStudentRank(string id);
         public void InsertStudent(Student student);
 
         public Task<int> UpdateStudentAsync(string id, Student student, string? newPassword = null);
@@ -23,5 +23,7 @@ namespace TadrousManassa.Repositories.IRepositories
         public Task<bool> ResetPassword(string studentEmail, string newPassword);
 
         public void DeleteStudent(string id);
+
+        public bool UpdateProfileImage(string studentId, byte[] imageBytes);
     }
 }

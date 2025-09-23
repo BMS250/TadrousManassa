@@ -493,5 +493,176 @@ namespace TadrousManassa.Areas.Student.Controllers
             TempData["GoToQuiz"] = "true";
             return RedirectToAction(nameof(QuizDetails), new { vId = (string?)null, qId });
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Profile()
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    _logger.LogWarning("Current user not found");
+                    return RedirectToAction("Login", "Account", new { area = "Identity" });
+                }
+
+                var student = _studentService.GetStudent(currentUser.Id);
+                if (!student.Success)
+                {
+                    _logger.LogError("Student not found for user {UserId}", currentUser.Id);
+                    TempData["error"] = "Student profile not found.";
+                    return RedirectToAction("Login", "Account", new { area = "Identity" });
+                }
+
+                var rankResult = await _studentService.GetStudentRank(currentUser.Id);
+                int rank;
+                if (!rankResult.Success)
+                {
+                    rank = rankResult.Data;
+                }
+                else
+                {
+                    rank = 0;
+                }
+
+                var profile = new Profile
+                {
+                    Name = currentUser.UserName ?? "",
+                    Email = currentUser.Email ?? "",
+                    PhoneNumber = currentUser.PhoneNumber,
+                    Image = student.Data?.ProfileImage,
+                    TotalScore = student.Data?.TotalScore ?? 0,
+                    Rank = rank
+                };
+
+                return View(profile);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in Profile action");
+                TempData["error"] = "Error loading profile";
+                return View(new Profile());
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UploadProfileImage(IFormFile image)
+        {
+            try
+            {
+                if (image == null || image.Length == 0)
+                {
+                    return Json(new { success = false, message = "لم يتم اختيار صورة" });
+                }
+
+                // التحقق من نوع الملف
+                if (!image.ContentType.StartsWith("image/"))
+                {
+                    return Json(new { success = false, message = "يجب أن يكون الملف صورة" });
+                }
+
+                // التحقق من حجم الملف (5MB كحد أقصى)
+                if (image.Length > 5 * 1024 * 1024)
+                {
+                    return Json(new { success = false, message = "حجم الصورة يجب أن يكون أقل من 5 ميجابايت" });
+                }
+
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Json(new { success = false, message = "المستخدم غير موجود" });
+                }
+
+                // تحويل الصورة إلى byte array
+                using var memoryStream = new MemoryStream();
+                await image.CopyToAsync(memoryStream);
+                var imageBytes = memoryStream.ToArray();
+
+                // تحديث صورة الملف الشخصي في قاعدة البيانات
+                var updateResult = _studentService.UpdateProfileImage(currentUser.Id, imageBytes);
+                if (!updateResult.Success)
+                {
+                    return Json(new { success = false, message = updateResult.Message });
+                }
+
+                return Json(new { 
+                    success = true, 
+                    message = "تم رفع الصورة بنجاح",
+                    imageData = Convert.ToBase64String(imageBytes)
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error uploading profile image");
+                return Json(new { success = false, message = "حدث خطأ في رفع الصورة" });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateProfile(string name, string email, string phoneNumber)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Json(new { success = false, message = "المستخدم غير موجود" });
+                }
+
+                // تحديث بيانات المستخدم
+                currentUser.UserName = name;
+                currentUser.Email = email;
+                currentUser.PhoneNumber = phoneNumber;
+
+                var result = await _userManager.UpdateAsync(currentUser);
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    return Json(new { success = false, message = errors });
+                }
+
+                return Json(new { success = true, message = "تم تحديث البيانات بنجاح" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating profile");
+                return Json(new { success = false, message = "حدث خطأ في تحديث البيانات" });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ChangePassword(string currentPassword, string newPassword)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Json(new { success = false, message = "المستخدم غير موجود" });
+                }
+
+                // التحقق من كلمة المرور الحالية
+                var isCurrentPasswordValid = await _userManager.CheckPasswordAsync(currentUser, currentPassword);
+                if (!isCurrentPasswordValid)
+                {
+                    return Json(new { success = false, message = "كلمة المرور الحالية غير صحيحة" });
+                }
+
+                // تغيير كلمة المرور
+                var result = await _userManager.ChangePasswordAsync(currentUser, currentPassword, newPassword);
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    return Json(new { success = false, message = errors });
+                }
+
+                return Json(new { success = true, message = "تم تغيير كلمة المرور بنجاح" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error changing password");
+                return Json(new { success = false, message = "حدث خطأ في تغيير كلمة المرور" });
+            }
+        }
     }
 }

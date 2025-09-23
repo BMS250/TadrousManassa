@@ -121,6 +121,13 @@ namespace TadrousManassa.Repositories
                 .ToListAsync();
         }
 
+        public Task<double> CalculateStudentTotalScore(string studentId)
+        {
+            return _context.StudentQuizzes
+                .AsNoTracking()
+                .Where(sq => sq.StudentId == studentId)
+                .SumAsync(sq => (double)(sq.BestScore ?? 0));
+        }
 
         public async Task AddStudentQuizAsync(StudentQuiz studentQuiz)
         {

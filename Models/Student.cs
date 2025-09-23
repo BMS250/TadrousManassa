@@ -34,17 +34,14 @@ namespace TadrousManassa.Models
         public string ReferralSource { get; set; }
 
         [Required]
-        public int Score { get; set; }
+        public double TotalScore { get; set; }
         
-        [Required]
-        public int Rank { get; set; }
-
         [Required]
         [MaxLength(255)]
         public string DeviceId { get; set; }
 
         [MaxLength(500)]
-        public string? ProfileImage { get; set; }
+        public byte[]? ProfileImage { get; set; }
 
         public virtual ICollection<StudentLecture> StudentLectures { get; set; }
 

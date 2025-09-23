@@ -1,0 +1,271 @@
+@model TadrousManassa.Models.Profile
+@{
+    ViewData["Title"] = "الملف الشخصي";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="text-center mb-4">الملف الشخصي</h2>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- الصورة الشخصية -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <div id="imageContainer" class="mb-3">
+                        @if (Model.Image != null && Model.Image.Length > 0)
+                        {
+                            <img id="profileImage" src="data:image/jpeg;base64,@Convert.ToBase64String(Model.Image)" 
+                                 class="img-fluid rounded-circle" style="width: 200px; height: 200px; object-fit: cover;" 
+                                 alt="الصورة الشخصية">
+                        }
+                        else
+                        {
+                            <div id="noImagePlaceholder" class="d-flex align-items-center justify-content-center bg-light rounded-circle mx-auto" 
+                                 style="width: 200px; height: 200px; cursor: pointer;" onclick="document.getElementById('imageInput').click()">
+                                <i class="fas fa-camera fa-3x text-muted"></i>
+                            </div>
+                        }
+                    </div>
+                    
+                    <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="uploadImage(this)">
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="document.getElementById('imageInput').click()">
+                        <i class="fas fa-upload"></i> رفع صورة
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- بيانات الملف الشخصي -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">بيانات الملف الشخصي</h5>
+                </div>
+                <div class="card-body">
+                    <form id="profileForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="name" class="form-label">الاسم</label>
+                                <input type="text" class="form-control" id="name" name="name" value="@Model.Name" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">البريد الإلكتروني</label>
+                                <input type="email" class="form-control" id="email" name="email" value="@Model.Email" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="phoneNumber" class="form-label">رقم الهاتف</label>
+                                <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" value="@Model.PhoneNumber">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="totalScore" class="form-label">إجمالي النقاط</label>
+                                <input type="number" class="form-control" id="totalScore" name="totalScore" value="@Model.TotalScore" readonly>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="rank" class="form-label">الترتيب</label>
+                                <input type="number" class="form-control" id="rank" name="rank" value="@Model.Rank" readonly>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> حفظ التغييرات
+                            </button>
+                            <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                                <i class="fas fa-key"></i> تغيير كلمة المرور
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal لتغيير كلمة المرور -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changePasswordModalLabel">تغيير كلمة المرور</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="changePasswordForm">
+                    <div class="mb-3">
+                        <label for="currentPassword" class="form-label">كلمة المرور الحالية</label>
+                        <input type="password" class="form-control" id="currentPassword" name="currentPassword" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">كلمة المرور الجديدة</label>
+                        <input type="password" class="form-control" id="newPassword" name="newPassword" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">تأكيد كلمة المرور الجديدة</label>
+                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" onclick="changePassword()">تغيير كلمة المرور</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // رفع الصورة
+        function uploadImage(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                
+                // التحقق من نوع الملف
+                if (!file.type.startsWith('image/')) {
+                    alert('يرجى اختيار ملف صورة صالح');
+                    return;
+                }
+                
+                // التحقق من حجم الملف (5MB كحد أقصى)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('حجم الصورة يجب أن يكون أقل من 5 ميجابايت');
+                    return;
+                }
+                
+                const formData = new FormData();
+                formData.append('image', file);
+                
+                fetch('/Student/Home/UploadProfileImage', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // تحديث الصورة في الصفحة
+                        const imageContainer = document.getElementById('imageContainer');
+                        const noImagePlaceholder = document.getElementById('noImagePlaceholder');
+                        
+                        if (noImagePlaceholder) {
+                            noImagePlaceholder.remove();
+                        }
+                        
+                        let profileImage = document.getElementById('profileImage');
+                        if (!profileImage) {
+                            profileImage = document.createElement('img');
+                            profileImage.id = 'profileImage';
+                            profileImage.className = 'img-fluid rounded-circle';
+                            profileImage.style.width = '200px';
+                            profileImage.style.height = '200px';
+                            profileImage.style.objectFit = 'cover';
+                            profileImage.alt = 'الصورة الشخصية';
+                            imageContainer.appendChild(profileImage);
+                        }
+                        
+                        profileImage.src = 'data:image/jpeg;base64,' + data.imageData;
+                        showAlert('تم رفع الصورة بنجاح', 'success');
+                    } else {
+                        showAlert(data.message || 'حدث خطأ في رفع الصورة', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('حدث خطأ في رفع الصورة', 'error');
+                });
+            }
+        }
+        
+        // تحديث بيانات الملف الشخصي
+        document.getElementById('profileForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            fetch('/Student/Home/UpdateProfile', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('تم تحديث البيانات بنجاح', 'success');
+                } else {
+                    showAlert(data.message || 'حدث خطأ في تحديث البيانات', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('حدث خطأ في تحديث البيانات', 'error');
+            });
+        });
+        
+        // تغيير كلمة المرور
+        function changePassword() {
+            const form = document.getElementById('changePasswordForm');
+            const formData = new FormData(form);
+            
+            // التحقق من تطابق كلمة المرور الجديدة
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (newPassword !== confirmPassword) {
+                showAlert('كلمة المرور الجديدة وتأكيدها غير متطابقين', 'error');
+                return;
+            }
+            
+            fetch('/Student/Home/ChangePassword', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('تم تغيير كلمة المرور بنجاح', 'success');
+                    // إغلاق المودال وتنظيف النموذج
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('changePasswordModal'));
+                    modal.hide();
+                    form.reset();
+                } else {
+                    showAlert(data.message || 'حدث خطأ في تغيير كلمة المرور', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('حدث خطأ في تغيير كلمة المرور', 'error');
+            });
+        }
+        
+        // عرض التنبيهات
+        function showAlert(message, type) {
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+            const alertHtml = `
+                <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            
+            // إضافة التنبيه في أعلى الصفحة
+            const container = document.querySelector('.container');
+            container.insertAdjacentHTML('afterbegin', alertHtml);
+            
+            // إزالة التنبيه تلقائياً بعد 5 ثوان
+            setTimeout(() => {
+                const alert = container.querySelector('.alert');
+                if (alert) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+    </script>
+}
