@@ -552,33 +552,33 @@ namespace TadrousManassa.Areas.Student.Controllers
             {
                 if (image == null || image.Length == 0)
                 {
-                    return Json(new { success = false, message = "لم يتم اختيار صورة" });
+                    return Json(new { success = false, message = "No image selected" });
                 }
 
-                // التحقق من نوع الملف
+                // Check file type
                 if (!image.ContentType.StartsWith("image/"))
                 {
-                    return Json(new { success = false, message = "يجب أن يكون الملف صورة" });
+                    return Json(new { success = false, message = "File must be an image" });
                 }
 
-                // التحقق من حجم الملف (5MB كحد أقصى)
+                // Check file size (5MB max)
                 if (image.Length > 5 * 1024 * 1024)
                 {
-                    return Json(new { success = false, message = "حجم الصورة يجب أن يكون أقل من 5 ميجابايت" });
+                    return Json(new { success = false, message = "Image size must be less than 5MB" });
                 }
 
                 var currentUser = await _userManager.GetUserAsync(User);
                 if (currentUser == null)
                 {
-                    return Json(new { success = false, message = "المستخدم غير موجود" });
+                    return Json(new { success = false, message = "User not found" });
                 }
 
-                // تحويل الصورة إلى byte array
+                // Convert image to byte array
                 using var memoryStream = new MemoryStream();
                 await image.CopyToAsync(memoryStream);
                 var imageBytes = memoryStream.ToArray();
 
-                // تحديث صورة الملف الشخصي في قاعدة البيانات
+                // Update profile image in database
                 var updateResult = _studentService.UpdateProfileImage(currentUser.Id, imageBytes);
                 if (!updateResult.Success)
                 {
@@ -587,14 +587,14 @@ namespace TadrousManassa.Areas.Student.Controllers
 
                 return Json(new { 
                     success = true, 
-                    message = "تم رفع الصورة بنجاح",
+                    message = "Image uploaded successfully",
                     imageData = Convert.ToBase64String(imageBytes)
                 });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error uploading profile image");
-                return Json(new { success = false, message = "حدث خطأ في رفع الصورة" });
+                return Json(new { success = false, message = "Error uploading image" });
             }
         }
 
@@ -606,10 +606,10 @@ namespace TadrousManassa.Areas.Student.Controllers
                 var currentUser = await _userManager.GetUserAsync(User);
                 if (currentUser == null)
                 {
-                    return Json(new { success = false, message = "المستخدم غير موجود" });
+                    return Json(new { success = false, message = "User not found" });
                 }
 
-                // تحديث بيانات المستخدم
+                // Update user data
                 currentUser.UserName = name;
                 currentUser.Email = email;
                 currentUser.PhoneNumber = phoneNumber;
@@ -621,12 +621,12 @@ namespace TadrousManassa.Areas.Student.Controllers
                     return Json(new { success = false, message = errors });
                 }
 
-                return Json(new { success = true, message = "تم تحديث البيانات بنجاح" });
+                return Json(new { success = true, message = "Profile updated successfully" });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating profile");
-                return Json(new { success = false, message = "حدث خطأ في تحديث البيانات" });
+                return Json(new { success = false, message = "Error updating profile" });
             }
         }
 
@@ -638,17 +638,17 @@ namespace TadrousManassa.Areas.Student.Controllers
                 var currentUser = await _userManager.GetUserAsync(User);
                 if (currentUser == null)
                 {
-                    return Json(new { success = false, message = "المستخدم غير موجود" });
+                    return Json(new { success = false, message = "User not found" });
                 }
 
-                // التحقق من كلمة المرور الحالية
+                // Check current password
                 var isCurrentPasswordValid = await _userManager.CheckPasswordAsync(currentUser, currentPassword);
                 if (!isCurrentPasswordValid)
                 {
-                    return Json(new { success = false, message = "كلمة المرور الحالية غير صحيحة" });
+                    return Json(new { success = false, message = "Current password is incorrect" });
                 }
 
-                // تغيير كلمة المرور
+                // Change password
                 var result = await _userManager.ChangePasswordAsync(currentUser, currentPassword, newPassword);
                 if (!result.Succeeded)
                 {
@@ -656,12 +656,12 @@ namespace TadrousManassa.Areas.Student.Controllers
                     return Json(new { success = false, message = errors });
                 }
 
-                return Json(new { success = true, message = "تم تغيير كلمة المرور بنجاح" });
+                return Json(new { success = true, message = "Password changed successfully" });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error changing password");
-                return Json(new { success = false, message = "حدث خطأ في تغيير كلمة المرور" });
+                return Json(new { success = false, message = "Error changing password" });
             }
         }
     }

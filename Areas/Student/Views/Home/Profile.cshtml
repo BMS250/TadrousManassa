@@ -1,12 +1,12 @@
 @model TadrousManassa.Models.Profile
 @{
-    ViewData["Title"] = "الملف الشخصي";
+    ViewData["Title"] = "Profile";
 }
 
 <div class="container mt-4">
     <div class="row">
         <div class="col-12">
-            <h2 class="text-center mb-4">الملف الشخصي</h2>
+            <h2 class="text-center mb-4">Profile</h2>
         </div>
     </div>
     
@@ -20,7 +20,7 @@
                         {
                             <img id="profileImage" src="data:image/jpeg;base64,@Convert.ToBase64String(Model.Image)" 
                                  class="img-fluid rounded-circle" style="width: 200px; height: 200px; object-fit: cover;" 
-                                 alt="الصورة الشخصية">
+                                 alt="Profile Image">
                         }
                         else
                         {
@@ -33,7 +33,7 @@
                     
                     <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="uploadImage(this)">
                     <button type="button" class="btn btn-outline-primary btn-sm" onclick="document.getElementById('imageInput').click()">
-                        <i class="fas fa-upload"></i> رفع صورة
+                        <i class="fas fa-upload"></i> Upload Image
                     </button>
                 </div>
             </div>
@@ -43,45 +43,45 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="mb-0">بيانات الملف الشخصي</h5>
+                    <h5 class="mb-0">Profile Information</h5>
                 </div>
                 <div class="card-body">
                     <form id="profileForm">
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="name" class="form-label">الاسم</label>
+                                <label for="name" class="form-label">Name</label>
                                 <input type="text" class="form-control" id="name" name="name" value="@Model.Name" required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="email" class="form-label">البريد الإلكتروني</label>
+                                <label for="email" class="form-label">Email</label>
                                 <input type="email" class="form-control" id="email" name="email" value="@Model.Email" required>
                             </div>
                         </div>
                         
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="phoneNumber" class="form-label">رقم الهاتف</label>
+                                <label for="phoneNumber" class="form-label">Phone Number</label>
                                 <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" value="@Model.PhoneNumber">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="totalScore" class="form-label">إجمالي النقاط</label>
+                                <label for="totalScore" class="form-label">Total Score</label>
                                 <input type="number" class="form-control" id="totalScore" name="totalScore" value="@Model.TotalScore" readonly>
                             </div>
                         </div>
                         
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="rank" class="form-label">الترتيب</label>
+                                <label for="rank" class="form-label">Rank</label>
                                 <input type="number" class="form-control" id="rank" name="rank" value="@Model.Rank" readonly>
                             </div>
                         </div>
                         
                         <div class="d-flex justify-content-between">
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> حفظ التغييرات
+                                <i class="fas fa-save"></i> Save Changes
                             </button>
                             <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
-                                <i class="fas fa-key"></i> تغيير كلمة المرور
+                                <i class="fas fa-key"></i> Change Password
                             </button>
                         </div>
                     </form>
@@ -96,28 +96,28 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="changePasswordModalLabel">تغيير كلمة المرور</h5>
+                <h5 class="modal-title" id="changePasswordModalLabel">Change Password</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form id="changePasswordForm">
                     <div class="mb-3">
-                        <label for="currentPassword" class="form-label">كلمة المرور الحالية</label>
+                        <label for="currentPassword" class="form-label">Current Password</label>
                         <input type="password" class="form-control" id="currentPassword" name="currentPassword" required>
                     </div>
                     <div class="mb-3">
-                        <label for="newPassword" class="form-label">كلمة المرور الجديدة</label>
+                        <label for="newPassword" class="form-label">New Password</label>
                         <input type="password" class="form-control" id="newPassword" name="newPassword" required>
                     </div>
                     <div class="mb-3">
-                        <label for="confirmPassword" class="form-label">تأكيد كلمة المرور الجديدة</label>
+                        <label for="confirmPassword" class="form-label">Confirm New Password</label>
                         <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-                <button type="button" class="btn btn-primary" onclick="changePassword()">تغيير كلمة المرور</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="changePassword()">Change Password</button>
             </div>
         </div>
     </div>
@@ -130,15 +130,15 @@
             if (input.files && input.files[0]) {
                 const file = input.files[0];
                 
-                // التحقق من نوع الملف
+                // Check file type
                 if (!file.type.startsWith('image/')) {
-                    alert('يرجى اختيار ملف صورة صالح');
+                    alert('Please select a valid image file');
                     return;
                 }
                 
-                // التحقق من حجم الملف (5MB كحد أقصى)
+                // Check file size (5MB max)
                 if (file.size > 5 * 1024 * 1024) {
-                    alert('حجم الصورة يجب أن يكون أقل من 5 ميجابايت');
+                    alert('Image size must be less than 5MB');
                     return;
                 }
                 
@@ -152,7 +152,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // تحديث الصورة في الصفحة
+                        // Update image in page
                         const imageContainer = document.getElementById('imageContainer');
                         const noImagePlaceholder = document.getElementById('noImagePlaceholder');
                         
@@ -168,24 +168,24 @@
                             profileImage.style.width = '200px';
                             profileImage.style.height = '200px';
                             profileImage.style.objectFit = 'cover';
-                            profileImage.alt = 'الصورة الشخصية';
+                            profileImage.alt = 'Profile Image';
                             imageContainer.appendChild(profileImage);
                         }
                         
                         profileImage.src = 'data:image/jpeg;base64,' + data.imageData;
-                        showAlert('تم رفع الصورة بنجاح', 'success');
+                        showAlert('Image uploaded successfully', 'success');
                     } else {
-                        showAlert(data.message || 'حدث خطأ في رفع الصورة', 'error');
+                        showAlert(data.message || 'Error uploading image', 'error');
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    showAlert('حدث خطأ في رفع الصورة', 'error');
+                    showAlert('Error uploading image', 'error');
                 });
             }
         }
         
-        // تحديث بيانات الملف الشخصي
+        // Update profile data
         document.getElementById('profileForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -198,28 +198,28 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    showAlert('تم تحديث البيانات بنجاح', 'success');
+                    showAlert('Profile updated successfully', 'success');
                 } else {
-                    showAlert(data.message || 'حدث خطأ في تحديث البيانات', 'error');
+                    showAlert(data.message || 'Error updating profile', 'error');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                showAlert('حدث خطأ في تحديث البيانات', 'error');
+                showAlert('Error updating profile', 'error');
             });
         });
         
-        // تغيير كلمة المرور
+        // Change password
         function changePassword() {
             const form = document.getElementById('changePasswordForm');
             const formData = new FormData(form);
             
-            // التحقق من تطابق كلمة المرور الجديدة
+            // Check if new passwords match
             const newPassword = document.getElementById('newPassword').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
             
             if (newPassword !== confirmPassword) {
-                showAlert('كلمة المرور الجديدة وتأكيدها غير متطابقين', 'error');
+                showAlert('New password and confirmation do not match', 'error');
                 return;
             }
             
@@ -230,22 +230,22 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    showAlert('تم تغيير كلمة المرور بنجاح', 'success');
-                    // إغلاق المودال وتنظيف النموذج
+                    showAlert('Password changed successfully', 'success');
+                    // Close modal and reset form
                     const modal = bootstrap.Modal.getInstance(document.getElementById('changePasswordModal'));
                     modal.hide();
                     form.reset();
                 } else {
-                    showAlert(data.message || 'حدث خطأ في تغيير كلمة المرور', 'error');
+                    showAlert(data.message || 'Error changing password', 'error');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                showAlert('حدث خطأ في تغيير كلمة المرور', 'error');
+                showAlert('Error changing password', 'error');
             });
         }
         
-        // عرض التنبيهات
+        // Show alerts
         function showAlert(message, type) {
             const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
             const alertHtml = `
@@ -255,11 +255,11 @@
                 </div>
             `;
             
-            // إضافة التنبيه في أعلى الصفحة
+            // Add alert at the top of the page
             const container = document.querySelector('.container');
             container.insertAdjacentHTML('afterbegin', alertHtml);
             
-            // إزالة التنبيه تلقائياً بعد 5 ثوان
+            // Remove alert automatically after 5 seconds
             setTimeout(() => {
                 const alert = container.querySelector('.alert');
                 if (alert) {

@@ -145,6 +145,7 @@ namespace TadrousManassa.Areas.Identity.Pages.Account
                     {
                         user.Student.DeviceId = deviceId;
                         await _studentRepository.UpdateStudentAsync(user.Student.Id, user.Student);
+                        await _studentRepository.SaveChangesAsync();
                     }
                     else if (user.Student.DeviceId != deviceId)
                     {

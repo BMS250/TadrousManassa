@@ -72,7 +72,6 @@ namespace TadrousManassa.Repositories
         {
             ArgumentNullException.ThrowIfNull(student);
             _context.Students.Add(student);
-            _context.SaveChanges();
         }
 
         public async Task<int> UpdateStudentAsync(string id, Student student, string? newPassword = null)
@@ -109,8 +108,14 @@ namespace TadrousManassa.Repositories
             oldStudent.School = student.School;
             oldStudent.ReferralSource = student.ReferralSource;
 
-            await _context.SaveChangesAsync();
             return 0;
+        }
+
+        public void IncreaseTotalScore(string id, float scoreToAdd)
+        {
+            var student = GetStudent(id);
+            ArgumentNullException.ThrowIfNull(student);
+            student.TotalScore += scoreToAdd;
         }
 
         public async Task ResetDeviceId(string studentEmail)
@@ -121,7 +126,6 @@ namespace TadrousManassa.Repositories
             Student? student = GetStudentByEmail(studentEmail) ?? throw new ArgumentException("Student cannot be null");
             student.DeviceId = "000";
             _context.Entry(student).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
         }
 
         public async Task<bool> ResetPassword(string email, string newPassword)
@@ -166,7 +170,6 @@ namespace TadrousManassa.Repositories
             Student student = GetStudent(id);
             ArgumentNullException.ThrowIfNull(student);
             _context.Students.Remove(student);
-            _context.SaveChanges();
         }
 
         public bool UpdateProfileImage(string studentId, byte[] imageBytes)
@@ -192,6 +195,11 @@ namespace TadrousManassa.Repositories
             {
                 return false;
             }
+        }
+
+        public Task SaveChangesAsync()
+        {
+            return _context.SaveChangesAsync();
         }
     }
 }

@@ -13,13 +13,16 @@ namespace TadrousManassa.Services
     {
         private readonly IStudentQuizRepository _studentQuizRepository;
         private readonly IQuizRepository _quizRepository;
+        private readonly IStudentRepository _studentRepository;
 
         public StudentQuizService(
             IStudentQuizRepository studentQuizRepository,
-            IQuizRepository quizRepository)
+            IQuizRepository quizRepository,
+            IStudentRepository studentRepository)
         {
             _studentQuizRepository = studentQuizRepository;
             _quizRepository = quizRepository;
+            _studentRepository = studentRepository;
         }
 
         public async Task<OperationResult<List<Quiz>>> GetFullQuizzesByStudentIdAsync(string studentId)
@@ -142,6 +145,7 @@ namespace TadrousManassa.Services
 
                     scores = CalculateStudentAndTotalScoresAsync(quiz, answers);
                     studentQuiz.BestScore = scores.Score;
+                    _studentRepository.IncreaseTotalScore(studentId, scores.Score);
                     studentQuiz.IsSuccess = (scores.Score / scores.TotalScore) >= 0.5f;
 
                     await _studentQuizRepository.AddStudentQuizAsync(studentQuiz);
@@ -149,7 +153,12 @@ namespace TadrousManassa.Services
                 else
                 {
                     scores = CalculateStudentAndTotalScoresAsync(quiz, answers);
+                    float oldBestScore = studentQuiz.BestScore ?? 0;
                     studentQuiz.BestScore = Math.Max(studentQuiz.BestScore ?? 0, scores.Score);
+                    if (studentQuiz.BestScore > oldBestScore)
+                    {
+                        _studentRepository.IncreaseTotalScore(studentId, studentQuiz.BestScore ?? 0 - oldBestScore);
+                    }
                     studentQuiz.IsSuccess = studentQuiz?.IsSuccess == true
                         || (scores.Score / scores.TotalScore) >= 0.5f;
                 }

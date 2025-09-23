@@ -103,6 +103,7 @@ namespace TadrousManassa.Services
             {
                 ArgumentNullException.ThrowIfNull(student);
                 studentRepository.InsertStudent(student);
+                await studentRepository.SaveChangesAsync();
                 return OperationResult<bool>.Ok(true, "Student inserted successfully.");
             }
             catch (Exception ex)
@@ -134,6 +135,7 @@ namespace TadrousManassa.Services
             try
             {
                 await studentRepository.ResetDeviceId(studentEmail);
+                await studentRepository.SaveChangesAsync();
                 return OperationResult<bool>.Ok(true, "Device ID reset successfully.");
             }
             catch (Exception ex)
@@ -148,6 +150,7 @@ namespace TadrousManassa.Services
             try
             {
                 studentRepository.DeleteStudent(id);
+                await studentRepository.SaveChangesAsync();
                 return OperationResult<bool>.Ok(true, "Student deleted successfully.");
             }
             catch (Exception ex)
