@@ -18,7 +18,7 @@
     </div>
 }
 
-<form asp-action="ResetDeviceId" method="post">
+<form asp-action="ResetDeviceId" asp-controller="Device" method="post">
     <div class="mb-3">
         <label for="userEmail" class="form-label">User Email</label>
         <input type="email" class="form-control" id="userEmail" name="userEmail" required />

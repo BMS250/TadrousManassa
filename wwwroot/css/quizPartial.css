@@ -1,0 +1,162 @@
+﻿.question-block {
+    transition: all 0.3s ease;
+}
+
+.question-block:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.choice-item {
+    transition: all 0.2s ease;
+}
+
+.choice-item:hover {
+    background-color: #f8f9fa !important;
+}
+
+.question-image-preview img,
+.choice-image-preview img {
+    border: 2px solid #dee2e6;
+    border-radius: 4px;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+}
+
+.text-danger {
+    color: #dc3545 !important;
+}
+
+#totalQuestions {
+    font-size: 1rem;
+}
+
+.btn {
+    transition: all 0.2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+    color: #0c5460;
+}
+
+/* Fix overlapping elements and improve layout */
+.choice-item {
+    margin-bottom: 10px;
+    overflow: hidden;
+}
+
+.choice-item .row {
+    margin: 0;
+}
+
+.choice-item .col-md-2,
+.choice-item .col-md-3,
+.choice-item .col-md-5 {
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+/* Adjust delete button positioning to avoid overlap with file input text */
+.choice-item .col-md-2:last-child {
+    padding-left: 15px;
+    padding-right: 5px;
+}
+
+.form-check-label {
+    font-size: 0.9rem;
+    white-space: nowrap;
+    margin-left: 5px;
+}
+
+.choice-text {
+    width: 100%;
+}
+
+.choice-image {
+    width: 100%;
+    font-size: 0.85rem;
+    padding-right: 5px;
+}
+
+.choice-image-preview {
+    clear: both;
+    margin-top: 10px;
+}
+
+.question-block {
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.choices-container {
+    margin-top: 15px;
+}
+
+.choices-list {
+    margin-bottom: 10px;
+}
+
+/* Ensure proper spacing for form elements */
+.form-control {
+    margin-bottom: 5px;
+}
+
+/* Fix file input styling */
+input[type="file"] {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Ensure buttons don't overlap */
+.btn-sm {
+    margin: 2px;
+}
+
+/* Specific styling for delete button in choices */
+.choice-item .remove-choice-btn {
+    margin-left: 35px;
+    min-width: 35px;
+}
+
+/* Question score input styling */
+.question-score {
+    width: 100%;
+}
+
+/* Optional field styling - only for specific labels */
+.form-label.optional-pair::after {
+    content: " (at least one required)";
+    font-size: 0.8rem;
+    color: #6c757d;
+    font-weight: normal;
+}
+
+/* Make it clear that text and image are mutually optional */
+.question-text,
+.choice-text {
+    border-left: 3px solid #e9ecef;
+}
+
+.question-text:focus,
+.choice-text:focus {
+    border-left-color: #007bff;
+}
+
+.question-image,
+.choice-image {
+    border-left: 3px solid #e9ecef;
+}
+
+.question-image:focus,
+.choice-image:focus {
+    border-left-color: #007bff;
+}

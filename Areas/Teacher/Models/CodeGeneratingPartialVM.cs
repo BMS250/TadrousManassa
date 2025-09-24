@@ -2,6 +2,6 @@
 {
     public class CodeGeneratingPartialVM
     {
-        public List<LectureBasicDTO> Lectures { get; set; }
+        public List<BasicDTO> Lectures { get; set; }
     }
 }

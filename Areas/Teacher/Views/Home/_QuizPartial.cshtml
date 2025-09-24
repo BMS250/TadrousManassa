@@ -1,0 +1,484 @@
+﻿@using TadrousManassa.Areas.Teacher.Models
+@using TadrousManassa.Utilities
+@model QuizCreatingPartialVM
+
+<head>
+	<link rel="stylesheet" href="~/css/quizPartial.css" />
+</head>
+
+<div class="container-fluid">
+	<h3>Create New Quiz</h3>
+
+	<form id="quizForm" enctype="multipart/form-data" asp-action="CreateQuiz", asp-controller="Quiz">
+		<!-- Grade, Lecture, and Video Selection -->
+		<div class="row mb-4">
+			<div class="col-md-4">
+				<label asp-for="Grade">Grade</label>
+				<select asp-for="Grade"
+						asp-items="Html.GetEnumSelectList<Grade>()"
+						class="form-control"
+						id="gradeSelect"
+						aria-required="true">
+					<option value="">Enter Grade</option>
+				</select>
+
+				<span asp-validation-for="Grade" class="text-danger"></span>
+			</div>
+			<div class="col-md-4">
+				<label for="lectureSelect" class="form-label">Lecture <span class="text-danger">*</span></label>
+				<select class="form-select" id="lectureSelect" name="LectureId" required disabled>
+					<option value="">Select Lecture</option>
+				</select>
+			</div>
+			<div class="col-md-4">
+				<label for="videoSelect" class="form-label">Video <span class="text-danger">*</span></label>
+				<select class="form-select" id="videoSelect" name="VideoId" required disabled>
+					<option value="">Select Video</option>
+				</select>
+			</div>
+		</div>
+
+		<!-- Quiz Basic Information -->
+		<div class="row mb-4">
+			<div class="col-md-6">
+				<label for="quizName" class="form-label">Quiz Name <span class="text-danger">*</span></label>
+				<input type="text" class="form-control" id="quizName" name="Name" required>
+			</div>
+			<div class="col-md-6">
+				<label for="quizDescription" class="form-label">Description</label>
+				<textarea class="form-control" id="quizDescription" name="Description" rows="2"></textarea>
+			</div>
+		</div>
+
+		<div class="row mb-4">
+			<div class="col-md-3">
+				<label for="timeHours" class="form-label">Time Hours</label>
+				<input type="number" class="form-control" id="timeHours" name="TimeHours" min="0" max="23" value="0">
+			</div>
+			<div class="col-md-3">
+				<label for="timeMinutes" class="form-label">Time Minutes</label>
+				<input type="number" class="form-control" id="timeMinutes" name="TimeMinutes" min="0" max="59" value="30">
+			</div>
+			<div class="col-md-3">
+				<label for="totalAttempts" class="form-label">Total Number of Attempts</label>
+				<input type="number" class="form-control" id="totalAttempts" name="TotalNumOfAttempts" min="1" value="2">
+			</div>
+			<div class="col-md-3">
+				<label class="form-label">Total Questions: <span id="totalQuestions" class="badge bg-primary">0</span></label>
+			</div>
+		</div>
+
+		<!-- Questions Container -->
+		<div id="questionsContainer">
+			<h4>Questions</h4>
+			<div class="alert alert-info">
+				<i class="fas fa-info-circle"></i> Click "Add Question" to start adding questions to your quiz.
+			</div>
+		</div>
+
+		<!-- Add Question Button -->
+		<div class="mb-3">
+			<button type="button" class="btn btn-success" id="addQuestionBtn">
+				<i class="fas fa-plus"></i> Add Question
+			</button>
+		</div>
+
+		<!-- Submit Button -->
+		<div class="row">
+			<div class="col-12">
+				<button type="submit" class="btn btn-primary btn-lg">
+					<i class="fas fa-save"></i> Create Quiz
+				</button>
+				<button type="button" class="btn btn-secondary btn-lg ms-2" onclick="resetQuizForm()">
+					<i class="fas fa-undo"></i> Reset
+				</button>
+			</div>
+		</div>
+	</form>
+</div>
+
+<!-- Question Template (Hidden) -->
+<div id="questionTemplate" style="display: none;">
+	<div class="question-block border rounded p-3 mb-4 bg-light">
+		<div class="d-flex justify-content-between align-items-center mb-3">
+			<h5 class="question-title mb-0">Question <span class="question-number">1</span></h5>
+			<button type="button" class="btn btn-danger btn-sm remove-question-btn">
+				<i class="fas fa-trash"></i> Remove Question
+			</button>
+		</div>
+
+		<div class="row mb-3">
+			<div class="col-md-8">
+				<label class="form-label optional-pair">Question Text</label>
+				<textarea class="form-control question-text" name="Questions[0].Text" rows="3" placeholder="Enter question text (optional if image is provided)"></textarea>
+			</div>
+			<div class="col-md-4">
+				<label class="form-label optional-pair">Question Image</label>
+				<input type="file" class="form-control question-image" name="Questions[0].Image" accept="image/*">
+				<div class="question-image-preview mt-2" style="display: none;">
+					<img src="#" alt="Question Image" class="img-thumbnail" style="max-width: 150px;">
+					<button type="button" class="btn btn-sm btn-danger mt-1 remove-question-image">Remove</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Choices Container -->
+		<div class="choices-container">
+			<h6>Choices</h6>
+			<div class="choices-list">
+				<!-- Choices will be added here dynamically -->
+			</div>
+			<button type="button" class="btn btn-outline-primary btn-sm add-choice-btn mb-3">
+				<i class="fas fa-plus"></i> Add Choice
+			</button>
+		</div>
+
+		<!-- Question Score -->
+		<div class="row">
+			<div class="col-md-3">
+				<label for="questionScore" class="form-label">Number of score for this question</label>
+				<input type="number" class="form-control question-score" id="totalAttempts" name="Questions[0].Score" min="0.5" step="0.5" value="1">
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Choice Template (Hidden) -->
+<div id="choiceTemplate" style="display: none;">
+	<div class="choice-item border rounded p-2 mb-2 bg-white">
+		<div class="row align-items-center">
+			<div class="col-md-2">
+				<div class="form-check">
+					<input type="radio" class="form-check-input correct-choice" name="Questions[0].CorrectChoice" value="0" required>
+					<label class="form-check-label">Correct</label>
+				</div>
+			</div>
+			<div class="col-md-5">
+				<label class="form-label optional-pair">Choice Text</label>
+				<input type="text" class="form-control choice-text" name="Questions[0].Choices[0].Text" placeholder="Choice text (optional if image is provided)">
+			</div>
+			<div class="col-md-3">
+				<label class="form-label optional-pair">Choice Image</label>
+				<input type="file" class="form-control choice-image" name="Questions[0].Choices[0].Image" accept="image/*">
+			</div>
+			<div class="col-md-2">
+				<button type="button" class="btn btn-danger btn-sm remove-choice-btn">
+					<i class="fas fa-trash"></i>
+				</button>
+			</div>
+		</div>
+		<div class="choice-image-preview mt-2" style="display: none;">
+			<img src="#" alt="Choice Image" class="img-thumbnail" style="max-width: 100px;">
+			<button type="button" class="btn btn-sm btn-danger mt-1 remove-choice-image">Remove</button>
+		</div>
+	</div>
+</div>
+
+<script>
+	$(document).ready(function() {
+		let questionCounter = 0;
+		// Grade selection change event
+		$('#gradeSelect').change(function() {
+			// console.log("Grade changed:", $(this).val());
+			const selectedGrade = $(this).val();
+			const lectureSelect = $('#lectureSelect');
+			const videoSelect = $('#videoSelect');
+
+			// Reset dependent dropdowns
+			lectureSelect.prop('disabled', true).html('<option value="">Select Lecture</option>');
+			videoSelect.prop('disabled', true).html('<option value="">Select Video</option>');
+
+			if (selectedGrade) {
+				// Fetch lectures for selected grade
+				$.get(`/Teacher/Quiz/GetLecturesByGrade?grade=${selectedGrade}`)
+					.done(function(lectures) {
+						lectureSelect.prop('disabled', false);
+						lectures.forEach(lecture => {
+							lectureSelect.append(`<option value="${lecture.id}">${lecture.name}</option>`);
+						});
+					})
+					.fail(function() {
+						alert('Error loading lectures. Please try again.');
+					});
+			}
+		});
+
+		// Lecture selection change event
+		$('#lectureSelect').change(function() {
+			const selectedLectureId = $(this).val();
+			const videoSelect = $('#videoSelect');
+
+			videoSelect.prop('disabled', true).html('<option value="">Select Video</option>');
+
+			if (selectedLectureId) {
+				// Fetch videos for selected lecture
+				$.get(`/Teacher/Quiz/GetVideosByLecture?lectureId=${selectedLectureId}`)
+					.done(function(videos) {
+						videoSelect.prop('disabled', false);
+						videos.forEach(video => {
+							videoSelect.append(`<option value="${video.id}">${video.name}</option>`);
+						});
+					})
+					.fail(function() {
+						alert('Error loading videos. Please try again.');
+					});
+			}
+		});
+
+		// Add Question Button Event
+		$('#addQuestionBtn').click(function() {
+			addQuestion();
+		});
+
+		function addQuestion() {
+			questionCounter++;
+			const questionTemplate = $('#questionTemplate').clone();
+			questionTemplate.attr('id', `question-${questionCounter}`);
+			questionTemplate.show();
+
+			const questionBlock = questionTemplate.find('.question-block');
+
+			// Update question number and names
+			questionBlock.find('.question-number').text(questionCounter);
+			questionBlock.find('.question-text').attr('name', `Questions[${questionCounter - 1}].Text`);
+			questionBlock.find('.question-image').attr('name', `Questions[${questionCounter - 1}].Image`);
+			questionBlock.find('.question-score').attr('name', `Questions[${questionCounter - 1}].Score`);
+
+			// Add event handlers for this question
+			addQuestionEventHandlers(questionBlock, questionCounter - 1);
+
+			$('#questionsContainer').append(questionTemplate);
+			reindexQuestions();
+			updateQuestionCount();
+
+			// Remove the info alert if it's the first question
+			if (questionCounter === 1) {
+				$('#questionsContainer .alert-info').remove();
+			}
+		}
+
+		function addQuestionEventHandlers(questionElement, questionIndex) {
+			// Remove question event
+			questionElement.find('.remove-question-btn').click(function() {
+				if (confirm('Are you sure you want to remove this question?')) {
+					// Remove the wrapper containing this question block
+					questionElement.parent().remove();
+					reindexQuestions();
+					updateQuestionCount();
+				}
+			});
+
+			// Add choice event
+			questionElement.find('.add-choice-btn').click(function() {
+				addChoice(questionElement, questionIndex);
+			});
+
+			// Question image preview
+			questionElement.find('.question-image').change(function() {
+				handleImagePreview(this, questionElement.find('.question-image-preview'));
+			});
+
+			// Remove question image
+			questionElement.find('.remove-question-image').click(function() {
+				removeImagePreview(questionElement.find('.question-image'), questionElement.find('.question-image-preview'));
+			});
+		}
+
+		function addChoice(questionElement, questionIndex) {
+			const choicesContainer = questionElement.find('.choices-list');
+			const choiceIndex = choicesContainer.find('.choice-item').length;
+
+			const choiceTemplate = $('#choiceTemplate').clone();
+			choiceTemplate.attr('id', `question-${questionIndex + 1}-choice-${choiceIndex + 1}`);
+			choiceTemplate.show();
+
+			// Update names and values
+			const radioName = `Questions[${questionIndex}].CorrectChoice`;
+			choiceTemplate.find('.correct-choice').attr('name', radioName).attr('value', choiceIndex);
+			choiceTemplate.find('.choice-text').attr('name', `Questions[${questionIndex}].Choices[${choiceIndex}].Text`);
+			choiceTemplate.find('.choice-image').attr('name', `Questions[${questionIndex}].Choices[${choiceIndex}].Image`);
+
+			// Add event handlers for this choice
+			addChoiceEventHandlers(choiceTemplate, questionElement);
+
+			choicesContainer.append(choiceTemplate);
+
+			// Add first two choices automatically for new questions
+			if (choiceIndex < 1) {
+				setTimeout(() => addChoice(questionElement, questionIndex), 100);
+			}
+		}
+
+		function addChoiceEventHandlers(choiceElement, questionElement) {
+			// Remove choice event
+			choiceElement.find('.remove-choice-btn').click(function() {
+				const choicesCount = questionElement.find('.choice-item').length;
+				if (choicesCount > 2) {
+					choiceElement.remove();
+					reindexChoices(questionElement);
+				} else {
+					alert('A question must have at least 2 choices.');
+				}
+			});
+
+			// Choice image preview
+			choiceElement.find('.choice-image').change(function() {
+				handleImagePreview(this, choiceElement.find('.choice-image-preview'));
+			});
+
+			// Remove choice image
+			choiceElement.find('.remove-choice-image').click(function() {
+				removeImagePreview(choiceElement.find('.choice-image'), choiceElement.find('.choice-image-preview'));
+			});
+		}
+
+		function handleImagePreview(input, previewContainer) {
+			if (input.files && input.files[0]) {
+				const reader = new FileReader();
+				reader.onload = function(e) {
+					previewContainer.find('img').attr('src', e.target.result);
+					previewContainer.show();
+				};
+				reader.readAsDataURL(input.files[0]);
+			}
+		}
+
+		function removeImagePreview(inputElement, previewContainer) {
+			inputElement.val('');
+			previewContainer.hide();
+			previewContainer.find('img').attr('src', '#');
+		}
+
+		function updateQuestionCount() {
+			$('#totalQuestions').text($('#questionsContainer .question-block').length);
+			printAllQuestions();
+		}
+
+		function printAllQuestions() {
+			const questions = [];
+			$('#questionsContainer .question-block').each(function(index) {
+				const questionText = $(this).find('.question-text').val();
+				const score = $(this).find('.question-score').val();
+				const choices = [];
+				$(this).find('.choice-item').each(function(cidx){
+					choices.push({
+						text: $(this).find('.choice-text').val(),
+						isCorrect: $(this).find('.correct-choice').is(':checked')
+					});
+				});
+				questions.push({ index: index + 1, text: questionText, score: score, choices: choices });
+			});
+			console.log('Questions (' + questions.length + '):', questions);
+		}
+
+		function reindexQuestions() {
+			$('#questionsContainer .question-block').each(function(index) {
+				$(this).find('.question-number').text(index + 1);
+				$(this).find('.question-text').attr('name', `Questions[${index}].Text`);
+				$(this).find('.question-image').attr('name', `Questions[${index}].Image`);
+				$(this).find('.question-score').attr('name', `Questions[${index}].Score`);
+
+				reindexChoices($(this));
+			});
+		}
+
+		function reindexChoices(questionElement) {
+			// Ensure we work with the actual question-block element
+			const questionBlock = questionElement.hasClass('question-block') ? questionElement : questionElement.find('.question-block').first();
+			const questionIndex = $('#questionsContainer .question-block').index(questionBlock);
+			const radioName = `Questions[${questionIndex}].CorrectChoice`;
+
+			questionBlock.find('.choice-item').each(function(choiceIndex) {
+				$(this).find('.correct-choice').attr('name', radioName).attr('value', choiceIndex);
+				$(this).find('.choice-text').attr('name', `Questions[${questionIndex}].Choices[${choiceIndex}].Text`);
+				$(this).find('.choice-image').attr('name', `Questions[${questionIndex}].Choices[${choiceIndex}].Image`);
+			});
+		}
+
+		// Form submission
+		$('#quizForm').submit(function(e) {
+			e.preventDefault();
+
+			// Validate that we have at least one question
+			if ($('.question-block').length === 0) {
+				alert('Please add at least one question to the quiz.');
+				return false;
+			}
+
+			// Validate questions and choices
+			let hasValidation = true;
+			$('.question-block').each(function(questionIndex) {
+				const questionBlock = $(this);
+				
+				// Check if question has at least text or image
+				const questionText = questionBlock.find('.question-text').val().trim();
+				const questionImage = questionBlock.find('.question-image')[0].files.length > 0;
+				
+				if (!questionText && !questionImage) {
+					alert(`Question ${questionIndex + 1}: Please provide either question text or an image.`);
+					hasValidation = false;
+					return false;
+				}
+				
+				// Check if question has a correct answer selected
+				if (!questionBlock.find('.correct-choice:checked').length) {
+					alert(`Question ${questionIndex + 1}: Please select a correct answer.`);
+					hasValidation = false;
+					return false;
+				}
+				
+				// Check choices - each choice must have either text or image
+				questionBlock.find('.choice-item').each(function(choiceIndex) {
+					const choiceText = $(this).find('.choice-text').val().trim();
+					const choiceImage = $(this).find('.choice-image')[0].files.length > 0;
+					
+					if (!choiceText && !choiceImage) {
+						alert(`Question ${questionIndex + 1}, Choice ${choiceIndex + 1}: Please provide either choice text or an image.`);
+						hasValidation = false;
+						return false;
+					}
+				});
+				
+				if (!hasValidation) return false;
+			});
+
+			if (!hasValidation) return false;
+
+			// Create FormData for file upload
+			const formData = new FormData(this);
+
+			// Submit the form
+			$.ajax({
+				url: '/Teacher/Quiz/CreateQuiz',
+				type: 'POST',
+				data: formData,
+				processData: false,
+				contentType: false,
+				success: function(response) {
+					if (response.success) {
+						alert('Quiz created successfully!');
+						resetQuizForm();
+					} else {
+						alert('Error: ' + response.message);
+					}
+				},
+				error: function() {
+					alert('An error occurred while creating the quiz.');
+				}
+			});
+		});
+
+		// Add first question automatically when form loads
+		setTimeout(addQuestion, 500);
+
+		// Expose reset function with access to closure-scoped helpers
+		window.resetQuizForm = function() {
+			$('#quizForm')[0].reset();
+			$('#questionsContainer').html('<h4>Questions</h4><div class="alert alert-info"><i class="fas fa-info-circle"></i> Click "Add Question" to start adding questions to your quiz.</div>');
+			$('#lectureSelect').prop('disabled', true).html('<option value="">Select Lecture</option>');
+			$('#videoSelect').prop('disabled', true).html('<option value="">Select Video</option>');
+			questionCounter = 0;
+			updateQuestionCount(); // will set badge using DOM count
+		};
+	});
+</script>

@@ -23,6 +23,8 @@ namespace TadrousManassa.Models
 
         public float TotalScore { get; set; }
 
+        public int TotalNumOfAttempts { get; set; } = 2;
+
         [Required]
         public required string LectureId { get; set; }
 
@@ -34,8 +36,6 @@ namespace TadrousManassa.Models
 
         [ForeignKey("VideoId")]
         public Video Video { get; set; }
-
-        public int TotalNumOfAttempts { get; set; } = 2;
 
         public ICollection<Question> Questions { get; set; } = [];
 

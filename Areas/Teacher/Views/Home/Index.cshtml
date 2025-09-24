@@ -19,6 +19,11 @@
                 </button>
             </li>
             <li class="nav-item" role="presentation">
+                <button class="nav-link" id="quiz-tab" data-tab="quiz" type="button" role="tab" aria-controls="quiz" aria-selected="false">
+                    Create Quiz
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
                 <button class="nav-link" id="lectures-tab" data-tab="lectures" type="button" role="tab" aria-controls="lectures" aria-selected="false">
                     Lectures Analysis
                 </button>
@@ -43,6 +48,9 @@
             </div>
             <div class="tab-pane fade p-3" id="video-pane" role="tabpanel" aria-labelledby="video-tab">
                 <img id="video-spinner" src="/images/SpinnerLoading.gif" style="display:none; margin:auto;" alt="Loading..." />
+            </div>
+            <div class="tab-pane fade p-3" id="quiz-pane" role="tabpanel" aria-labelledby="quiz-tab">
+                <img id="quiz-spinner" src="/images/SpinnerLoading.gif" style="display:none; margin:auto;" alt="Loading..." />
             </div>
             <div class="tab-pane fade p-3" id="lectures-pane" role="tabpanel" aria-labelledby="lectures-tab">
                 <img id="lectures-spinner" src="/images/SpinnerLoading.gif" style="display:none; margin:auto;" alt="Loading..." />
@@ -82,11 +90,37 @@
                 if (!pane.hasAttribute('data-loaded')) {
                     const spinner = document.getElementById(`${tab}-spinner`);
                     if(spinner) spinner.style.display = 'block';
-                    fetch(`/Teacher/Home/Load${tab.charAt(0).toUpperCase() + tab.slice(1)}Tab`)
+                    
+                    // Map tabs to their respective controllers
+                    const controllerMap = {
+                        'settings': 'Setting',
+                        'video': 'Video', 
+                        'quiz': 'Quiz',
+                        'lectures': 'Lecture',
+                        'codes': 'Code',
+                        'reset': 'Device'
+                    };
+                    
+                    const controller = controllerMap[tab] || 'Home';
+                    fetch(`/Teacher/${controller}/Load${tab.charAt(0).toUpperCase() + tab.slice(1)}Tab`)
                         .then(res => res.text())
                         .then(html => {
                             if(spinner) spinner.style.display = 'none';
                             pane.innerHTML = spinner.outerHTML + html;
+
+                            // Execute any scripts embedded in the loaded HTML
+                            const scripts = Array.from(pane.querySelectorAll('script'));
+                            scripts.forEach(oldScript => {
+                                const newScript = document.createElement('script');
+                                // Copy attributes (e.g., src, type)
+                                Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                                if (!oldScript.src) {
+                                    newScript.textContent = oldScript.textContent;
+                                }
+                                // Replace to trigger execution
+                                oldScript.parentNode.replaceChild(newScript, oldScript);
+                            });
+
                             pane.setAttribute('data-loaded', 'true');
                         });
                 }
@@ -94,55 +128,6 @@
         });
     </script>
 
-    <script>
-        function fetchCode(lectureId) {
-        fetch(`/Teacher/Home/GetCode?lectureId=${lectureId}`, {
-            method: 'POST'
-        })
-        .then(response => response.json())
-        .then(data => {
-            const codeElement = document.getElementById(`codeValue-${lectureId}`);
-            const resultDiv = document.getElementById(`codeResult-${lectureId}`);
-            const soldBtn = document.getElementById(`soldBtn-${lectureId}`);
-            codeElement.textContent = data.code;
-            resultDiv.style.display = 'block';
-            if(soldBtn) soldBtn.style.display = 'inline-block';
-        })
-        .catch(error => console.error('Error:', error));
-    }
-
-    function confirmSold(lectureId) {
-        if (window.confirm('Are you sure that this code has been sold to a student?')) {
-            markCodeAsSold(lectureId);
-        }
-    }
-
-    function markCodeAsSold(lectureId) {
-        const code = document.getElementById(`codeValue-${lectureId}`).textContent;
-        fetch(`/Teacher/Home/MarkCodeAsSold`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ lectureId: lectureId, code: code })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if(data.success) {
-                document.getElementById(`codeResult-${lectureId}`).style.display = 'none';
-            } else {
-                alert('Error: ' + data.message);
-            }
-        });
-    }
-
-        function copyCode(lectureId) {
-            const code = document.getElementById(`codeValue-${lectureId}`).textContent;
-            navigator.clipboard.writeText(code).then(() => {
-                // Show some feedback
-                const toast = new bootstrap.Toast(document.getElementById('copyToast'));
-                toast.show();
-            });
-        }
-    </script>
 
     <!-- Add this toast for copy feedback -->
     <div class="toast position-fixed bottom-0 end-0 m-3" id="copyToast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="2000">

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TadrousManassa.Areas.Student.Models;
+using TadrousManassa.Areas.Teacher.Models;
 using TadrousManassa.Data;
 using TadrousManassa.Models;
 using TadrousManassa.Repositories;
@@ -56,6 +57,16 @@ namespace TadrousManassa.Services
                 return await Task.FromResult(OperationResult<int?>.Ok(-1, "This is the last video in the lecture."));
             }
             return await Task.FromResult(OperationResult<int?>.Ok(currentVideo.Order + 1, "Next video order retrieved successfully."));
+        }
+
+        public async Task<OperationResult<List<BasicDTO>>> GetVideosBasicDataByLectureIdAsync(string lectureId)
+        {
+            var videos = await _videoRepository.GetVideosBasicDataByLectureIdAsync(lectureId);
+            if (videos is null || videos.Count == 0)
+            {
+                return OperationResult<List<BasicDTO>>.Fail("No videos found for the specified lecture.");
+            }
+            return OperationResult<List<BasicDTO>>.Ok(videos, "Videos retrieved successfully.");
         }
     }
 }

@@ -31,9 +31,20 @@ namespace TadrousManassa.Repositories
             return [.. _context.Lectures.AsNoTracking()];
         }
 
-        public List<LectureBasicDTO> GetLecturesBasicData()
+        public List<BasicDTO> GetLecturesBasicData()
         {
-            return [.. _context.Lectures.AsNoTracking().Select(l => new LectureBasicDTO { Id = l.Id, Name = l.Name })];
+            return [.. _context.Lectures.AsNoTracking().Select(l => new BasicDTO { Id = l.Id, Name = l.Name })];
+        }
+
+        public Task<List<BasicDTO>> GetLecturesBasicDataByGrade(int grade)
+        {
+            return _context.Lectures.AsNoTracking()
+                .Where(l => l.Grade == grade)
+                .Select(l => new BasicDTO
+                {
+                    Id = l.Id,
+                    Name = l.Name
+                }).ToListAsync();
         }
 
         public List<LectureViewsCountDTO> GetLecturesViewsCount()
@@ -51,16 +62,9 @@ namespace TadrousManassa.Repositories
             return _context.Lectures.AsNoTracking().FirstOrDefault(l => l.Id == id)?.ViewsCount ?? 0;
         }
 
-        public OperationResult<Lecture> GetLecture(string id)
+        public Task<Lecture?> GetLecture(string id)
         {
-            if (string.IsNullOrWhiteSpace(id))
-                return OperationResult<Lecture>.Fail("Lecture ID cannot be null or empty.");
-
-            var lecture = _context.Lectures.AsNoTracking().FirstOrDefault(l => l.Id == id);
-            if (lecture == null)
-                return OperationResult<Lecture>.Fail("Lecture not found.");
-
-            return OperationResult<Lecture>.Ok(lecture, "Lecture retrieved successfully.");
+            return _context.Lectures.AsNoTracking().FirstOrDefaultAsync(l => l.Id == id);
         }
 
         public Task<string?> GetUnit(string id)
@@ -71,7 +75,7 @@ namespace TadrousManassa.Repositories
                 .FirstOrDefaultAsync();
         }
 
-        private static bool IsValidGrade(int grade) => grade >= 1 && grade <= 6;
+        public bool IsValidGrade(int grade) => grade >= 1 && grade <= 6;
 
         public OperationResult<List<Lecture>> GetLecturesByGrade(int grade)
         {
@@ -119,6 +123,14 @@ namespace TadrousManassa.Repositories
             if (lectures == null || lectures.Count == 0)
                 return OperationResult<List<Lecture>>.Fail($"No lectures found for unit '{unit}'.");
             return OperationResult<List<Lecture>>.Ok(lectures, $"Lectures for unit '{unit}' retrieved successfully.");
+        }
+
+        public Task<List<string>> GetLectureNamesByGradeAsync(int grade)
+        {
+            return _context.Lectures.AsNoTracking()
+                .Where(l => l.Grade == grade)
+                .Select(l => l.Name)
+                .ToListAsync();
         }
 
         public OperationResult<Lecture> AddLecture(Lecture lecture)

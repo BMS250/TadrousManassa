@@ -1,0 +1,12 @@
+﻿.navbar-nav .nav-item .nav-link,
+.navbar-nav .nav-item form .nav-link.btn-link {
+    transition: background 0.2s, color 0.2s;
+    border-radius: 20px;
+}
+
+.navbar-nav .nav-item .nav-link:hover,
+.navbar-nav .nav-item form .nav-link.btn-link:hover {
+    background: #000;
+    color: #fff8dc !important;
+    border-radius: 20px;
+}

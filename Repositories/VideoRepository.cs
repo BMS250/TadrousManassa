@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TadrousManassa.Areas.Student.Models;
+using TadrousManassa.Areas.Teacher.Models;
 using TadrousManassa.Data;
 using TadrousManassa.Models;
 using TadrousManassa.Repositories.IRepositories;
@@ -68,6 +69,20 @@ namespace TadrousManassa.Repositories
                 .Where(v => v.LectureId == lectureId && v.Order == order)
                 .Select(v => v.Id)
                 .FirstOrDefaultAsync();
+        }
+
+        public Task<List<BasicDTO>> GetVideosBasicDataByLectureIdAsync(string lectureId)
+        {
+            return _context.Videos
+                .AsNoTracking()
+                .Where(v => v.LectureId == lectureId)
+                .OrderBy(v => v.Order)
+                .Select(v => new BasicDTO
+                {
+                    Id = v.Id,
+                    Name = v.Name
+                })
+                .ToListAsync();
         }
     }
 }

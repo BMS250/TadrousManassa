@@ -1,7 +1,7 @@
 @using TadrousManassa.Areas.Teacher.Models
 @model ApplicationSettings
 
-<form asp-action="UpdateSettings" method="post">
+<form asp-action="UpdateSettings" asp-controller="Setting" method="post">
     <div class="mb-3">
         <label asp-for="CurrentYear" class="form-label">Current Year</label>
         <input asp-for="CurrentYear" class="form-control" value="@Model.CurrentYear" />

@@ -1,0 +1,84 @@
+@using TadrousManassa.Areas.Teacher.Models
+@model CodeGeneratingPartialVM
+
+<h3>Lecture Access Codes</h3>
+<div class="row">
+    @foreach (var lecture in Model.Lectures)
+    {
+        <div class="col-md-6 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">@lecture.Name</h5>
+                    <div>
+                        <button type="button"
+                                class="btn btn-sm btn-outline-success"
+                                onclick="fetchCode('@lecture.Id')">
+                            Generate Code
+                        </button>
+                        <div id="codeResult-@lecture.Id" class="mt-2" style="display: none;">
+                            <div class="alert alert-primary d-inline-block mb-0 p-2">
+                                <span id="codeValue-@lecture.Id"></span>
+                                <button class="btn btn-sm btn-success text-white"
+                                        onclick="copyCode('@lecture.Id')"
+                                        title="Copy code">
+                                    <i class="fas fa-copy">copy</i>
+                                </button>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-danger mt-2" id="soldBtn-@lecture.Id" style="display:none;" onclick="confirmSold('@lecture.Id')">Sold</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+    function fetchCode(lectureId) {
+        fetch(`/Teacher/Code/GetCode?lectureId=${lectureId}`, {
+            method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        const codeElement = document.getElementById(`codeValue-${lectureId}`);
+        const resultDiv = document.getElementById(`codeResult-${lectureId}`);
+        const soldBtn = document.getElementById(`soldBtn-${lectureId}`);
+        codeElement.textContent = data.code;
+        resultDiv.style.display = 'block';
+        if(soldBtn) soldBtn.style.display = 'inline-block';
+    })
+    .catch(error => console.error('Error:', error));
+    }
+
+    function confirmSold(lectureId) {
+        if (window.confirm('Are you sure that this code has been sold to a student?')) {
+            markCodeAsSold(lectureId);
+        }
+    }
+
+    function markCodeAsSold(lectureId) {
+        const code = document.getElementById(`codeValue-${lectureId}`).textContent;
+        fetch(`/Teacher/Code/MarkCodeAsSold`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ lectureId: lectureId, code: code })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.success) {
+                document.getElementById(`codeResult-${lectureId}`).style.display = 'none';
+            } else {
+                alert('Error: ' + data.message);
+            }
+        });
+    }
+
+    function copyCode(lectureId) {
+        const code = document.getElementById(`codeValue-${lectureId}`).textContent;
+        navigator.clipboard.writeText(code).then(() => {
+            // Show some feedback
+            const toast = new bootstrap.Toast(document.getElementById('copyToast'));
+            toast.show();
+        });
+    }
+</script>
