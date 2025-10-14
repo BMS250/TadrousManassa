@@ -1,0 +1,275 @@
+﻿@using TadrousManassa.Models.ViewModels
+@using TadrousManassa.Utilities
+@model OfflineQuizDTO
+<head>
+	<link rel="stylesheet" href="~/css/offlineQuizPartial.css" />
+</head>
+<div class="container-fluid">
+	<h3>Add Offline Quiz Score</h3>
+	<form asp-action="AddOfflineQuiz" asp-controller="OfflineQuiz">
+
+		<!-- Student Search Section -->
+		<div class="card mb-4">
+			<div class="card-header">
+				<h5>Student Information</h5>
+			</div>
+			<div class="card-body">
+				<!-- Radio Buttons for Search Type -->
+				<div class="row mb-3">
+					<div class="col-md-12">
+						<label class="form-label">Search By:</label>
+						<div class="form-check form-check-inline">
+							<input class="form-check-input" type="radio" name="searchType" id="searchByName" value="name" checked>
+							<label class="form-check-label" for="searchByName">
+								Student Name
+							</label>
+						</div>
+						<div class="form-check form-check-inline">
+							<input class="form-check-input" type="radio" name="searchType" id="searchByEmail" value="email">
+							<label class="form-check-label" for="searchByEmail">
+								Student Email
+							</label>
+						</div>
+					</div>
+				</div>
+
+				<!-- Search Input -->
+				<div class="row mb-3">
+					<div class="col-md-12">
+						<label for="studentSearch" class="form-label">
+							<span id="searchLabel">Student Name</span> <span class="text-danger">*</span>
+						</label>
+						<div class="search-container">
+							<input type="text"
+								   class="form-control"
+								   id="studentSearch"
+								   placeholder="Start typing to search..."
+								   autocomplete="off"
+								   required>
+							<div id="searchResults" class="search-results" style="display: none;"></div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Hidden Fields for Selected Student -->
+				<input type="hidden" id="selectedStudentId" name="StudentId" asp-for="StudentId">
+				<input type="hidden" id="selectedStudentName" name="StudentName" asp-for="StudentName">
+				<input type="hidden" id="selectedStudentEmail" name="StudentEmail" asp-for="StudentEmail">
+
+				<!-- Display Selected Student Info -->
+				<div id="selectedStudentInfo" class="alert alert-success" style="display: none;">
+					<strong>Selected Student:</strong>
+					<div id="displayStudentDetails"></div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Quiz Score Information -->
+		<div class="card mb-4">
+			<div class="card-header">
+				<h5>Quiz Score Details</h5>
+			</div>
+			<div class="card-body">
+				<div class="row mb-3">
+					<div class="col-md-4">
+						<label for="weekNumber" class="form-label">Week Number <span class="text-danger">*</span></label>
+						<input type="number"
+							   class="form-control"
+							   id="weekNumber"
+							   name="WeekNumber"
+							   asp-for="WeekNumber"
+							   min="1"
+							   required>
+						<span asp-validation-for="WeekNumber" class="text-danger"></span>
+					</div>
+					<div class="col-md-4">
+						<label for="score" class="form-label">Score <span class="text-danger">*</span></label>
+						<input type="number"
+							   class="form-control"
+							   id="score"
+							   name="Score"
+							   asp-for="Score"
+							   min="0"
+							   step="0.01"
+							   required>
+						<span asp-validation-for="Score" class="text-danger"></span>
+					</div>
+					<div class="col-md-4">
+						<label for="totalScore" class="form-label">Total Score <span class="text-danger">*</span></label>
+						<input type="number"
+							   class="form-control"
+							   id="totalScore"
+							   name="TotalScore"
+							   asp-for="TotalScore"
+							   min="0"
+							   step="0.01"
+							   value="10"
+							   required>
+						<span asp-validation-for="TotalScore" class="text-danger"></span>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Submit Button -->
+		<div class="row">
+			<div class="col-12">
+				<button type="submit" class="btn btn-primary btn-lg">
+					<i class="fas fa-save"></i> Save Quiz Score
+				</button>
+				<button type="button" class="btn btn-secondary btn-lg ms-2" onclick="resetForm()">
+					<i class="fas fa-undo"></i> Reset
+				</button>
+			</div>
+		</div>
+	</form>
+</div>
+
+<script>
+	let currentSearchType = 'name';
+	let selectedStudent = null;
+
+    // Initialize event listeners (works for dynamically injected partials)
+    function initOfflineQuizSearch() {
+        const searchInput = document.getElementById('studentSearch');
+        const searchResults = document.getElementById('searchResults');
+        const radioButtons = document.querySelectorAll('input[name="searchType"]');
+
+        if (!searchInput || !searchResults || radioButtons.length === 0) {
+            return;
+        }
+
+        // Radio button change event
+        radioButtons.forEach(radio => {
+            radio.addEventListener('change', function() {
+                currentSearchType = this.value;
+                const searchLabel = document.getElementById('searchLabel');
+                searchLabel.textContent = currentSearchType === 'name' ? 'Student Name' : 'Student Email';
+                searchInput.placeholder = `Start typing ${currentSearchType}...`;
+                searchInput.value = '';
+                searchResults.style.display = 'none';
+                clearSelectedStudent();
+            });
+        });
+
+        // Debounced search input event with server API
+        const debouncedSearch = debounce(async function() {
+            const term = searchInput.value.trim();
+            if (term.length === 0) {
+                searchResults.style.display = 'none';
+                return;
+            }
+            try {
+                const res = await fetch(`/Teacher/OfflineQuiz/SearchStudents?query=${encodeURIComponent(term)}&type=${encodeURIComponent(currentSearchType)}`);
+                const json = await res.json();
+                if (json && json.success) {
+                    displaySearchResults(json.data || []);
+                } else {
+                    displaySearchResults([]);
+                }
+            } catch {
+                displaySearchResults([]);
+            }
+        }, 250);
+
+        searchInput.addEventListener('input', debouncedSearch);
+
+        // Close search results when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.search-container')) {
+                searchResults.style.display = 'none';
+            }
+        });
+
+        // Sync UI with default radio selection on init
+        const checkedRadio = document.querySelector('input[name="searchType"]:checked');
+        if (checkedRadio) {
+            checkedRadio.dispatchEvent(new Event('change'));
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initOfflineQuizSearch);
+    } else {
+        initOfflineQuizSearch();
+    }
+
+	function displaySearchResults(students) {
+		const searchResults = document.getElementById('searchResults');
+
+		if (students.length === 0) {
+			searchResults.innerHTML = '<div class="search-result-item">No students found</div>';
+			searchResults.style.display = 'block';
+			return;
+		}
+
+        const resultsHTML = students.map(student => `
+            <div class="search-result-item" onclick="selectStudent('${student.id}', '${student.name}', '${student.email}')">
+                <div><strong>${student.name ?? ''}</strong></div>
+                <div class="student-info">${student.email ?? ''}</div>
+            </div>
+        `).join('');
+
+		searchResults.innerHTML = resultsHTML;
+		searchResults.style.display = 'block';
+	}
+
+	function selectStudent(id, name, email) {
+		selectedStudent = { id, name, email };
+
+		// Set hidden fields
+		document.getElementById('selectedStudentId').value = id;
+		document.getElementById('selectedStudentName').value = name;
+		document.getElementById('selectedStudentEmail').value = email;
+
+		// Update search input
+		document.getElementById('studentSearch').value = currentSearchType === 'name' ? name : email;
+
+		// Hide search results
+		document.getElementById('searchResults').style.display = 'none';
+
+		// Display selected student info
+		const infoDiv = document.getElementById('selectedStudentInfo');
+		const detailsDiv = document.getElementById('displayStudentDetails');
+		detailsDiv.innerHTML = `
+			<div><strong>Name:</strong> ${name}</div>
+			<div><strong>Email:</strong> ${email}</div>
+		`;
+		infoDiv.style.display = 'block';
+	}
+
+	function clearSelectedStudent() {
+		selectedStudent = null;
+		document.getElementById('selectedStudentId').value = '';
+		document.getElementById('selectedStudentName').value = '';
+		document.getElementById('selectedStudentEmail').value = '';
+		document.getElementById('selectedStudentInfo').style.display = 'none';
+	}
+
+	function resetForm() {
+		document.getElementById('studentSearch').value = '';
+		clearSelectedStudent();
+		document.getElementById('weekNumber').value = '';
+		document.getElementById('score').value = '';
+		document.getElementById('totalScore').value = '10';
+		document.getElementById('searchByName').checked = true;
+		currentSearchType = 'name';
+		document.getElementById('searchLabel').textContent = 'Student Name';
+		document.getElementById('searchResults').style.display = 'none';
+	}
+
+    // Simple debounce helper
+    function debounce(fn, delay) {
+        let t;
+        return function() {
+            clearTimeout(t);
+            t = setTimeout(() => fn.apply(this, arguments), delay);
+        };
+    }
+</script>
+
+@section Scripts {
+	@{
+		await Html.RenderPartialAsync("_ValidationScriptsPartial");
+	}
+}

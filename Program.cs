@@ -85,6 +85,8 @@ namespace TadrousManassa
             builder.Services.AddScoped<IVideoService, VideoService>();
             builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
             builder.Services.AddScoped<ISubmissionService, SubmissionService>();
+            builder.Services.AddScoped<IOfflineQuizRepository, OfflineQuizRepository>();
+            builder.Services.AddScoped<IOfflineQuizService, OfflineQuizService>();
 
             // Email Service
             builder.Services.AddScoped<IEmailSender, EmailSender>();

@@ -1,3 +1,4 @@
+@using TadrousManassa.Utilities
 @model TadrousManassa.Models.Profile
 @{
     ViewData["Title"] = "Profile";
@@ -10,7 +11,7 @@
             <h2 class="text-center mb-4">Profile</h2>
         </div>
     </div>
-    
+
     <div class="row">
         <!-- الصورة الشخصية -->
         <div class="col-md-4">
@@ -19,19 +20,19 @@
                     <div id="imageContainer" class="mb-3">
                         @if (Model.Image != null && Model.Image.Length > 0)
                         {
-                            <img id="profileImage" src="data:image/jpeg;base64,@Convert.ToBase64String(Model.Image)" 
-                                 class="img-fluid rounded-circle" style="width: 200px; height: 200px; object-fit: cover;" 
+                            <img id="profileImage" src="data:image/jpeg;base64,@Convert.ToBase64String(Model.Image)"
+                                 class="img-fluid rounded-circle" style="width: 200px; height: 200px; object-fit: cover;"
                                  alt="Profile Image">
                         }
                         else
                         {
-                            <div id="noImagePlaceholder" class="d-flex align-items-center justify-content-center bg-light rounded-circle mx-auto" 
+                            <div id="noImagePlaceholder" class="d-flex align-items-center justify-content-center bg-light rounded-circle mx-auto"
                                  style="width: 200px; height: 200px; cursor: pointer;" onclick="document.getElementById('imageInput').click()">
                                 <i class="fas fa-camera fa-3x text-muted"></i>
                             </div>
                         }
                     </div>
-                    
+
                     <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="uploadImage(this)">
                     <button type="button" class="btn btn-outline-primary btn-sm" onclick="document.getElementById('imageInput').click()">
                         <i class="fas fa-upload"></i> Upload Image
@@ -39,7 +40,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- بيانات الملف الشخصي -->
         <div class="col-md-8">
             <div class="card">
@@ -58,25 +59,84 @@
                                 <input type="email" class="form-control" id="email" name="email" value="@Model.Email" required>
                             </div>
                         </div>
-                        
+
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="phoneNumber" class="form-label">Phone Number</label>
                                 <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" value="@Model.PhoneNumber">
                             </div>
                             <div class="col-md-6 mb-3">
+                                <label for="grade" class="form-label">Grade</label>
+                                <select asp-for="@Model.Grade"
+                                        asp-items="Html.GetEnumSelectList<Grade>()"
+                                        class="form-control"
+                                        id="grade" name="grade"
+                                        value="@Model.Grade"
+                                        aria-required="true"
+                                        disabled>
+                                    @* <option value="">Enter your Grade</option> *@
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
                                 <label for="totalScore" class="form-label">Total Score</label>
                                 <input type="number" class="form-control" id="totalScore" name="totalScore" value="@Model.TotalScore" readonly>
                             </div>
-                        </div>
-                        
-                        <div class="row">
+
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <div class="card shadow-sm">
+                                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0">
+                                                <i class="fas fa-clipboard-list"></i> Offline Quizzes
+                                            </h5>
+                                        </div>
+                                        <div class="card-body p-0">
+                                            @if (Model.OfflineQuizzes != null && Model.OfflineQuizzes.Any())
+                                            {
+                                                <div class="table-responsive">
+                                                    <table class="table table-hover table-striped mb-0 align-middle text-center">
+                                                        <thead class="table-light">
+                                                            <tr>
+                                                                <th>Week</th>
+                                                                <th>Score</th>
+                                                                <th>Total Score</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach (var quiz in Model.OfflineQuizzes)
+                                                            {
+                                                                var percentage = (quiz.Score / quiz.TotalScore) * 100;
+                                                                <tr>
+                                                                    <td>@quiz.WeekNumber</td>
+                                                                    <td>@quiz.Score</td>
+                                                                    <td>@quiz.TotalScore</td>
+                                                                </tr>
+                                                            }
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="p-3 text-center text-muted">
+                                                    No offline quizzes recorded yet.
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
                             <div class="col-md-6 mb-3">
                                 <label for="rank" class="form-label">Rank</label>
                                 <input type="number" class="form-control" id="rank" name="rank" value="@Model.Rank" readonly>
                             </div>
                         </div>
-                        
+
                         <div class="d-flex justify-content-between">
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> Save Changes
@@ -130,22 +190,22 @@
         function uploadImage(input) {
             if (input.files && input.files[0]) {
                 const file = input.files[0];
-                
+
                 // Check file type
                 if (!file.type.startsWith('image/')) {
                     alert('Please select a valid image file');
                     return;
                 }
-                
+
                 // Check file size (5MB max)
                 if (file.size > 5 * 1024 * 1024) {
                     alert('Image size must be less than 5MB');
                     return;
                 }
-                
+
                 const formData = new FormData();
                 formData.append('image', file);
-                
+
                 // Add anti-forgery token
                 const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
                 formData.append('__RequestVerificationToken', token);
@@ -160,11 +220,11 @@
                         // Update image in page
                         const imageContainer = document.getElementById('imageContainer');
                         const noImagePlaceholder = document.getElementById('noImagePlaceholder');
-                        
+
                         if (noImagePlaceholder) {
                             noImagePlaceholder.remove();
                         }
-                        
+
                         let profileImage = document.getElementById('profileImage');
                         if (!profileImage) {
                             profileImage = document.createElement('img');
@@ -176,7 +236,7 @@
                             profileImage.alt = 'Profile Image';
                             imageContainer.appendChild(profileImage);
                         }
-                        
+
                         profileImage.src = 'data:image/jpeg;base64,' + data.imageData;
                         showAlert('Image uploaded successfully', 'success');
                     } else {
@@ -189,13 +249,13 @@
                 });
             }
         }
-        
+
         // Update profile data
         document.getElementById('profileForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            
+
             const formData = new FormData(this);
-            
+
             fetch('/Student/Profile/UpdateProfile', {
                 method: 'POST',
                 body: formData
@@ -213,21 +273,21 @@
                 showAlert('Error updating profile', 'error');
             });
         });
-        
+
         // Change password
         function changePassword() {
             const form = document.getElementById('changePasswordForm');
             const formData = new FormData(form);
-            
+
             // Check if new passwords match
             const newPassword = document.getElementById('newPassword').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
-            
+
             if (newPassword !== confirmPassword) {
                 showAlert('New password and confirmation do not match', 'error');
                 return;
             }
-            
+
             fetch('/Student/Profile/ChangePassword', {
                 method: 'POST',
                 body: formData
@@ -249,7 +309,7 @@
                 showAlert('Error changing password', 'error');
             });
         }
-        
+
         // Show alerts
         function showAlert(message, type) {
             const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
@@ -259,11 +319,11 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             `;
-            
+
             // Add alert at the top of the page
             const container = document.querySelector('.container');
             container.insertAdjacentHTML('afterbegin', alertHtml);
-            
+
             // Remove alert automatically after 5 seconds
             setTimeout(() => {
                 const alert = container.querySelector('.alert');

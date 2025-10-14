@@ -71,7 +71,7 @@ namespace TadrousManassa.Areas.Student.Controllers
                 if (string.IsNullOrWhiteSpace(lectureId))
                 {
                     TempData["error"] = "You must login first.";
-                    return View("ErrorView", TempData["error"]); ;
+                    return View("ErrorView", TempData["error"]);
                 }
 
                 var currentUser = await _userManager.GetUserAsync(User);
@@ -85,23 +85,23 @@ namespace TadrousManassa.Areas.Student.Controllers
                 if (!isPurchased.Success || !isPurchased.Data)
                 {
                     TempData["error"] = "You must buy the lecture first.";
-                    return View("ErrorView", TempData["error"]); ;
+                    return View("ErrorView", TempData["error"]);
                 }
 
                 var videoDetailsDTO = await _videoService.GetVideoDetails(lectureId, order);
                 if (!videoDetailsDTO.Success)
                 {
                     TempData["error"] = "The lecture is not found";
-                    return View("ErrorView", TempData["error"]); ;
+                    return View("ErrorView", TempData["error"]);
                 }
 
-                return View("lectureDetails", videoDetailsDTO.Data);
+                return View(videoDetailsDTO.Data);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in LectureDetails action");
                 TempData["error"] = "Error in LectureDetails action";
-                return View("ErrorView", TempData["error"]); ;
+                return View("ErrorView", TempData["error"]);
             }
         }
 

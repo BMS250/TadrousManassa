@@ -47,5 +47,7 @@ namespace TadrousManassa.Models
         public virtual ICollection<StudentQuiz> StudentQuizzes { get; set; }
 
         public virtual ICollection<StudentChoice> StudentChoices { get; set; }
+
+        public virtual ICollection<OfflineQuiz> OfflineQuizzes { get; set; }
     }
 }

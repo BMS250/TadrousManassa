@@ -124,5 +124,6 @@ namespace TadrousManassa.Data
         public virtual DbSet<StudentQuiz> StudentQuizzes { get; set; }
         public virtual DbSet<Submission> Submissions { get; set; }
         public virtual DbSet<StudentChoice> StudentChoices { get; set; }
+        public virtual DbSet<OfflineQuiz> OfflineQuizzes { get; set; }
     }
 }

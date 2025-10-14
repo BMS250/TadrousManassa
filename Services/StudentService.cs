@@ -67,6 +67,23 @@ namespace TadrousManassa.Services
                 return OperationResult<Student>.Fail("Failed to retrieve student.");
             }
         }
+
+        public async Task<OperationResult<Student?>> GetStudentWithOfflineQuizzesGrades(string id)
+        {
+            try
+            {
+                var student = await studentRepository.GetStudentWithOfflineQuizzesGrades(id);
+                if (student == null)
+                    return OperationResult<Student?>.Fail("Student not found.");
+
+                return OperationResult<Student?>.Ok(student);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Error retrieving student with ID {id}");
+                return OperationResult<Student?>.Fail("Failed to retrieve student.");
+            }
+        }
         public OperationResult<Student> GetStudentByEmail(string email)
         {
             try
@@ -80,6 +97,20 @@ namespace TadrousManassa.Services
             {
                 logger.LogError(ex, $"Error retrieving student with email {email}");
                 return OperationResult<Student>.Fail("Failed to retrieve student.");
+            }
+        }
+
+        public OperationResult<List<Student>> SearchStudents(string query, string type, int limit = 10)
+        {
+            try
+            {
+                var results = studentRepository.SearchStudents(query, type, limit);
+                return OperationResult<List<Student>>.Ok(results);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Error searching students with query '{query}' and type '{type}'");
+                return OperationResult<List<Student>>.Fail("Failed to search students.");
             }
         }
 

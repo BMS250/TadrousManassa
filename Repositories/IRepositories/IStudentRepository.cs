@@ -6,7 +6,9 @@ namespace TadrousManassa.Repositories.IRepositories
     {
         public List<Student> GetStudents();
         public Student? GetStudent(string id);
+        public Task<Student?> GetStudentWithOfflineQuizzesGrades(string id);
         public Student? GetStudentByEmail(string email);
+        public List<Student> SearchStudents(string query, string type, int limit = 10);
         public List<Student> GetStudentsByGrade(int grade);
         public int GetStudentGrade(string id);
         public Task<int> GetStudentRank(string id);

@@ -24,6 +24,11 @@
                 </button>
             </li>
             <li class="nav-item" role="presentation">
+                <button class="nav-link" id="offlineQuiz-tab" data-tab="offlineQuiz" type="button" role="tab" aria-controls="offlineQuiz" aria-selected="false">
+                    Add Offline Quiz Score
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
                 <button class="nav-link" id="lectures-tab" data-tab="lectures" type="button" role="tab" aria-controls="lectures" aria-selected="false">
                     Lectures Analysis
                 </button>
@@ -51,6 +56,9 @@
             </div>
             <div class="tab-pane fade p-3" id="quiz-pane" role="tabpanel" aria-labelledby="quiz-tab">
                 <img id="quiz-spinner" src="/images/SpinnerLoading.gif" style="display:none; margin:auto;" alt="Loading..." />
+            </div>
+            <div class="tab-pane fade p-3" id="offlineQuiz-pane" role="tabpanel" aria-labelledby="offlineQuiz-tab">
+                <img id="offlineQuiz-spinner" src="/images/SpinnerLoading.gif" style="display:none; margin:auto;" alt="Loading..." />
             </div>
             <div class="tab-pane fade p-3" id="lectures-pane" role="tabpanel" aria-labelledby="lectures-tab">
                 <img id="lectures-spinner" src="/images/SpinnerLoading.gif" style="display:none; margin:auto;" alt="Loading..." />
@@ -96,6 +104,7 @@
                         'settings': 'Setting',
                         'video': 'Video', 
                         'quiz': 'Quiz',
+                        'offlineQuiz': 'OfflineQuiz',
                         'lectures': 'Lecture',
                         'codes': 'Code',
                         'reset': 'Device'
@@ -106,7 +115,7 @@
                         .then(res => res.text())
                         .then(html => {
                             if(spinner) spinner.style.display = 'none';
-                            pane.innerHTML = spinner.outerHTML + html;
+                            pane.innerHTML = (spinner ? spinner.outerHTML : '') + html;
 
                             // Execute any scripts embedded in the loaded HTML
                             const scripts = Array.from(pane.querySelectorAll('script'));

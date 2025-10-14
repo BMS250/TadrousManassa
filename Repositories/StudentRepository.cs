@@ -32,9 +32,36 @@ namespace TadrousManassa.Repositories
             return _context.Students.FirstOrDefault(s => s.Id == id);
         }
 
+        public Task<Student?> GetStudentWithOfflineQuizzesGrades(string id)
+        {
+            return _context.Students
+                .Include(s => s.OfflineQuizzes)
+                .FirstOrDefaultAsync(s => s.Id == id);
+        }
+
         public Student? GetStudentByEmail(string email)
         {
             return _context.Students.FirstOrDefault(s => s.ApplicationUser.Email == email);
+        }
+
+        public List<Student> SearchStudents(string query, string type, int limit = 10)
+        {
+            if (string.IsNullOrWhiteSpace(query)) return new List<Student>();
+            query = query.Trim().ToLower();
+
+            IQueryable<Student> q = _context.Students.Include(s => s.ApplicationUser);
+
+            if (type?.ToLower() == "email")
+            {
+                q = q.Where(s => s.ApplicationUser.Email.ToLower().Contains(query));
+            }
+            else
+            {
+                // Default to name search
+                q = q.Where(s => s.ApplicationUser.UserName.ToLower().Contains(query));
+            }
+
+            return q/*.Take(limit)*/.ToList();
         }
 
         public List<Student> GetStudentsByGrade(int grade)
@@ -107,7 +134,7 @@ namespace TadrousManassa.Repositories
             oldStudent.Address = student.Address;
             oldStudent.School = student.School;
             oldStudent.ReferralSource = student.ReferralSource;
-
+            await SaveChangesAsync();
             return 0;
         }
 
@@ -188,7 +215,7 @@ namespace TadrousManassa.Repositories
 
                 student.ProfileImage = imageBytes;
                 _context.Entry(student).State = EntityState.Modified;
-                _context.SaveChanges();
+                SaveChangesAsync();
                 return true;
             }
             catch (Exception)

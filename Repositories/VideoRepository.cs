@@ -75,7 +75,7 @@ namespace TadrousManassa.Repositories
         {
             return _context.Videos
                 .AsNoTracking()
-                .Where(v => v.LectureId == lectureId)
+                .Where(v => v.LectureId == lectureId && string.IsNullOrWhiteSpace(v.QuizId))
                 .OrderBy(v => v.Order)
                 .Select(v => new BasicDTO
                 {

@@ -148,7 +148,7 @@ namespace TadrousManassa.Repositories
                 return OperationResult<bool>.Fail("Lecture ID cannot be null or empty.");
 
             StudentLecture? row = _context.StudentLectures
-                .FirstOrDefault(sl => sl.Code == code && sl.LectureId == lectureId && (sl.StudentId == "" || sl.StudentId == null));
+                .FirstOrDefault(sl => sl.Code == code && sl.LectureId == lectureId && string.IsNullOrEmpty(sl.StudentId));
             if (row == null)
                 return OperationResult<bool>.Fail("Code is not valid.");
             try

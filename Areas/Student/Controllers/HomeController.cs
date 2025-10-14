@@ -1,5 +1,5 @@
 using Amazon.Runtime.Internal.Util;
-using AspNetCoreGeneratedDocument;
+//using AspNetCoreGeneratedDocument;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;

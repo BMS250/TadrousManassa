@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using TadrousManassa.Areas.Student.Models;
 using TadrousManassa.Models;
 using TadrousManassa.Services.IServices;
+using TadrousManassa.Utilities;
 
 namespace TadrousManassa.Areas.Student.Controllers
 {
@@ -45,7 +46,7 @@ namespace TadrousManassa.Areas.Student.Controllers
                     return RedirectToAction("Login", "Account", new { area = "Identity" });
                 }
 
-                var student = _studentService.GetStudent(currentUser.Id);
+                var student = await _studentService.GetStudentWithOfflineQuizzesGrades(currentUser.Id);
                 if (!student.Success)
                 {
                     _logger.LogError("Student not found for user {UserId}", currentUser.Id);
@@ -71,7 +72,10 @@ namespace TadrousManassa.Areas.Student.Controllers
                     PhoneNumber = currentUser.PhoneNumber,
                     Image = student.Data?.ProfileImage,
                     TotalScore = student.Data?.TotalScore ?? 0,
-                    Rank = rank
+                    // TODO: I don't know whether he wants to make the grade changable or not
+                    //Grade = (Grade)(student.Data?.Grade ?? (int)Grade.FirstPreparatory),
+                    Rank = rank,
+                    OfflineQuizzes = student.Data?.OfflineQuizzes ?? new List<OfflineQuiz>()
                 };
 
                 return View(profile);
@@ -139,7 +143,7 @@ namespace TadrousManassa.Areas.Student.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UpdateProfile(string name, string email, string phoneNumber)
+        public async Task<IActionResult> UpdateProfile(string name, string email, string phoneNumber, Grade? grade)
         {
             try
             {
@@ -148,12 +152,27 @@ namespace TadrousManassa.Areas.Student.Controllers
                 {
                     return Json(new { success = false, message = "User not found" });
                 }
-
+                if (User.IsInRole("Student"))
+                {
+                    var student = _studentService.GetStudent(currentUser.Id);
+                    if (!student.Success)
+                    {
+                        return Json(new { success = false, message = "Student profile not found" });
+                    }
+                    if (grade.HasValue)
+                    {
+                        student.Data.Grade = (int)grade.Value;
+                        var updateResult = await _studentService.UpdateStudentAsync(student.Data.Id, student.Data);
+                        if (!updateResult.Success)
+                        {
+                            return Json(new { success = false, message = updateResult.Message });
+                        }
+                    }
+                }
                 // Update user data
                 currentUser.UserName = name;
                 currentUser.Email = email;
                 currentUser.PhoneNumber = phoneNumber;
-
                 var result = await _userManager.UpdateAsync(currentUser);
                 if (!result.Succeeded)
                 {

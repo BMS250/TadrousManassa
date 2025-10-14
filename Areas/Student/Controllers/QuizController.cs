@@ -1,5 +1,5 @@
 using Amazon.Runtime.Internal.Util;
-using AspNetCoreGeneratedDocument;
+//using AspNetCoreGeneratedDocument;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -68,14 +68,14 @@ namespace TadrousManassa.Areas.Student.Controllers
                 if (string.IsNullOrWhiteSpace(vId) && string.IsNullOrWhiteSpace(qId))
                 {
                     TempData["error"] = "Video ID or Quiz ID is required.";
-                    return View("ErrorView", TempData["error"]); ;
+                    return View("ErrorView", TempData["error"]);
                 }
 
                 string? quizId = qId ?? await _videoService.GetQuizIdByVideoIdAsync(vId);
                 if (string.IsNullOrWhiteSpace(quizId))
                 {
                     TempData["error"] = "Quiz not found for the provided video.";
-                    return View("ErrorView", TempData["error"]); ;
+                    return View("ErrorView", TempData["error"]);
                 }
 
                 // check if the student has bought the lecture
@@ -83,7 +83,7 @@ namespace TadrousManassa.Areas.Student.Controllers
                 if (!lectureIdResult.Success || string.IsNullOrWhiteSpace(lectureIdResult.Data))
                 {
                     TempData["error"] = "Lecture not found for this quiz.";
-                    return View("ErrorView", TempData["error"]); ;
+                    return View("ErrorView", TempData["error"]);
                 }
                 string lectureId = lectureIdResult.Data;
 
@@ -189,18 +189,18 @@ namespace TadrousManassa.Areas.Student.Controllers
                     TimeMinutes = quiz.TimeMinutes,
                     QuizStartTime = quizStartTime, // Use the cached start time, not DateTime.Now!
                     Questions = [.. quiz.Questions.Select(q => new QuestionVM
-            {
-                Id = q.Id,
-                Text = q.Text,
-                Image = q.Image,
-                Score = q.Score,
-                Choices = [.. q.Choices.Select(c => new ChoiceVM
-                {
-                    Id = c.Id,
-                    Text = c.Text,
-                    Image = c.Image
-                })]
-            })]
+                    {
+                        Id = q.Id,
+                        Text = q.Text,
+                        Image = q.Image,
+                        Score = q.Score,
+                        Choices = [.. q.Choices.Select(c => new ChoiceVM
+                        {
+                            Id = c.Id,
+                            Text = c.Text,
+                            Image = c.Image
+                        })]
+                    })]
                 };
 
                 // Pass the quiz start time to the view via ViewBag for JavaScript

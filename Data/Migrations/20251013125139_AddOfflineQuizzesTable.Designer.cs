@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TadrousManassa.Data;
 
@@ -11,9 +12,11 @@ using TadrousManassa.Data;
 namespace TadrousManassa.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251013125139_AddOfflineQuizzesTable")]
+    partial class AddOfflineQuizzesTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -171,7 +174,7 @@ namespace TadrousManassa.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ApplicationSettings", (string)null);
+                    b.ToTable("ApplicationSettings");
                 });
 
             modelBuilder.Entity("TadrousManassa.Models.ApplicationUser", b =>
@@ -262,7 +265,7 @@ namespace TadrousManassa.Data.Migrations
 
                     b.HasIndex("QuestionId");
 
-                    b.ToTable("Choices", (string)null);
+                    b.ToTable("Choices");
                 });
 
             modelBuilder.Entity("TadrousManassa.Models.Lecture", b =>
@@ -307,7 +310,7 @@ namespace TadrousManassa.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Lectures", (string)null);
+                    b.ToTable("Lectures");
                 });
 
             modelBuilder.Entity("TadrousManassa.Models.OfflineQuiz", b =>
@@ -332,7 +335,7 @@ namespace TadrousManassa.Data.Migrations
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("OfflineQuizzes", (string)null);
+                    b.ToTable("OfflineQuizzes");
                 });
 
             modelBuilder.Entity("TadrousManassa.Models.Question", b =>
@@ -365,7 +368,7 @@ namespace TadrousManassa.Data.Migrations
 
                     b.HasIndex("QuizId");
 
-                    b.ToTable("Questions", (string)null);
+                    b.ToTable("Questions");
                 });
 
             modelBuilder.Entity("TadrousManassa.Models.Quiz", b =>
@@ -407,7 +410,7 @@ namespace TadrousManassa.Data.Migrations
                     b.HasIndex("VideoId")
                         .IsUnique();
 
-                    b.ToTable("Quizzes", (string)null);
+                    b.ToTable("Quizzes");
                 });
 
             modelBuilder.Entity("TadrousManassa.Models.Student", b =>
@@ -451,7 +454,7 @@ namespace TadrousManassa.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Students", (string)null);
+                    b.ToTable("Students");
                 });
 
             modelBuilder.Entity("TadrousManassa.Models.StudentChoice", b =>
@@ -482,7 +485,7 @@ namespace TadrousManassa.Data.Migrations
 
                     b.HasIndex("SubmissionId");
 
-                    b.ToTable("StudentChoices", (string)null);
+                    b.ToTable("StudentChoices");
                 });
 
             modelBuilder.Entity("TadrousManassa.Models.StudentLecture", b =>
@@ -517,7 +520,7 @@ namespace TadrousManassa.Data.Migrations
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("StudentLectures", (string)null);
+                    b.ToTable("StudentLectures");
                 });
 
             modelBuilder.Entity("TadrousManassa.Models.StudentQuiz", b =>
@@ -548,7 +551,7 @@ namespace TadrousManassa.Data.Migrations
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("StudentQuizzes", (string)null);
+                    b.ToTable("StudentQuizzes");
                 });
 
             modelBuilder.Entity("TadrousManassa.Models.Submission", b =>
@@ -578,7 +581,7 @@ namespace TadrousManassa.Data.Migrations
 
                     b.HasIndex("StudentQuizId");
 
-                    b.ToTable("Submissions", (string)null);
+                    b.ToTable("Submissions");
                 });
 
             modelBuilder.Entity("TadrousManassa.Models.Video", b =>
@@ -620,7 +623,7 @@ namespace TadrousManassa.Data.Migrations
 
                     b.HasIndex("LectureId");
 
-                    b.ToTable("Videos", (string)null);
+                    b.ToTable("Videos");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

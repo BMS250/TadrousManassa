@@ -6,7 +6,9 @@ namespace TadrousManassa.Services.IServices
     {
         OperationResult<List<Student>> GetStudents();
         OperationResult<Student> GetStudent(string id);
+        Task<OperationResult<Student?>> GetStudentWithOfflineQuizzesGrades(string id);
         OperationResult<Student> GetStudentByEmail(string email);
+        OperationResult<List<Student>> SearchStudents(string query, string type, int limit = 10);
         OperationResult<List<Student>> GetStudentsByGrade(int grade);
         OperationResult<List<Student>> GetStudentsByLecture(string lectureId);
         Task<OperationResult<int>> GetStudentRank(string id);

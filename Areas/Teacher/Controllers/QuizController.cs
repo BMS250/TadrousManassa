@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TadrousManassa.Areas.Teacher.Models;
+using TadrousManassa.Models;
 using TadrousManassa.Services.IServices;
 
 namespace TadrousManassa.Areas.Teacher.Controllers
@@ -63,7 +65,7 @@ namespace TadrousManassa.Areas.Teacher.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateQuiz()
+        public IActionResult CreateQuiz(QuizCreatingPartialVM quiz)
         {
             return PartialView("~/Areas/Teacher/Views/Home/_QuizPartial.cshtml");
         }
