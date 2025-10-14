@@ -53,7 +53,7 @@ namespace TadrousManassa.Areas.Student.Controllers
                     return View("ErrorView", buyResult.Message);
                 }
 
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index), "Home");
             }
             catch (Exception ex)
             {

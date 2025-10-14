@@ -40,7 +40,7 @@ namespace TadrousManassa.Areas.Teacher.Controllers
                 return View(dateVM); // Return the view with an error message
             }
             TempData["success"] = "Settings updated successfully.";
-            return RedirectToAction("Index"); // Redirect to settings overview page
+            return RedirectToAction("Index", "Home"); // Redirect to settings overview page
         }
     }
 }

@@ -28,7 +28,7 @@ namespace TadrousManassa.Areas.Teacher.Controllers
             if (string.IsNullOrEmpty(userEmail))
             {
                 TempData["Error"] = "Email is required.";
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", "Home");
             }
 
             try
@@ -48,7 +48,7 @@ namespace TadrousManassa.Areas.Teacher.Controllers
                 TempData["Error"] = $"An error occurred: {ex.Message}";
             }
 
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", "Home");
         }
     }
 }

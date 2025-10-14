@@ -14,7 +14,7 @@ namespace TadrousManassa.Repositories.IRepositories
         public Task<StudentQuiz?> GetStudentQuizAsync(string studentId, string quizId, bool includeQuiz = false);
         public Task<StudentQuizScoresDTO?> GetStudentQuizScoresAsync(string studentId, string quizId);
         public Task<float> GetBestScoreAsync(string studentId, string quizId);
-        public Task<List<TopStudentsScores>> GetTopStudentsScoresAsync(string studentId, int topN = 3);
+        public Task<List<TopStudentsScores>> GetTopStudentsScoresAsync(string studentId, double totalScore, int topN = 3);
         public Task<double> CalculateStudentTotalScore(string studentId);
         public Task AddStudentQuizAsync(StudentQuiz studentQuiz);
         public Task SaveChangesAsync();

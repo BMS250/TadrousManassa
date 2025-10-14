@@ -98,20 +98,15 @@ namespace TadrousManassa.Repositories
             return studentQuiz?.BestScore ?? 0;
         }
 
-        public Task<List<TopStudentsScores>> GetTopStudentsScoresAsync(string studentId, int topN = 3)
+        public Task<List<TopStudentsScores>> GetTopStudentsScoresAsync(string studentId, double totalScore, int topN = 3)
         {
             return _context.StudentQuizzes
                 .AsNoTracking()
-                .GroupBy(sq => new
-                {
-                    sq.StudentId,
-                    sq.Student.ApplicationUser.UserName
-                })
                 .Select(g => new TopStudentsScores
                 {
-                    StudentId = g.Key.StudentId, // Add StudentId to the model if not already present
-                    StudentName = g.Key.UserName,
-                    TotalScore = g.Sum(sq => sq.BestScore ?? 0)
+                    StudentId = g.StudentId,
+                    StudentName = g.Student.ApplicationUser.UserName,
+                    TotalScore = totalScore//g.Sum(sq => sq.BestScore ?? 0)
                 })
                 .Where(s => s.TotalScore > 0)
                 .OrderByDescending(s => s.TotalScore)

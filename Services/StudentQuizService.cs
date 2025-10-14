@@ -214,9 +214,10 @@ namespace TadrousManassa.Services
             return _studentQuizRepository.GetBestScoreAsync(studentId, quizId);
         }
 
-        public Task<List<TopStudentsScores>> GetTopStudentsScoresAsync(string studentId, int topN = 3)
+        public async Task<List<TopStudentsScores>> GetTopStudentsScoresAsync(string studentId, int topN = 3)
         {
-            return _studentQuizRepository.GetTopStudentsScoresAsync(studentId, topN);
+            var totalScore = await _studentRepository.GetTotalScore(studentId);
+            return await _studentQuizRepository.GetTopStudentsScoresAsync(studentId, totalScore, topN);
         }
 
         public async Task<OperationResult<double>> CalculateStudentTotalScore(string studentId)

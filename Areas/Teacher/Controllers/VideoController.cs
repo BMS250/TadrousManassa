@@ -41,7 +41,7 @@ namespace TadrousManassa.Areas.Teacher.Controllers
             if (videoUploadingVM.Video == null || videoUploadingVM.Video.Length == 0)
             {
                 TempData["error"] = "No video file provided.";
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", "Home");
             }
 
             ApplicationSettings appSettingsData = _appSettingsRepo.GetCurrentData();
@@ -103,7 +103,7 @@ namespace TadrousManassa.Areas.Teacher.Controllers
                 _logger.LogError(ex, "Unexpected Error: {Message}", ex.Message);
                 TempData["error"] = "An unexpected error occurred.";
             }
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", "Home");
         }
 
         public IActionResult DownloadCodes(string lectureName, HashSet<string> lectureCodes)

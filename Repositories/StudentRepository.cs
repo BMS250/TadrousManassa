@@ -88,12 +88,17 @@ namespace TadrousManassa.Repositories
 
             // 2. Find the rank
             var rank = studentScores
-                .Select((s, index) => new { s.StudentId, Rank = index + 1 })
-                .FirstOrDefault(x => x.StudentId == id);
+                .Select((s, index) => new { s.StudentId, Rank = index + 1, s.TotalScore })
+                .FirstOrDefault(x => x.StudentId == id && x.TotalScore > 0);
 
             return rank?.Rank ?? 0;
         }
 
+        public async Task<double> GetTotalScore(string id)
+        {
+            var student = await _context.Students.FirstOrDefaultAsync(s => s.Id == id);
+            return student?.TotalScore ?? 0;
+        }
 
         public void InsertStudent(Student student)
         {
