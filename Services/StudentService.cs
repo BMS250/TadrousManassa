@@ -133,7 +133,7 @@ namespace TadrousManassa.Services
             try
             {
                 ArgumentNullException.ThrowIfNull(student);
-                studentRepository.InsertStudent(student);
+                await studentRepository.InsertStudent(student);
                 await studentRepository.SaveChangesAsync();
                 return OperationResult<bool>.Ok(true, "Student inserted successfully.");
             }

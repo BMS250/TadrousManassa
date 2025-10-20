@@ -44,9 +44,14 @@ namespace TadrousManassa.Repositories
                 .FirstOrDefaultAsync();
         }
 
-        public Task<VideoDetailsDTO?> GetVideoDetailsAsync(string id, string unit)
+        public async Task<VideoDetailsDTO?> GetVideoDetailsAsync(string id, string unit)
         {
-            return _context.Videos
+            var quizId = await _context.Videos
+                    .AsNoTracking()
+                    .Where(q => q.Id == id)
+                    .Select(q => q.QuizId)
+                    .FirstOrDefaultAsync();
+            return await _context.Videos
                 .AsNoTracking()
                 .Where(v => v.Id == id)
                 .Select(v => new VideoDetailsDTO
@@ -57,7 +62,8 @@ namespace TadrousManassa.Repositories
                     Order = v.Order,
                     Path = v.Path,
                     SheetPath = v.SheetPath,
-                    Unit = unit
+                    Unit = unit,
+                    QuizId = quizId
                 })
                 .FirstOrDefaultAsync();
         }

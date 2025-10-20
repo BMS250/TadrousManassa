@@ -13,7 +13,7 @@ namespace TadrousManassa.Repositories.IRepositories
         public int GetStudentGrade(string id);
         public Task<int> GetStudentRank(string id);
         public Task<double> GetTotalScore(string id);
-        public void InsertStudent(Student student);
+        public Task InsertStudent(Student student);
         public Task<int> UpdateStudentAsync(string id, Student student, string? newPassword = null);
         public bool UpdateProfileImage(string studentId, byte[] imageBytes);
         public void IncreaseTotalScore(string id, float scoreToAdd);

@@ -9,5 +9,6 @@
         public string? Unit { get; set; }
         public string? SheetPath { get; set; }
         public int Order { get; set; }
+        public string? QuizId { get; set; }
     }
 }

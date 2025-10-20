@@ -32,10 +32,13 @@
             </a>
 
         }
-        <form asp-action="QuizDetails" asp-controller="Quiz" method="get" style="display:inline;">
-            <input type="hidden" name="vId" value="@Model.Id" />
-            <button type="submit" class="btn btn-outline-success">Go to Quiz</button>
-        </form>
+        @if (!string.IsNullOrEmpty(Model.QuizId))
+        {
+            <form asp-action="QuizDetails" asp-controller="Quiz" method="get" style="display:inline;">
+                <input type="hidden" name="vId" value="@Model.Id" />
+                <button type="submit" class="btn btn-outline-success">Go to Quiz</button>
+            </form>
+        }
     </div>
 </div>
     

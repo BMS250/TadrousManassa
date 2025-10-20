@@ -100,9 +100,11 @@ namespace TadrousManassa.Repositories
             return student?.TotalScore ?? 0;
         }
 
-        public void InsertStudent(Student student)
+        public async Task InsertStudent(Student student)
         {
             ArgumentNullException.ThrowIfNull(student);
+            student.ApplicationUser.Student = null;
+            await userManager.CreateAsync(student.ApplicationUser);
             _context.Students.Add(student);
         }
 
