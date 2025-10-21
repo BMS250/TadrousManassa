@@ -27,29 +27,25 @@ namespace TadrousManassa.Models.ViewModels
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
 
-        [Required]
         [DataType(DataType.PhoneNumber)]
-        [RegularExpression(@"^\d{11}$", ErrorMessage = "Phone number must be 11 digits.")]
-        public string PhoneNumber { get; set; }
+        [RegularExpression(@"^(\d{11})?$", ErrorMessage = "Phone number must be 11 digits or empty.")]
+        public string? PhoneNumber { get; set; } = "";
 
-        [Required]
         [DataType(DataType.PhoneNumber)]
-        [RegularExpression(@"^\d{11}$", ErrorMessage = "Phone number must be 11 digits.")]
-        public string PhoneNumber_Parents { get; set; }
+        [RegularExpression(@"^(\d{11})?$", ErrorMessage = "Phone number must be 11 digits or empty.")]
+        public string? PhoneNumber_Parents { get; set; } = "";
 
-        [Required]
         [MaxLength(70)]
-        public string Address { get; set; }
+        public string? Address { get; set; } = "";
 
-        [Required]
         [MaxLength(70)]
-        public string School { get; set; }
+        public string? School { get; set; } = "";
 
         [Required]
-        public int Grade { get; set; }
+        [Range(1, 6, ErrorMessage = "Grade must be between 5 and 9.")]
+        public int Grade { get; set; } = 1;
 
-        [Required]
         [MaxLength(255)]
-        public string ReferralSource { get; set; }
+        public string? ReferralSource { get; set; } = "";
     }
 }

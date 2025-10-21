@@ -1,0 +1,77 @@
+@model TadrousManassa.Models.ViewModels.RegisterStudentVM
+
+@{
+    ViewData["Title"] = "Register Student";
+}
+
+<h2>Register New Student</h2>
+
+<form asp-area="Teacher" asp-controller="Home" asp-action="RegisterStudent" method="post">
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <div class="form-group">
+        <label asp-for="Name"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Email"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Password"></label>
+        <input asp-for="Password" class="form-control" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="ConfirmPassword"></label>
+        <input asp-for="ConfirmPassword" class="form-control" />
+        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="PhoneNumber"></label>
+        <input asp-for="PhoneNumber" class="form-control" />
+        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="PhoneNumber_Parents"></label>
+        <input asp-for="PhoneNumber_Parents" class="form-control" />
+        <span asp-validation-for="PhoneNumber_Parents" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Address"></label>
+        <input asp-for="Address" class="form-control" />
+        <span asp-validation-for="Address" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="School"></label>
+        <input asp-for="School" class="form-control" />
+        <span asp-validation-for="School" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Grade"></label>
+        <input asp-for="Grade" type="number" min="1" max="6" class="form-control" />
+        <span asp-validation-for="Grade" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="ReferralSource"></label>
+        <input asp-for="ReferralSource" class="form-control" />
+        <span asp-validation-for="ReferralSource" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Add Student</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

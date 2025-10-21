@@ -104,7 +104,7 @@ namespace TadrousManassa.Repositories
         {
             ArgumentNullException.ThrowIfNull(student);
             student.ApplicationUser.Student = null;
-            await userManager.CreateAsync(student.ApplicationUser);
+            //await userManager.CreateAsync(student.ApplicationUser); // the problem is here
             _context.Students.Add(student);
         }
 

@@ -132,6 +132,12 @@ namespace TadrousManassa.Areas.Identity.Pages.Account
 
                 user.Student = _studentRepository.GetStudent(user.Id);
 
+                if (user.Student is null)
+                {
+                    ModelState.AddModelError(string.Empty, "There is a problem on the server, please contact with the teacher.");
+                    return Page();
+                }
+
                 //string deviceId = GetDeviceFingerprint();
                 string deviceId = _deviceService.GetDeviceId();
                 var emailAdmin = _configuration["AdminSimulation:Email"];

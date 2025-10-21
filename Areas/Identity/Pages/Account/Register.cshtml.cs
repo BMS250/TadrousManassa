@@ -68,14 +68,15 @@ namespace TadrousManassa.Areas.Identity.Pages.Account
 
         public async Task<IActionResult> OnGetAsync(string returnUrl = null)
         {
-            return NotFound();
+            //return NotFound();
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            return Page();
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
-            return NotFound();
+            //return NotFound();
             if (User.Identity.IsAuthenticated)
             {
                 return RedirectToAction("Index", "Home", new { area = "Student" });

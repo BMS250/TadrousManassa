@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using TadrousManassa.Models;
+using TadrousManassa.Models.ViewModels;
 using TadrousManassa.Services.IServices;
 
 namespace TadrousManassa.Areas.Teacher.Controllers
@@ -46,5 +47,56 @@ namespace TadrousManassa.Areas.Teacher.Controllers
                 return BadRequest(result.Message);
             }
         }
+
+        [HttpGet]
+        public IActionResult LoadAddStudentTab()
+        {
+            return PartialView("_StudentPartial", new RegisterStudentVM());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RegisterStudent(RegisterStudentVM model)
+        {
+            if (!ModelState.IsValid)
+                return PartialView("_StudentPartial", model);
+
+
+
+            var user = new ApplicationUser
+            {
+                UserName = model.Name,
+                Email = model.Email,
+                PhoneNumber = model.PhoneNumber ?? "",
+                Student = null
+            };
+
+            var result = await _userManager.CreateAsync(user, model.Password);
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                    ModelState.AddModelError("", error.Description);
+                return PartialView("_StudentPartial", model);
+            }
+
+            await _userManager.AddToRoleAsync(user, "Student");
+
+            var student = new TadrousManassa.Models.Student
+            {
+                Id = user.Id,
+                Address = model.Address ?? "",
+                PhoneNumber_Parents = model.PhoneNumber_Parents ?? "",
+                School = model.School ?? "",
+                Grade = model.Grade,
+                ReferralSource = model.ReferralSource ?? "",
+                DeviceId = "000",
+                TotalScore = 0,
+                ApplicationUser = user
+            };
+
+            await _studentService.InsertStudentAsync(student);
+            return Content("Student registered successfully.");
+        }
+
     }
 }

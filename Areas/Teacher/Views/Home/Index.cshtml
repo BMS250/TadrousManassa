@@ -43,6 +43,12 @@
                     Reset Device ID
                 </button>
             </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="addStudent-tab" data-tab="addStudent" type="button" role="tab" aria-controls="addStudent" aria-selected="false">
+                    Add Student
+                </button>
+            </li>
+
         </ul>
     </div>
 
@@ -68,6 +74,9 @@
             </div>
             <div class="tab-pane fade p-3" id="reset-pane" role="tabpanel" aria-labelledby="reset-tab">
                 <img id="reset-spinner" src="/images/SpinnerLoading.gif" style="display:none; margin:auto;" alt="Loading..." />
+            </div>
+            <div class="tab-pane fade p-3" id="addStudent-pane" role="tabpanel" aria-labelledby="addStudent-tab">
+                <img id="addStudent-spinner" src="/images/SpinnerLoading.gif" style="display:none; margin:auto;" alt="Loading..." />
             </div>
         </div>
     </div>
@@ -107,7 +116,8 @@
                         'offlineQuiz': 'OfflineQuiz',
                         'lectures': 'Lecture',
                         'codes': 'Code',
-                        'reset': 'Device'
+                        'reset': 'Device',
+                        'addStudent': 'Home'
                     };
                     
                     const controller = controllerMap[tab] || 'Home';
