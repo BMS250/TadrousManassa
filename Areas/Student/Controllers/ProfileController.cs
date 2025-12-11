@@ -1,5 +1,5 @@
 using Amazon.Runtime.Internal.Util;
-using AspNetCoreGeneratedDocument;
+//using AspNetCoreGeneratedDocument;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -73,7 +73,7 @@ namespace TadrousManassa.Areas.Student.Controllers
                     Image = student.Data?.ProfileImage,
                     TotalScore = student.Data?.TotalScore ?? 0,
                     // TODO: I don't know whether he wants to make the grade changable or not
-                    //Grade = (Grade)(student.Data?.Grade ?? (int)Grade.FirstPreparatory),
+                    Grade = (Grade)(student.Data?.Grade ?? (int)Grade.FirstPreparatory),
                     Rank = rank,
                     OfflineQuizzes = student.Data?.OfflineQuizzes ?? new List<OfflineQuiz>()
                 };

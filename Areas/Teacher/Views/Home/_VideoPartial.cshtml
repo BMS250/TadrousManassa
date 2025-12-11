@@ -4,12 +4,16 @@
 
 <form asp-action="UploadVideo" asp-controller="Video" method="post" enctype="multipart/form-data">
     <!-- File Input for Video -->
-    <div class="mb-3">
+    @* <div class="mb-3">
         <label asp-for="Video" class="form-label">Choose Video</label>
         <input asp-for="Video" type="file" class="form-control" id="videoFile" name="Video" accept="video/*" />
         <span asp-validation-for="Video" class="text-danger"></span>
+    </div> *@
+    <div class="mb-3">
+        <label asp-for="VideoPath" class="form-label">Video Path</label>
+        <input asp-for="VideoPath" class="form-control" />
+        <span asp-validation-for="VideoPath" class="text-danger"></span>
     </div>
-
     <!-- Video Details Inputs -->
     <div class="mb-3">
         <label asp-for="Name" class="form-label">Name</label>
@@ -37,11 +41,11 @@
         <input asp-for="Unit" class="form-control" />
         <span asp-validation-for="Unit" class="text-danger"></span>
     </div>
-    <div class="mb-3">
+    @* <div class="mb-3">
         <label asp-for="Price" class="form-label">Price</label>
         <input asp-for="Price" class="form-control" type="number" />
         <span asp-validation-for="Price" class="text-danger"></span>
-    </div>
+    </div> *@
     <div class="mb-3">
         <label asp-for="SheetPath" class="form-label">Sheet Path</label>
         <input asp-for="SheetPath" class="form-control" />

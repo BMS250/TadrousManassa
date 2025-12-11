@@ -35,43 +35,51 @@ namespace TadrousManassa.Areas.Teacher.Controllers
         }
 
         [HttpPost]
-        [DisableRequestSizeLimit]
+        //[DisableRequestSizeLimit]
         public IActionResult UploadVideo(VideoUploadingPartialVM videoUploadingVM)
         {
-            if (videoUploadingVM.Video == null || videoUploadingVM.Video.Length == 0)
+            if (videoUploadingVM.VideoPath == null || videoUploadingVM.VideoPath.Length == 0)
             {
                 TempData["error"] = "No video file provided.";
                 return RedirectToAction("Index", "Home");
             }
 
             ApplicationSettings appSettingsData = _appSettingsRepo.GetCurrentData();
-            string videoName = Path.GetFileName(videoUploadingVM.Video.FileName);
+            //string videoName = Path.GetFileName(videoUploadingVM.Video.FileName);
             // Create a unique object key (was) using a GUID and the original file name. /*{Guid.NewGuid()}_*/
-            string videoPath = $"{videoUploadingVM.Grade ?? 1}/{appSettingsData.CurrentYear}/{appSettingsData.CurrentSemester}/{videoName}";
+            //string videoPath = $"{videoUploadingVM.Grade ?? 1}/{appSettingsData.CurrentYear}/{appSettingsData.CurrentSemester}/{videoName}";
 
             try
             {
-                using (var stream = videoUploadingVM.Video.OpenReadStream())
-                {
-                    // Reset the stream position if needed.
-                    if (stream.CanSeek)
-                    {
-                        stream.Seek(0, SeekOrigin.Begin);
-                    }
-                }
+                //using (var stream = videoUploadingVM.Video.OpenReadStream())
+                //{
+                //    // Reset the stream position if needed.
+                //    if (stream.CanSeek)
+                //    {
+                //        stream.Seek(0, SeekOrigin.Begin);
+                //    }
+                //}
 
                 TempData["success"] = "Video uploaded successfully!";
-                // You might choose to save the object key or URL in your database.
                 Lecture lecture = new Lecture()
                 {
                     Id = Guid.NewGuid().ToString(),
-                    Name = videoUploadingVM.Name ?? videoName,
+                    Name = videoUploadingVM.Name ?? "",
                     Description = videoUploadingVM.Description,
                     Grade = videoUploadingVM.Grade ?? 1,
                     Unit = videoUploadingVM.Unit,
-                    Price = videoUploadingVM.Price ?? 0,
-                    // TODO Add videos initialization with quizzes here and in frontend part
-                    Videos = [],
+                    Price = 0,
+                    Videos = [new Video 
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Name = videoUploadingVM.Name,
+                        Description = videoUploadingVM.Description,
+                        Path = videoUploadingVM.VideoPath,
+                        Order = 1,
+                        SheetPath = videoUploadingVM.SheetPath,
+                        ViewsCount = 0
+                        //LectureId = "" // Will be set by EF Core
+                    }],
                     //SheetPath = videoUploadingVM.SheetPath,
                     Semester = appSettingsData.CurrentSemester,
                     Year = appSettingsData.CurrentYear,

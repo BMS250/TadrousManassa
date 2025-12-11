@@ -125,11 +125,11 @@ namespace TadrousManassa
                 app.UseHsts();
             }
 
-            app.Use(async (context, next) =>
-            {
-                context.Features.Get<IHttpMaxRequestBodySizeFeature>().MaxRequestBodySize = null;
-                await next();
-            });
+            //app.Use(async (context, next) =>
+            //{
+            //    context.Features.Get<IHttpMaxRequestBodySizeFeature>().MaxRequestBodySize = null;
+            //    await next();
+            //});
 
 
             app.UseHttpsRedirection();
