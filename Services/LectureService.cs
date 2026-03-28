@@ -106,7 +106,7 @@ namespace TadrousManassa.Services
             Student student = _studentRepository.GetStudent(studentId);
             if (student == null)
                 return OperationResult<LecturesBySemesterVM>.Fail("Student not found.");
-            var lecturesVM = new Dictionary<int, List<LectureVM>>();
+            var lecturesVM = new SortedDictionary<int, List<LectureVM>>();
             //var lecturesResult = _lectureRepository.GetLecturesByStudent(studentId);
             var lecturesResult = GetCurrentLecturesByGrade(student.Grade);
             if (lecturesResult.Success)

@@ -121,6 +121,14 @@
 <div class="container">
     <!-- Semester Cards Section -->
     <div class="row g-4">
+        @if (!Model.LecturesOfSemestersByUnits.Keys.Any())
+        {
+            <div class="col-12">
+                <div class="alert alert-info text-center" role="alert">
+                    No lectures available yet. Stay tuned! 🚀
+                </div>
+            </div>
+        }
         @foreach (var semester in Model.LecturesOfSemestersByUnits.Keys)
         {
             var lectureCount = Model.LecturesOfSemestersByUnits[semester].Count;

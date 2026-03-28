@@ -63,7 +63,7 @@ namespace TadrousManassa.Areas.Student.Controllers
                 {
                     _logger.LogError("Failed to get lectures for student {StudentId}", currentUser.Id);
                     TempData["error"] = lecturesVM.Message;
-                    return View(new LecturesBySemesterVM { LecturesOfSemestersByUnits = new Dictionary<int, List<LectureVM>>() });
+                    return View(new LecturesBySemesterVM { LecturesOfSemestersByUnits = new SortedDictionary<int, List<LectureVM>>() });
                 }
                 var topScores = await _studentQuizService.GetTopStudentsScoresAsync(currentUser.Id);
                 lecturesVM.Data!.TopStudentsScores = topScores;
@@ -73,7 +73,7 @@ namespace TadrousManassa.Areas.Student.Controllers
             {
                 _logger.LogError(ex, "Error in Index action");
                 TempData["error"] = "Error in Index action";
-                return View(new LecturesBySemesterVM { LecturesOfSemestersByUnits = new Dictionary<int, List<LectureVM>>() });
+                return View(new LecturesBySemesterVM { LecturesOfSemestersByUnits = new SortedDictionary<int, List<LectureVM>>() });
             }
         }
     }
