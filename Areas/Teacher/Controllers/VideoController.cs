@@ -103,7 +103,7 @@ namespace TadrousManassa.Areas.Teacher.Controllers
                 else
                 {
                     TempData["success"] = "Codes generated successfully!";
-                    return DownloadCodes(lecture.Name, lectureCodes);
+                    //return DownloadCodes(lecture.Name, lectureCodes);
                 }
             }
             catch (Exception ex)
